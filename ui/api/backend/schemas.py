@@ -74,9 +74,11 @@ class ValidationResponse(BaseModel):
 class GenerateRequest(BaseModel):
     """Request to generate a document."""
     data: dict = Field(..., description="Input data for document generation")
-    validate: bool = Field(True, description="Whether to validate before generating")
+    should_validate: bool = Field(True, alias="validate", description="Whether to validate before generating")
     strict_validation: bool = Field(False, description="Fail on validation errors")
     apply_cell_colors: bool = Field(True, description="Apply cell background colors")
+
+    model_config = {"populate_by_name": True}
 
 
 class TraceHit(BaseModel):

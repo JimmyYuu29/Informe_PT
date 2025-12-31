@@ -15,7 +15,8 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
 
 from modules.plugin_loader import load_plugin, list_plugins
 from modules.generate import generate, GenerationOptions
@@ -55,6 +56,31 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# ============================================================================
+# Static Files and HTML UI
+# ============================================================================
+
+# Directory for static UI files
+UI_DIR = Path(__file__).parent.parent / "ui"
+
+# Mount static files (CSS, JS) - must be before root route
+if UI_DIR.exists():
+    app.mount("/static", StaticFiles(directory=str(UI_DIR)), name="static")
+
+
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    """
+    Serve the main HTML UI.
+    """
+    index_file = UI_DIR / "index.html"
+    if index_file.exists():
+        return HTMLResponse(content=index_file.read_text(encoding="utf-8"))
+    return HTMLResponse(
+        content="<h1>Document Generation API</h1><p>Visit <a href='/docs'>/docs</a> for API documentation.</p>"
+    )
 
 
 # ============================================================================
@@ -196,7 +222,7 @@ async def generate_document(plugin_id: str, request: GenerateRequest):
 
     # Create generation options
     options = GenerationOptions(
-        validate=request.validate,
+        validate=request.should_validate,
         strict_validation=request.strict_validation,
         apply_cell_colors=request.apply_cell_colors,
         save_trace=True,
