@@ -1,0 +1,394 @@
+================================================================================
+NORMALIZED TEMPLATE - Plantilla_1231.docx (PATCHED)
+Generated: 2025-12-31 | Step 1 - Template Normalization
+Status: All patches applied - Ready for Step 2
+================================================================================
+
+[HEADER]
+Departamento de Precios de Transferencia
+Forvis Mazars Tax & Legal, S.L.P.
+
+================================================================================
+COVER PAGE
+================================================================================
+
+[TITLE]
+Revisión en materia de precios de transferencia para la auditoría del ejercicio fiscal finalizado el {{ fecha_fin_fiscal }}
+
+[SUBTITLE]
+{{ entidad_cliente }}
+
+[SUBTITLE]
+Forvis Mazars Tax & Legal, S.L.P.
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+Contenidos
+
+1.	Introducción y alcance del trabajo	3
+2.	Resumen ejecutivo	5
+Anexo I – Revisión valorativa	10
+Anexo II – Revisión de requisitos formales en detalle	15
+Anexo III – Desarrollo Comentarios técnicos	16
+
+[PAGE_BREAK]
+
+================================================================================
+SECTION 1: INTRODUCCIÓN Y ALCANCE DEL TRABAJO
+================================================================================
+
+# Introducción y alcance del trabajo
+
+El alcance de este trabajo queda limitado a la realización de una revisión de la documentación en materia de precios de transferencia (Local File) de {{ entidad_cliente }} (en adelante, la "Compañía") para el ejercicio auditado. Esta revisión consiste en la lectura de la documentación en materia de precios de transferencia, y la elaboración de un memorándum que sintetice (i) la opinión del departamento de precios de transferencia de Forvis Mazars con respecto al cumplimiento de los requisitos formales que disponen los artículos 15 y 16 del Real Decreto 634/2015 de 10 de julio, por el que se aprueba el Reglamento del Impuesto sobre Sociedades (en adelante, "RIS" o "el Reglamento"), habilitados por el artículo 18.3 de la Ley 27/2014, de 27 de noviembre del Impuesto sobre Sociedades (en adelante, "LIS") y (ii) la adecuación desde una perspectiva valorativa del contenido de la documentación en materia de precios de transferencia a lo establecido por la LIS y el Reglamento, así como acordes a las pautas, principios generales y metodologías de valoración a efectos fiscales establecidas por la Organización para la Cooperación y el Desarrollo Económico (en adelante, "OCDE") .
+
+{% if master_file == 0 %}
+Cabe destacar que la Compañía tiene obligación en el ejercicio auditado, de mantener a disposición de la Administración Tributaria el Master File , a pesar de ello, el Departamento de Precios de Transferencia no ha tenido acceso al mismo y por lo tanto no ha podido realizar su revisión. En el caso de que la Administración solicitase dicha documentación, la Compañía debería estar en disposición de entregarla en el plazo de 10 días (con una extensión adicional de 5 días a petición del contribuyente). En el caso de que la Compañía no proporcionara el Masterfile del Grupo, la Administración podría interponer las sanciones establecidas en el artículo 18.13 de la LIS.
+{% endif %}
+
+En la medida en que la Documentación Facilitada hace referencia a las transacciones vinculadas llevadas a cabo durante el Ejercicio {{ anyo_ejercicio }}, los comentarios aquí incluidos serían válidos únicamente para dicho ejercicio.
+
+Debido a que la Compañía, a fecha de realización de esta revisión, no tiene obligación de disponer de la documentación relativa al ejercicio auditado, se ha analizado la documentación del Ejercicio {{ anyo_ejercicio }}, no obstante, si las transacciones vinculadas realizadas durante el ejercicio auditado fueron consistentes con las del Ejercicio {{ anyo_ejercicio }}, y no han existido cambios significativos en la política de precios de transferencia de la Compañía, las conclusiones de este informe pueden servir de guía para el ejercicio auditado.
+
+Con respecto a los análisis económicos incluidos en la documentación proporcionada, cabe mencionar que el Departamento de Precios de Transferencia se ha limitado a interpretar los resultados, realizando las comprobaciones precisas necesarias para la presente revisión.
+
+Asimismo, el análisis realizado no incluye la revisión y auditoría de la información financiera facilitada o la verificación o auditoría de los datos e información incluida en la documentación revisada, lo cual es responsabilidad del equipo de auditoría financiera.
+
+En el curso de la realización de esta revisión no se han examinado otras obligaciones fiscales de la Compañía. Aunque creemos que las conclusiones de nuestra revisión reflejan una razonable interpretación de las regulaciones en materia de precios de transferencia, nuestras opiniones no son vinculantes sobre las autoridades fiscales. Como consecuencia, las conclusiones de esta revisión no deberían ser tratadas como un seguro de que las autoridades fiscales estarán conformes con nuestras opiniones. En caso de producirse algún cambio en las leyes, regulaciones o condiciones del mercado en el que la sociedad opera o en sus prácticas de negocio, nuestras opiniones y resultados deberían ser reevaluados. No obstante, no asumimos la obligación de revisar de nuevo la documentación proporcionada en caso de reflejar ésta alguna circunstancia o condición que se produzca con posterioridad a la fecha de expedición del presente memo.
+
+Finalmente, señalamos que, aun cuando Forvis Mazars considera que ha llevado a cabo una interpretación razonable de los criterios y pautas establecidos por la legislación española en materia de precios de transferencia y por la OCDE, las conclusiones que se derivan del presente memorando podrían no ser las finalmente adoptadas por las administraciones tributarias en caso de inspección, o por los distintos órganos jurisdiccionales competentes en caso de recurso, y el memorando no debe considerarse como una manifestación o garantía de que las administraciones tributarias o los órganos jurisdiccionales competentes coincidirán con las mismas.
+
+El trabajo realizado y las conclusiones del presente memorándum fiscal se fundamentan en los papeles de trabajo de auditoría, en la información obtenida de los equipos de auditoría y en las entrevistas e indagaciones ante los responsables fiscales de la Compañía y sus asesores.
+
+El valor que ha de dársele a este memorándum es el de una estimación razonable, no cuantificada, de las eventuales contingencias fiscales que pudieran existir, hecha con criterios profesionales, dado que la normativa fiscal aplicable a los conceptos que en este informe se analizan pudiera ser objeto de diversas interpretaciones.
+
+Para realizar la revisión, el departamento de Precios de Transferencia de Forvis Mazars tuvo acceso a los siguientes documentos relativos a la Compañía (en adelante, "Documentación Facilitada"):
+
+{% for doc in documentacion_facilitada %}
+• {{ doc }}
+{% endfor %}
+
+La propia Documentación Facilitada incluye las siguientes operaciones intragrupo que tuvieron lugar en el Ejercicio {{ anyo_ejercicio }}.
+
+Tabla 1. Identificación de las operaciones intragrupo en el Ejercicio {{ anyo_ejercicio }}
+
++-------+---------------------------+
+| #     | Operaciones intragrupo    |
++-------+---------------------------+
+{% for item in servicios_vinculados %}
+| {{ loop.index }} | {{ item.servicio_vinculado }} |
+{% endfor %}
++-------+---------------------------+
+
+.
+
+[PAGE_BREAK]
+
+================================================================================
+SECTION 2: RESUMEN EJECUTIVO
+================================================================================
+
+# Resumen ejecutivo
+
+## Situación general
+
+{{ descripcion_actividad }}
+
+La situación del negocio de la Compañía, así como su volumen de operaciones vinculadas puede verse desglosada en las siguientes tablas:
+
+Tabla 2. Situación de negocio de la Compañía en los Ejercicios {{ anyo_ejercicio }}, {{ anyo_ejercicio_ant }}
+
++-------------------------+----------------------------------+---------------------------+-------------------------------+
+| Partidas Contables      | Variación {{ anyo_ejercicio_ant }}-{{ anyo_ejercicio }} (%) | Ejercicio {{ anyo_ejercicio }} (EUR) | Ejercicio {{ anyo_ejercicio_ant }} (EUR) |
++-------------------------+----------------------------------+---------------------------+-------------------------------+
+| Cifra de negocios       | {{ var_cifra }} %                | {{ cifra_1 }}             | {{ cifra_0 }}                 |
+| Total costes operativos | {{ var_cost }} %                 | {{ cost_1 }}              | {{ cost_0 }}                  |
+| EBIT                    | {{ var_ebit }} %                 | {{ ebit_1 }}              | {{ ebit_0 }}                  |
+| Resultado Financiero    | {{ var_resfin }} %               | {{ resultado_fin_1 }}     | {{ resultado_fin_0 }}         |
+| EBT                     | {{ var_ebt }} %                  | {{ ebt_1 }}               | {{ ebt_0 }}                   |
+| Resultado Neto          | {{ var_resnet }} %               | {{ resultado_net_1 }}     | {{ resultado_net_0 }}         |
+| Operating Margin (OM)   | {{ var_om }} %                   | {{ om_1 }}                | {{ om_0 }}                    |
+| Net Cost Plus (NCP)     | {{ var_ncp }} %                  | {{ ncp_1 }}               | {{ ncp_0 }}                   |
++-------------------------+----------------------------------+---------------------------+-------------------------------+
+
+Tabla 3. Operaciones vinculadas llevadas a cabo durante el Ejercicio {{ anyo_ejercicio }}
+
++----------------------------+-------------------+------------------------+------------------------+
+| Tipo de operación vinculada | Entidad vinculada | Ingreso FY {{ anyo_ejercicio }} | Gasto FY {{ anyo_ejercicio }} |
++----------------------------+-------------------+------------------------+------------------------+
+{% for servicio in servicios_vinculados %}
+{% for entidad in servicio.entidades_vinculadas %}
+| {{ servicio.servicio_vinculado }} | {{ entidad.entidad_vinculada }} | {{ entidad.ingreso_entidad }} | {{ entidad.gasto_entidad }} |
+{% endfor %}
+{% endfor %}
++----------------------------+-------------------+------------------------+------------------------+
+| Total ingreso oovv         |                   | {{ total_ingreso_oov }} |                        |
+| Total gasto oovv           |                   |                        | {{ total_gasto_oov }}   |
+| Peso oovv sobre INCN       |                   | {{ peso_oov_sobre_incn }} % |                    |
+| Peso oovv sobre total costes |                 |                        | {{ peso_oov_sobre_costes }} % |
++----------------------------+-------------------+------------------------+------------------------+
+
+En el Ejercicio {{ anyo_ejercicio }}, los gastos vinculados constituyen prácticamente la totalidad de los gastos operativos de la Compañía, representando concretamente el {{ peso_oov_sobre_costes }} % del total. En este sentido, la relevancia de las operaciones intragrupo sigue siendo moderada-alta y en línea con el ejercicio anterior.
+
+## Conclusiones
+
+{% for servicio in servicios_oovv %}
+{% if servicio.enabled %}
+### {{ servicio.titulo_servicio_oovv }}
+
+{{ servicio.texto_intro_servicio }}
+
+{{ servicio.descripcion_tabla }}
+
++----------------+----------+----------+----------+----------+----------+
+| Método Elegido | Min      | LQ       | Med      | UQ       | Max      |
++----------------+----------+----------+----------+----------+----------+
+| {{ servicio.metodo }} | {{ servicio.min }} % | {{ servicio.lq }} % | {{ servicio.med }} % | {{ servicio.uq }} % | {{ servicio.max }} % |
++----------------+----------+----------+----------+----------+----------+
+
+{{ servicio.texto_conclusion_servicio }}
+
+{% endif %}
+{% endfor %}
+
+### Conclusiones desde una perspectiva formal
+
+Tras realizar la revisión de la Documentación Facilitada, en cuanto a su adecuación al cumplimiento de los requisitos establecidos en el Reglamento, el departamento de precios de precios de transferencia de Forvis Mazars concluye que cumple con gran parte de los requisitos formales que el Reglamento prescribe, siguiendo lo dispuesto por el artículo 18.13 de la LIS.
+
+El grado de cumplimiento se encuentra recogido en la siguiente tabla:
+
+Tabla 7. Grado de cumplimiento formal tras la revisión realizada (Local File)
+
++---+----------------------------------------------+-------------+
+| # | Secciones (Artículo 16 del Reglamento)       | Cumplimiento |
++---+----------------------------------------------+-------------+
+| 1 | Información del contribuyente                | {{ cumplimiento_resumen_local_1 }} |
+| 2 | Información de las operaciones vinculadas    | {{ cumplimiento_resumen_local_2 }} |
+| 3 | Información económico-financiera del contribuyente | {{ cumplimiento_resumen_local_3 }} |
++---+----------------------------------------------+-------------+
+
+{% if master_file == 1 %}
+Tabla 8. Grado de cumplimiento formal tras la revisión realizada (Master File)
+
++---+----------------------------------------------+-------------+
+| # | Secciones (Artículo 15 del Reglamento)       | Cumplimiento |
++---+----------------------------------------------+-------------+
+| 1 | Información relativa a la estructura y actividades del Grupo | {{ cumplimiento_resumen_mast_1 }} |
+| 2 | Información relativa a los activos intangibles del Grupo | {{ cumplimiento_resumen_mast_2 }} |
+| 3 | Información relativa a la actividad financiera | {{ cumplimiento_resumen_mast_3 }} |
+| 4 | Situación financiera y fiscal del Grupo      | {{ cumplimiento_resumen_mast_4 }} |
++---+----------------------------------------------+-------------+
+
+Para mayor desglose del cumplimiento por requerimiento acudir a los apéndices.
+
+Por lo tanto, tras la revisión realizada se puede concluir que la Compañía cumple con los requisitos formales establecidos por la normativa en cuanto a la documentación de precios de transferencia.
+{% endif %}
+
+[PAGE_BREAK]
+
+================================================================================
+ANEXO I – REVISIÓN VALORATIVA
+================================================================================
+
+Anexo I – Revisión valorativa
+
+El riesgo en materia de precios de transferencia es un riesgo fiscal que puede tener un impacto en otras prácticas como el financiero, contable y de riesgos. Es importante tener este riesgo identificado y analizado con el fin de minorar cualquier posible impacto en la rentabilidad de la Compañía.
+
+El riesgo en materia de precios de transferencia tiene su origen en diferencias en términos de valoración de ciertas operativas vinculadas por parte de la Administración con la aplicada por el contribuyente. En estos casos, la Administración puede plantear ajustes de valoración que deriven en un recálculo en la base imponible del impuesto sobre sociedades y, por consiguiente, un cambio en el resultado neto del contribuyente.
+
+La presente sección trata de identificar qué posibles riesgos pueden impactar en la Compañía, así como qué controles y mitigadores dispone ésta para poder minorar o evitar cualquier impacto.
+
+Para ello, es importante analizar y tener presente cuáles son los escenarios o elementos que la Administración considera interesantes para proceder a una actuación inspectora. Estos elementos tienen una conexión directa con las principales áreas de riesgos que existen en materia de precios de transferencia y que la Administración es conocedora.
+
+El Plan Estratégico 2024-2027 recoge la orientación de la actuación de la Agencia Tributaria en los próximos años y constituye, dada su visión global y su carácter plurianual, el instrumento central de planificación. En dicho Plan se incluyen las principales líneas estratégicas que seguirá la Agencia Tributaria en materia de asistencia, prevención y control del fraude tributario y aduanero.
+
+Por ello, el Plan Anual de Control Tributario y Aduanero desglosa las actuaciones a llevar a cabo por la Administración en línea con lo establecido en el Plan Estratégico y sus Adendas.
+
+En este sentido, cada año la Administración establece cuáles son los planes de actuación en materia de control e inspección tributario, donde se definen cuáles son aquellas áreas que van a ser categorizadas como "hot topics" en materia de inspección. Entre ellas, existe una sección donde establece cuáles son las áreas en materia de precios de transferencia donde la inspección va a incidir y revisar con especial atención. En concreto, los principales puntos que afectan a los precios de transferencia son:
+
+Restructuraciones empresariales;
+Valoración de transmisiones intragrupo de distintos activos intangibles;
+Cesiones de activos intangibles no repercutidos o de la indebida aplicación de la reducción de rentas procedentes de dichos activos;
+Pagos por cánones derivados de la cesión de intangibles;
+Pagos por servicios intragrupo;
+Existencia de pérdidas reiteradas;
+Operaciones financieras entre partes vinculadas;
+Estructuras funcionales de bajo riesgo, tanto en el ámbito de la fabricación como de la distribución;
+Falta de declaración de ingresos intragrupo por las prestaciones de servicios o de cesiones de activos intangibles no repercutidos;
+Erosión de bases imponibles causada por el establecimiento de estructuras en el exterior en las que se remanses beneficios que deben tributar en España;
+Revisión de las formas societarias utilizadas para el desempeño de la actividad económica con el objetivo de verificar si se está produciendo una minoración improcedente de la correcta tributación de la actividad desarrollada o una traslación de bases imponibles negativas hacia entidades jurídicas sometidas a menores tipos; y
+Operaciones con establecimientos permanentes.
+
+En este sentido, se ha procedido a revisar cada uno de los puntos que se describen en dicho plan de control tributario con el fin de verificar en qué medida pueden afectar a la Compañía y como ésta consigue o no mitigar cualquier riesgo derivado de dichas casuísticas.
+
+Adicionalmente a cada uno de los puntos identificados, se han incluido otros que por la experiencia del equipo de precios de transferencia de Forvis Mazars pueden tener un impacto en términos de riesgo de precios de transferencia en la medida en que la Administración también las tiene en cuenta a la hora de comenzar sus actuaciones inspectoras
+
+Tabla 9. Revisión de elementos identificados como categorías de riesgo en materia de precios de transferencia por parte de la Administración
+
++----+--------------------------------------------------------------------------------+-------------+-------------------------+---------------------------+------------------------+
+| #  | Elementos de riesgo en materia fiscal                                          | Impacto     | Nivel Afectación Prelim | Mitigadores de Riesgo     | Nivel Afectación Final |
++----+--------------------------------------------------------------------------------+-------------+-------------------------+---------------------------+------------------------+
+| 1  | Restructuraciones empresariales                                                | {{ impacto_1 }} | {{ afectacion_pre_1 }} | {{ texto_mitigacion_1 }} | {{ afectacion_final_1 }} |
+| 2  | Valoración de transmisiones intragrupo de distintos activos intangibles        | {{ impacto_2 }} | {{ afectacion_pre_2 }} | {{ texto_mitigacion_2 }} | {{ afectacion_final_2 }} |
+| 3  | Pagos por cánones derivados de la cesión de intangibles                        | {{ impacto_3 }} | {{ afectacion_pre_3 }} | {{ texto_mitigacion_3 }} | {{ afectacion_final_3 }} |
+| 4  | Pagos por servicios intragrupo                                                 | {{ impacto_4 }} | {{ afectacion_pre_4 }} | {{ texto_mitigacion_4 }} | {{ afectacion_final_4 }} |
+| 5  | Existencia de pérdidas reiteradas                                              | {{ impacto_5 }} | {{ afectacion_pre_5 }} | {{ texto_mitigacion_5 }} | {{ afectacion_final_5 }} |
+| 6  | Operaciones financieras entre partes vinculadas                                | {{ impacto_6 }} | {{ afectacion_pre_6 }} | {{ texto_mitigacion_6 }} | {{ afectacion_final_6 }} |
+| 7  | Estructuras funcionales de bajo riesgo                                         | {{ impacto_7 }} | {{ afectacion_pre_7 }} | {{ texto_mitigacion_7 }} | {{ afectacion_final_7 }} |
+| 8  | Falta de declaración de ingresos intragrupo                                    | {{ impacto_8 }} | {{ afectacion_pre_8 }} | {{ texto_mitigacion_8 }} | {{ afectacion_final_8 }} |
+| 9  | Erosión de bases imponibles                                                    | {{ impacto_9 }} | {{ afectacion_pre_9 }} | {{ texto_mitigacion_9 }} | {{ afectacion_final_9 }} |
+| 10 | Revisión de las formas societarias                                             | {{ impacto_10 }} | {{ afectacion_pre_10 }} | {{ texto_mitigacion_10 }} | {{ afectacion_final_10 }} |
+| 11 | Operaciones con establecimientos permanentes                                   | {{ impacto_11 }} | {{ afectacion_pre_11 }} | {{ texto_mitigacion_11 }} | {{ afectacion_final_11 }} |
+| 12 | Peso de las operaciones vinculadas relevante                                   | {{ impacto_12 }} | {{ afectacion_pre_12 }} | {{ texto_mitigacion_12 }} | {{ afectacion_final_12 }} |
++----+--------------------------------------------------------------------------------+-------------+-------------------------+---------------------------+------------------------+
+
+[PAGE_BREAK]
+
+================================================================================
+ANEXO II – REVISIÓN DE REQUISITOS FORMALES EN DETALLE
+================================================================================
+
+Anexo II – Revisión de requisitos formales en detalle
+
+Tabla 10. Grado de cumplimiento formal tras la revisión realizada – Local File
+
++----+------------------------------------------------------------------+----------------+------------------------+
+| #  | Secciones (Artículo 16 del Reglamento)                           | Cumplimiento   | Comentario             |
++----+------------------------------------------------------------------+----------------+------------------------+
+| 1  | Estructura de dirección, organigrama...                          | {{ cumplido_local_1 }} | {{ texto_cumplido_local_1 }} |
+| 2  | Descripción de las actividades del contribuyente...              | {{ cumplido_local_2 }} | {{ texto_cumplido_local_2 }} |
+| 3  | Principales competidores                                         | {{ cumplido_local_3 }} | {{ texto_cumplido_local_3 }} |
+| 4  | Descripción detallada de la naturaleza...                        | {{ cumplido_local_4 }} | {{ texto_cumplido_local_4 }} |
+| 5  | Nombre y apellidos o razón social...                             | {{ cumplido_local_5 }} | {{ texto_cumplido_local_5 }} |
+| 6  | Análisis de comparabilidad detallado                             | {{ cumplido_local_6 }} | {{ texto_cumplido_local_6 }} |
+| 7  | Explicación relativa a la selección del método...                | {{ cumplido_local_7 }} | {{ texto_cumplido_local_7 }} |
+| 8  | En su caso, criterios de reparto de gastos...                    | {{ cumplido_local_8 }} | {{ texto_cumplido_local_8 }} |
+| 9  | Copia de los acuerdos previos de valoración...                   | {{ cumplido_local_9 }} | {{ texto_cumplido_local_9 }} |
+| 10 | Cualquier otra información relevante...                          | {{ cumplido_local_10 }} | {{ texto_cumplido_local_10 }} |
+| 11 | Estados financieros anuales del contribuyente                    | {{ cumplido_local_11 }} | {{ texto_cumplido_local_11 }} |
+| 12 | Conciliación entre los datos utilizados...                       | {{ cumplido_local_12 }} | {{ texto_cumplido_local_12 }} |
+| 13 | Datos financieros de los comparables...                          | {{ cumplido_local_13 }} | {{ texto_cumplido_local_13 }} |
+| 14 | Si, para determinar el valor de mercado...                       | {{ cumplido_local_14 }} | {{ texto_cumplido_local_14 }} |
++----+------------------------------------------------------------------+----------------+------------------------+
+
+{% if master_file == 1 %}
+Tabla 11. Grado de cumplimiento formal tras la revisión realizada – Master File
+
++----+------------------------------------------------------------------+----------------+------------------------+
+| #  | Secciones (Artículo 15 del Reglamento)                           | Cumplimiento   | Comentario             |
++----+------------------------------------------------------------------+----------------+------------------------+
+| 1  | Descripción general de la estructura organizativa...             | {{ cumplido_mast_1 }} | {{ texto_cumplido_mast_1 }} |
+| 2  | Identificación de las distintas entidades...                     | {{ cumplido_mast_2 }} | {{ texto_cumplido_mast_2 }} |
+| 3  | Actividades principales del grupo...                             | {{ cumplido_mast_3 }} | {{ texto_cumplido_mast_3 }} |
+| 4  | Descripción general de las funciones ejercidas...                | {{ cumplido_mast_4 }} | {{ texto_cumplido_mast_4 }} |
+| 5  | Descripción de la política del grupo...                          | {{ cumplido_mast_5 }} | {{ texto_cumplido_mast_5 }} |
+| 6  | Relación y breve descripción de los acuerdos...                  | {{ cumplido_mast_6 }} | {{ texto_cumplido_mast_6 }} |
+| 7  | Descripción de las operaciones de reorganización...              | {{ cumplido_mast_7 }} | {{ texto_cumplido_mast_7 }} |
+| 8  | Descripción general de la estrategia global...                   | {{ cumplido_mast_8 }} | {{ texto_cumplido_mast_8 }} |
+| 9  | Relación de los activos intangibles del grupo...                 | {{ cumplido_mast_9 }} | {{ texto_cumplido_mast_9 }} |
+| 10 | Importe de las contraprestaciones...                             | {{ cumplido_mast_10 }} | {{ texto_cumplido_mast_10 }} |
+| 11 | Relación de acuerdos entre las entidades...                      | {{ cumplido_mast_11 }} | {{ texto_cumplido_mast_11 }} |
+| 12 | Descripción general de cualquier transferencia...                | {{ cumplido_mast_12 }} | {{ texto_cumplido_mast_12 }} |
+| 13 | Descripción general de la forma de financiación...               | {{ cumplido_mast_13 }} | {{ texto_cumplido_mast_13 }} |
+| 14 | Identificación de las entidades del grupo...                     | {{ cumplido_mast_14 }} | {{ texto_cumplido_mast_14 }} |
+| 15 | Descripción general de la política de precios...                 | {{ cumplido_mast_15 }} | {{ texto_cumplido_mast_15 }} |
+| 16 | Estados financieros anuales consolidados...                      | {{ cumplido_mast_16 }} | {{ texto_cumplido_mast_16 }} |
+| 17 | Relación y breve descripción de los acuerdos...                  | {{ cumplido_mast_17 }} | {{ texto_cumplido_mast_17 }} |
++----+------------------------------------------------------------------+----------------+------------------------+
+{% endif %}
+
+[PAGE_BREAK]
+
+================================================================================
+ANEXO III – DESARROLLO COMENTARIOS TÉCNICOS
+================================================================================
+
+Anexo III – Desarrollo Comentarios técnicos
+
+A continuación, se detalla el soporte del análisis efectuado identificando los aspectos a mejorar, las omisiones o incidencias detectadas:
+
+Comentarios relativos a los requisitos de documentación en relación con el obligado tributario (Local File art. 16 RIS)
+
+Basándonos en el contenido de la tabla, a continuación, se exponen los principales aspectos a resaltar desde un punto de vista formal, así como nuestras consideraciones al respecto:
+
+• Apartados Generales/Requisitos formales de documentación: en cuanto al Local File cabe indicar que existe un elevado grado de cumplimiento formal. Sin perjuicio de lo anterior, en caso de una eventual Inspección, la Administración Tributaria podría solicitar un mayor detalle y/o documentación complementaria para trazar determinado contenido de los requisitos de documentación.
+
+• En lo relativo al Master File del Grupo, dado que Forvis Mazars no ha tenido acceso a dicho documento, no puede determinarse su grado de cumplimiento. A este respecto, recomendamos que la Compañía mantenga a disposición de la Administración Tributaria el Master File del Grupo relativo al ejercicio auditado y que el mismo se encuentre en línea con lo recogido en el Local File de la Compañía.
+
+• {{ texto_anexo3 }}
+
+• Debido a que la Compañía, a fecha de realización de esta revisión, no tiene obligación de disponer de la documentación relativa al ejercicio auditado, se ha analizado la documentación del Ejercicio {{ anyo_ejercicio }}, no obstante, si las transacciones vinculadas realizadas durante el ejercicio auditado fueron consistentes con las del Ejercicio {{ anyo_ejercicio }}, y no han existido cambios significativos en la política de precios de transferencia de {{ entidad_cliente }}, las conclusiones de este informe pueden servir de guía para el Ejercicio auditado.
+
+• Por lo tanto, recomendaríamos que la Compañía dispusiera tanto del Master File como del Local File actualizados para dicho ejercicio.
+
+• Comentarios valorativos
+
+• Documentación en otro idioma
+
+• Texto del comentario
+
+• Servicios intragrupo
+
+• Texto del comentario
+
+• ETC
+
+[PAGE_BREAK]
+
+================================================================================
+CONTACTS
+================================================================================
+
+# Contactos
+
+{{ contacto1 }}
+{{ cargo_contacto1 }}
+{{ correo_contacto1 }}
+
+{{ contacto2 }}
+{{ cargo_contacto2 }}
+{{ correo_contacto2 }}
+
+{{ contacto3 }}
+{{ cargo_contacto3 }}
+{{ correo_contacto3 }}
+
+Forvis Mazars es la marca de la red Forvis Mazars Global (Forvis Mazars Global Limited), una red mundial de servicios profesionales. La red opera bajo una única marca en todo el mundo, con sólo dos miembros: Forvis Mazars, LLP en Estados Unidos y Forvis Mazars Group SC, una asociación internacional integrada que opera en más de 100 países y territorios.
+
+Las entidades de la red Forvis Mazars en España (Forvis Mazars Auditores S.L.P; Forvis Mazars Tax & Legal S.L.P.; Forvis Mazars Servicios Profesionales, S.L.P; Forvis Mazars Financial Advisory, S.L) prestan servicios de auditoría & assurance, asesoramiento fiscal, legal, financiero, consultoría, outsourcing y sostenibilidad a través de 800 profesionales en 8 oficinas.
+
+www.forvismazars.es
+
+[FOOTER]
+Page {{ page_number }}
+
+================================================================================
+END OF TEMPLATE
+================================================================================
+
+================================================================================
+APPLIED PATCHES SUMMARY
+================================================================================
+
+The following patches have been applied to this normalized template:
+
+✓ PATCH_001: Fixed missing closing brace in titulo_servicio_oovv
+✓ PATCH_002: Renamed TEXT_BLOCK ID (removed space) texto_perspectiva_forma_1
+✓ PATCH_003: Renamed duplicate TEXT_BLOCK ID to texto_perspectiva_forma_2
+✓ PATCH_004: Removed redundant variable from heading (fixed text only)
+✓ PATCH_005: Fixed variable with space texto_perspectiva_forma_1
+✓ PATCH_006: Fixed variable with space texto_perspectiva_forma_2
+✓ PATCH_007: Fixed typo anyo_ejecicio → anyo_ejercicio (all occurrences)
+✓ PATCH_008: Fixed typo anyo_ejecicio_ant → anyo_ejercicio_ant
+✓ PATCH_009: Fixed accented variable Descripción_actividad → descripcion_actividad
+✓ PATCH_010: Normalized all CamelCase variables to snake_case
+✓ PATCH_011: Fixed hardcoded "UNIMA España" → {{ entidad_cliente }}
+✓ PATCH_012: Added loop syntax to Table 1
+✓ PATCH_013: Added nested loop syntax to Table 3 (with Gasto column added)
+✓ PATCH_014: Added service block loop with conditional
+✓ PATCH_015: Added Gasto column to Table 3
+✓ PATCH_016: Removed all AI_NOTE annotations (extracted to catalog)
+✓ PATCH_017: Converted TEXT_BLOCK markers to Jinja conditionals
+
+All variables now use canonical snake_case lowercase ASCII format.
