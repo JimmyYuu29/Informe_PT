@@ -1,0 +1,55 @@
+执行 Step 1（Template normalization）。
+
+请先阅读并严格遵守：
+- prompts/enterprise_docgen_platform.superprompt.en.md
+- prompts/01_word_template_normalization.superprompt.en.md
+
+输入文件：
+- 根目录的 Plantilla_1231.docx
+
+任务：
+1) 解析 Plantilla_1231.docx（包含 [AI_NOTE] 与 [TEXT_BLOCK] 等注释）。
+2) 在根目录创建：Proces/step1_outputs/ 与 config/
+3) 将 Step1 prompt 要求的 8 个输出文件，全部写入 Proces/step1_outputs/（文件名必须完全一致）。
+4) 不要生成任何 YAML 或 Python 代码；只生成 Step1 所需的 txt/markdown catalogs。
+5) 特别注意：修复建议必须写入 template_patch_plan.md；不要“默默修复不记录”。
+
+开始执行。
+
+执行 Step 2（YAML pack generation）。
+
+请先阅读并严格遵守：
+- prompts/enterprise_docgen_platform.superprompt.en.md
+- prompts/02_yaml_plugin_generation.superprompt.en.md
+
+输入：
+- Proces/step1_outputs/ 下的所有文件
+- 我已经把根据 Step1 结果修订后的最终模板放到：config/templates/<plugin_id>/template_final.docx
+
+任务：
+1) 选择一个稳定的 plugin_id（snake_case，短且语义明确），并在输出中固定使用。
+2) 在 config/yamls/<plugin_id>/ 生成完整 YAML pack（包含 PACK_README.md 等所有必需文件）。
+3) 生成 sample_inputs 三个向量，并在 validation_report.md 说明覆盖到哪些 decisions。
+4) 所有 text/table/decision/rule 必须可追溯到 Step1 的 source_block_id；引用必须可解析；不得遗漏必需文件。
+
+开始执行。
+
+执行 Step 3（Build runnable app）。
+
+请先阅读并严格遵守：
+- prompts/enterprise_docgen_platform.superprompt.en.md
+- prompts/03_Build_Runnable_App.en.md
+
+输入：
+- config/yamls/<plugin_id>/（Step2 生成的 YAML pack）
+- config/templates/<plugin_id>/template_final.docx（最终模板）
+
+任务：
+1) 在根目录创建/生成：modules/、ui/、scripts/、tests/、README.md（与 config/ 平行）。
+2) UI 必须双线：
+   - ui/streamlit_app/：可用、稳定、动态表格输入不丢数据
+   - ui/api/backend/：FastAPI，至少提供 plugins/schema/validate/generate
+   - ui/api/ui/FRONTEND_PROMPT.md：一份“HTML UI 对接配置 prompt”
+3) 实现 validate_plugin + generate()，并提供至少 1 个 golden test。
+
+开始执行。
