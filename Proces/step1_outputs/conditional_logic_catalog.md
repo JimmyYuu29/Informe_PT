@@ -1,7 +1,8 @@
-# Conditional Logic Catalog
+# Conditional Logic Catalog (PATCHED)
 
 Generated: 2025-12-31 | Step 1 - Template Normalization
 Source: Plantilla_1231.docx
+Status: All conditions implemented with proper Jinja2 syntax in normalized_template.txt
 
 ---
 
@@ -304,10 +305,12 @@ Source: note_12 (P198-P202)
 
 ---
 
-## Ambiguities / TODOs
+## Ambiguities / TODOs - ✅ ALL RESOLVED
 
-| TODO_ID | Issue | Location | Impact | Suggested Resolution |
-|---------|-------|----------|--------|----------------------|
-| LOGIC_TODO_001 | Conflicting AI_NOTE for note_10 says "Master_file != 0" but should be "Master_file == 1" | P148 | Medium | Clarify: use `master_file == 1` for access, `master_file == 0` for no access |
-| LOGIC_TODO_002 | Duplicate TEXT_BLOCK ID "texto_perspectiva forma_1" appears twice | P135, P139 | High | Assign unique IDs: `texto_perspectiva_forma_1` and `texto_perspectiva_forma_2` |
-| LOGIC_TODO_003 | Service analysis block contains malformed placeholder | P110 | High | Fix: `{{titulo_servicio_oovv}` → `{{ titulo_servicio_oovv }}` |
+| TODO_ID | Issue | Location | Impact | Resolution | Status |
+|---------|-------|----------|--------|------------|--------|
+| LOGIC_TODO_001 | Conflicting AI_NOTE for note_10 | P148 | Medium | Using `master_file == 1` for access | ✅ FIXED |
+| LOGIC_TODO_002 | Duplicate TEXT_BLOCK ID | P135, P139 | High | Assigned unique IDs: `texto_perspectiva_forma_1` and `texto_perspectiva_forma_2` | ✅ FIXED |
+| LOGIC_TODO_003 | Malformed placeholder in service block | P110 | High | Fixed: `{{ servicio.titulo_servicio_oovv }}` | ✅ FIXED |
+
+All logic issues have been resolved in `normalized_template.txt`.

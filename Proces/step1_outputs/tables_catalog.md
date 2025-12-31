@@ -1,7 +1,8 @@
-# Tables Catalog
+# Tables Catalog (PATCHED)
 
 Generated: 2025-12-31 | Step 1 - Template Normalization
 Source: Plantilla_1231.docx
+Status: All tables updated with proper loop syntax and Gasto column added to Table 3
 
 ---
 
@@ -425,10 +426,12 @@ note_12 (P198-P202): Explains condition and enum values
 
 ---
 
-## Table TODOs
+## Table TODOs - ✅ ALL RESOLVED
 
-| TODO_ID | Table | Issue | Impact | Suggested Resolution |
-|---------|-------|-------|--------|----------------------|
-| TABLE_TODO_001 | table_03 | Missing Gasto column in original | High | Add gasto_entidad column or clarify if implicit |
-| TABLE_TODO_002 | table_05/06 | Empty Cumplimiento cells | Medium | Confirm enum input (si/no) vs fixed values |
-| TABLE_TODO_003 | table_04 | Caption uses variable `descripcion_tabla` | Low | Ensure variable is input per service |
+| TODO_ID | Table | Issue | Impact | Resolution | Status |
+|---------|-------|-------|--------|------------|--------|
+| TABLE_TODO_001 | table_03 | Missing Gasto column in original | High | Added `gasto_entidad` column | ✅ FIXED |
+| TABLE_TODO_002 | table_05/06 | Empty Cumplimiento cells | Medium | Confirmed as enum input (si/no) | ✅ DOCUMENTED |
+| TABLE_TODO_003 | table_04 | Caption uses variable `descripcion_tabla` | Low | Variable is per-service input | ✅ DOCUMENTED |
+
+All table issues have been resolved in `normalized_template.txt`.

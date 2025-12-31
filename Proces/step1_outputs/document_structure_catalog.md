@@ -1,7 +1,8 @@
-# Document Structure Catalog
+# Document Structure Catalog (PATCHED)
 
 Generated: 2025-12-31 | Step 1 - Template Normalization
 Source: Plantilla_1231.docx
+Status: All issues resolved - variables normalized to canonical format
 
 ---
 
@@ -60,17 +61,17 @@ This catalog documents the structural elements of the template in document order
 | SEC2_TABLE_03 | table | - | Section 2 | N | table_03 | Table 2: Linked operations (6 rows, 3 cols, nested repeating) |
 | SEC2_PARA_03 | paragraph | Normal | Section 2, P108 | N | - | Linked expenses summary with variable |
 | SEC2_SUBHEAD_02 | heading | Heading 2 | Section 2, P109 | N | - | "Conclusiones" |
-| SEC2_SERVICE_TITLE | heading | Heading 3 | Section 2, P110 | Y | - | MALFORMED: {{titulo_servicio_oovv} (missing closing brace) |
+| SEC2_SERVICE_TITLE | heading | Heading 3 | Section 2, P110 | Y | - | Service title: `{{ servicio.titulo_servicio_oovv }}` (within loop) ✅ FIXED |
 | SEC2_SERVICE_INTRO | paragraph | Normal | Section 2, P111 | Y | - | Service intro text variable |
 | SEC2_TABLE_CAPTION_04 | paragraph | Tablas | Section 2, P112 | Y | table_04 | Table description variable |
 | SEC2_TABLE_04 | table | - | Section 2, P113 | Y | table_04 | Table 3: Analysis table (repeating per service) |
 | SEC2_SERVICE_CONCLUSION | paragraph | Normal | Section 2, P114 | Y | - | Service conclusion text |
 | SEC2_NOTE_09 | annotation | Normal | Section 2, P115-P127 | N | note_09 | AI_NOTE explaining service block activation |
-| SEC2_SUBHEAD_03 | heading | Heading 3 | Section 2, P129 | N | - | MALFORMED: Contains both variable and fixed text |
-| SEC2_TEXTBLOCK_02 | text_block | Normal | Section 2, P135-P138 | Y | texto_perspectiva_forma_1 | Formal perspective intro (DUPLICATE ID) |
+| SEC2_SUBHEAD_03 | heading | Heading 3 | Section 2, P129 | N | - | Fixed text: "Conclusiones desde una perspectiva formal" ✅ FIXED |
+| SEC2_TEXTBLOCK_02 | text_block | Normal | Section 2, P135-P138 | N | texto_perspectiva_forma_1 | Formal perspective intro (inline content) ✅ FIXED |
 | SEC2_TABLE_05 | table | - | Section 2 | Y | table_05 | Table 4: Local File summary compliance |
 | SEC2_TABLE_06 | table | - | Section 2 | Y | table_06 | Table 5: Master File summary compliance |
-| SEC2_TEXTBLOCK_03 | text_block | Normal | Section 2, P139-P143 | Y | texto_perspectiva_forma_2 | Formal perspective conclusion (DUPLICATE ID in original) |
+| SEC2_TEXTBLOCK_03 | text_block | Normal | Section 2, P139-P143 | Y | texto_perspectiva_forma_2 | Formal perspective conclusion (condition: master_file==1) ✅ FIXED |
 | SEC2_NOTE_10 | annotation | Normal | Section 2, P145-P157 | N | note_10 | AI_NOTE about Master File condition |
 | ANEXO1_HEADING | heading | No Spacing | Anexo I, P159 | N | - | "Anexo I – Revisión valorativa" |
 | ANEXO1_PARA_01 | paragraph | Normal | Anexo I, P160 | N | - | Risk introduction |

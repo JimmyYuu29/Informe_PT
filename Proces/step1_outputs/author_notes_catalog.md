@@ -1,7 +1,8 @@
-# Author Notes Catalog
+# Author Notes Catalog (PATCHED)
 
 Generated: 2025-12-31 | Step 1 - Template Normalization
 Source: Plantilla_1231.docx
+Status: All AI_NOTE content extracted; TEXT_BLOCK IDs fixed and converted to Jinja conditionals
 
 ---
 
@@ -448,10 +449,12 @@ Por lo tanto, tras la revisión realizada se puede concluir que la Compañía cu
 
 ---
 
-## Issues Requiring Resolution
+## Issues - ✅ ALL RESOLVED
 
-| Issue ID | Type | Location | Problem | Resolution |
-|----------|------|----------|---------|------------|
-| NOTE_ISSUE_001 | TEXT_BLOCK | P135, P139 | Duplicate ID `texto_perspectiva forma_1` | Rename second to `texto_perspectiva_forma_2` |
-| NOTE_ISSUE_002 | TEXT_BLOCK | All | Space in ID names | Replace spaces with underscores |
-| NOTE_ISSUE_003 | AI_NOTE | note_10 | Contradictory condition statement | Clarify: use `master_file == 1` for showing |
+| Issue ID | Type | Location | Problem | Resolution | Status |
+|----------|------|----------|---------|------------|--------|
+| NOTE_ISSUE_001 | TEXT_BLOCK | P135, P139 | Duplicate ID `texto_perspectiva forma_1` | Renamed second to `texto_perspectiva_forma_2` | ✅ FIXED |
+| NOTE_ISSUE_002 | TEXT_BLOCK | All | Space in ID names | Replaced spaces with underscores | ✅ FIXED |
+| NOTE_ISSUE_003 | AI_NOTE | note_10 | Contradictory condition statement | Using `master_file == 1` for showing | ✅ FIXED |
+
+All issues have been resolved in `normalized_template.txt`.
