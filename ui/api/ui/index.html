@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Generation Platform | Forvis Mazars</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <span class="logo-icon">FM</span>
+                <div class="logo-text">
+                    <span class="logo-primary">Forvis Mazars</span>
+                    <span class="logo-secondary">Document Generation Platform</span>
+                </div>
+            </div>
+            <nav class="nav">
+                <a href="#" class="nav-link active">Generator</a>
+                <a href="#" class="nav-link" id="nav-docs">Documentation</a>
+                <span class="nav-divider"></span>
+                <span class="status-indicator" id="api-status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Checking...</span>
+                </span>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Plugin Selection</h3>
+                <select id="plugin-select" class="select-input">
+                    <option value="">Loading plugins...</option>
+                </select>
+                <div id="plugin-info" class="plugin-info hidden">
+                    <h4 id="plugin-name"></h4>
+                    <p id="plugin-description"></p>
+                    <div class="plugin-meta">
+                        <span class="meta-item">
+                            <span class="meta-label">Version:</span>
+                            <span id="plugin-version">-</span>
+                        </span>
+                        <span class="meta-item">
+                            <span class="meta-label">Language:</span>
+                            <span id="plugin-language">-</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Actions</h3>
+                <button id="btn-validate" class="btn btn-secondary btn-block" disabled>
+                    <span class="btn-icon">✓</span>
+                    Validate Data
+                </button>
+                <button id="btn-generate" class="btn btn-primary btn-block" disabled>
+                    <span class="btn-icon">📄</span>
+                    Generate Document
+                </button>
+                <button id="btn-clear" class="btn btn-outline btn-block">
+                    <span class="btn-icon">↺</span>
+                    Clear Form
+                </button>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Quick Actions</h3>
+                <button id="btn-load-sample" class="btn btn-link btn-block">
+                    Load Sample Data
+                </button>
+                <button id="btn-export-json" class="btn btn-link btn-block">
+                    Export as JSON
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Form Area -->
+        <div class="content-area">
+            <!-- Notification Area -->
+            <div id="notification-area" class="notification-area"></div>
+
+            <!-- Form Container -->
+            <div id="form-container" class="form-container">
+                <div class="form-placeholder">
+                    <div class="placeholder-icon">📋</div>
+                    <h2>Select a Plugin to Begin</h2>
+                    <p>Choose a document type from the sidebar to load the input form.</p>
+                </div>
+            </div>
+
+            <!-- Results Panel -->
+            <div id="results-panel" class="results-panel hidden">
+                <div class="results-header">
+                    <h3>Generation Result</h3>
+                    <button id="btn-close-results" class="btn-icon-only">✕</button>
+                </div>
+                <div id="results-content" class="results-content"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <p>&copy; 2025 Forvis Mazars Tax & Legal, S.L.P. All rights reserved.</p>
+            <p class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <span class="divider">|</span>
+                <a href="#">Terms of Use</a>
+                <span class="divider">|</span>
+                <a href="#">Contact</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p id="loading-text">Processing...</p>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="modal-backdrop" class="modal-backdrop hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-title">Confirm Action</h3>
+                <button class="btn-icon-only modal-close">✕</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                Are you sure you want to proceed?
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline modal-cancel">Cancel</button>
+                <button class="btn btn-primary modal-confirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

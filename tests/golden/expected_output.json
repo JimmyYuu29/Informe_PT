@@ -1,0 +1,35 @@
+{
+  "_comment": "Expected metadata for golden test validation",
+  "plugin_id": "pt_review",
+  "input_file": "sample_input.json",
+
+  "expected_validation": {
+    "is_valid": true,
+    "max_errors": 0
+  },
+
+  "expected_generation": {
+    "success": true,
+    "output_extension": ".docx"
+  },
+
+  "expected_decisions": {
+    "d1_master_file_access": {
+      "description": "Master File Access Decision",
+      "expected_outcome": "Show no-access warning (master_file == 0)"
+    }
+  },
+
+  "expected_derived_values": {
+    "anyo_ejercicio": 2025,
+    "anyo_ejercicio_ant": 2024,
+    "cost_1": 12750000,
+    "cost_0": 12070000
+  },
+
+  "validation_rules": [
+    "No validation errors for complete input",
+    "Master File fields should be optional when master_file == 0",
+    "Compliance comments required only when cumplido != si"
+  ]
+}

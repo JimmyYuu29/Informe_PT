@@ -1,0 +1,142 @@
+{
+  "fecha_fin_fiscal": "2025-12-31",
+  "entidad_cliente": "Servicios Técnicos Peninsulares S.L.",
+  "master_file": 0,
+  "descripcion_actividad": "La Compañía presta servicios de mantenimiento y reparación de equipos industriales en el territorio nacional. Es una filial al 100% de un grupo familiar con sede en Alemania, siendo su única operación vinculada el recibo de servicios de gestión corporativa de la matriz.",
+  "texto_anexo3": "",
+
+  "contacto1": "Pedro Navarro Torres",
+  "cargo_contacto1": "Manager",
+  "correo_contacto1": "pedro.navarro@forvismazars.es",
+  "contacto2": "Isabel Ruiz Blanco",
+  "cargo_contacto2": "Senior Consultant",
+  "correo_contacto2": "isabel.ruiz@forvismazars.es",
+  "contacto3": "",
+  "cargo_contacto3": "",
+  "correo_contacto3": "",
+
+  "cifra_1": 8500000,
+  "cifra_0": 7800000,
+  "ebit_1": 680000,
+  "ebit_0": 624000,
+  "resultado_fin_1": -12000,
+  "resultado_fin_0": -10000,
+  "ebt_1": 668000,
+  "ebt_0": 614000,
+  "resultado_net_1": 501000,
+  "resultado_net_0": 460500,
+
+  "documentacion_facilitada": [
+    {"value": "Local File ejercicio 2024"},
+    {"value": "Estados Financieros auditados 2024"},
+    {"value": "Contrato de servicios de gestión con matriz"}
+  ],
+
+  "servicios_vinculados": [
+    {
+      "servicio_vinculado": "Servicios de gestión y administración",
+      "entidades_vinculadas": [
+        {
+          "entidad_vinculada": "Technische Dienste Holding GmbH (Alemania)",
+          "ingreso_entidad": 0,
+          "gasto_entidad": 180000
+        }
+      ]
+    }
+  ],
+
+  "servicios_oovv": [],
+
+  "cumplimiento_resumen_local_1": "si",
+  "cumplimiento_resumen_local_2": "si",
+  "cumplimiento_resumen_local_3": "si",
+
+  "impacto_1": "no",
+  "afectacion_pre_1": "bajo",
+  "texto_mitigacion_1": "",
+  "afectacion_final_1": "bajo",
+
+  "impacto_2": "no",
+  "afectacion_pre_2": "bajo",
+  "texto_mitigacion_2": "",
+  "afectacion_final_2": "bajo",
+
+  "impacto_3": "no",
+  "afectacion_pre_3": "bajo",
+  "texto_mitigacion_3": "",
+  "afectacion_final_3": "bajo",
+
+  "impacto_4": "no",
+  "afectacion_pre_4": "bajo",
+  "texto_mitigacion_4": "",
+  "afectacion_final_4": "bajo",
+
+  "impacto_5": "si",
+  "afectacion_pre_5": "bajo",
+  "texto_mitigacion_5": "Los servicios de gestión representan menos del 3% de la cifra de negocios y están debidamente documentados.",
+  "afectacion_final_5": "bajo",
+
+  "impacto_6": "no",
+  "afectacion_pre_6": "bajo",
+  "texto_mitigacion_6": "",
+  "afectacion_final_6": "bajo",
+
+  "impacto_7": "no",
+  "afectacion_pre_7": "bajo",
+  "texto_mitigacion_7": "",
+  "afectacion_final_7": "bajo",
+
+  "impacto_8": "no",
+  "afectacion_pre_8": "bajo",
+  "texto_mitigacion_8": "",
+  "afectacion_final_8": "bajo",
+
+  "impacto_9": "no",
+  "afectacion_pre_9": "bajo",
+  "texto_mitigacion_9": "",
+  "afectacion_final_9": "bajo",
+
+  "impacto_10": "no",
+  "afectacion_pre_10": "bajo",
+  "texto_mitigacion_10": "",
+  "afectacion_final_10": "bajo",
+
+  "impacto_11": "no",
+  "afectacion_pre_11": "bajo",
+  "texto_mitigacion_11": "",
+  "afectacion_final_11": "bajo",
+
+  "impacto_12": "no",
+  "afectacion_pre_12": "bajo",
+  "texto_mitigacion_12": "",
+  "afectacion_final_12": "bajo",
+
+  "cumplido_local_1": "si",
+  "texto_cumplido_local_1": "",
+  "cumplido_local_2": "si",
+  "texto_cumplido_local_2": "",
+  "cumplido_local_3": "si",
+  "texto_cumplido_local_3": "",
+  "cumplido_local_4": "si",
+  "texto_cumplido_local_4": "",
+  "cumplido_local_5": "si",
+  "texto_cumplido_local_5": "",
+  "cumplido_local_6": "si",
+  "texto_cumplido_local_6": "",
+  "cumplido_local_7": "si",
+  "texto_cumplido_local_7": "",
+  "cumplido_local_8": "si",
+  "texto_cumplido_local_8": "",
+  "cumplido_local_9": "si",
+  "texto_cumplido_local_9": "",
+  "cumplido_local_10": "si",
+  "texto_cumplido_local_10": "",
+  "cumplido_local_11": "si",
+  "texto_cumplido_local_11": "",
+  "cumplido_local_12": "si",
+  "texto_cumplido_local_12": "",
+  "cumplido_local_13": "si",
+  "texto_cumplido_local_13": "",
+  "cumplido_local_14": "si",
+  "texto_cumplido_local_14": ""
+}
