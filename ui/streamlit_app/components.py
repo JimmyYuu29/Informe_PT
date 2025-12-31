@@ -5,7 +5,7 @@ Reusable UI components for Streamlit.
 import streamlit as st
 from datetime import date
 from typing import Any, Callable, Optional
-from . import state_store as state
+from ui.streamlit_app import state_store as state
 
 
 def render_text_input(

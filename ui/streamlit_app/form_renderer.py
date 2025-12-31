@@ -11,8 +11,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from modules.plugin_loader import PluginPack
-from . import state_store as state
-from . import components
+from ui.streamlit_app import state_store as state
+from ui.streamlit_app import components
 
 
 def render_field(field_name: str, field_def: dict, context: dict) -> Any:
