@@ -1,0 +1,209 @@
+{
+  "fecha_fin_fiscal": "2025-12-31",
+  "entidad_cliente": "Industrias Globales España S.A.",
+  "master_file": 1,
+  "descripcion_actividad": "La Compañía opera como filial de distribución del grupo multinacional, realizando la comercialización de productos industriales en el mercado ibérico. Adicionalmente, presta servicios de logística y almacenamiento a otras entidades del grupo, y actúa como centro de servicios compartidos para funciones administrativas.",
+  "texto_anexo3": "Durante el ejercicio se realizó una reestructuración empresarial que implicó la transferencia de funciones de I+D a la matriz holandesa, así como la cesión de determinados activos intangibles relacionados con know-how comercial.",
+
+  "contacto1": "Elena Martínez Sánchez",
+  "cargo_contacto1": "Partner",
+  "correo_contacto1": "elena.martinez@forvismazars.es",
+  "contacto2": "Roberto Jiménez Pérez",
+  "cargo_contacto2": "Director",
+  "correo_contacto2": "roberto.jimenez@forvismazars.es",
+  "contacto3": "Laura Gómez Castro",
+  "cargo_contacto3": "Senior Manager",
+  "correo_contacto3": "laura.gomez@forvismazars.es",
+
+  "cifra_1": 85000000,
+  "cifra_0": 92000000,
+  "ebit_1": 1275000,
+  "ebit_0": 4600000,
+  "resultado_fin_1": -2100000,
+  "resultado_fin_0": -1800000,
+  "ebt_1": -825000,
+  "ebt_0": 2800000,
+  "resultado_net_1": -618750,
+  "resultado_net_0": 2100000,
+
+  "documentacion_facilitada": [
+    {"value": "Master File ejercicio 2024"},
+    {"value": "Local File ejercicio 2024"},
+    {"value": "Estados Financieros auditados 2024"},
+    {"value": "Estados Financieros auditados 2023"},
+    {"value": "Contratos intercompañía de servicios de gestión"},
+    {"value": "Contrato de licencia de marca"},
+    {"value": "Acuerdo de reparto de costes I+D"},
+    {"value": "Análisis de comparabilidad - Benchmarking 2024"},
+    {"value": "Documentación de reestructuración empresarial"}
+  ],
+
+  "servicios_vinculados": [
+    {
+      "servicio_vinculado": "Servicios de gestión corporativa",
+      "entidades_vinculadas": [
+        {
+          "entidad_vinculada": "Global Industries Holding B.V. (Holanda)",
+          "ingreso_entidad": 0,
+          "gasto_entidad": 3200000
+        }
+      ]
+    },
+    {
+      "servicio_vinculado": "Royalties por uso de marca y patentes",
+      "entidades_vinculadas": [
+        {
+          "entidad_vinculada": "Global IP Luxembourg S.à r.l.",
+          "ingreso_entidad": 0,
+          "gasto_entidad": 4250000
+        }
+      ]
+    },
+    {
+      "servicio_vinculado": "Servicios de I+D y desarrollo de productos",
+      "entidades_vinculadas": [
+        {
+          "entidad_vinculada": "Global R&D Center B.V. (Holanda)",
+          "ingreso_entidad": 0,
+          "gasto_entidad": 1800000
+        }
+      ]
+    },
+    {
+      "servicio_vinculado": "Préstamo intragrupo",
+      "entidades_vinculadas": [
+        {
+          "entidad_vinculada": "Global Finance Ireland Ltd.",
+          "ingreso_entidad": 0,
+          "gasto_entidad": 2100000
+        }
+      ]
+    },
+    {
+      "servicio_vinculado": "Servicios de distribución y logística",
+      "entidades_vinculadas": [
+        {
+          "entidad_vinculada": "Global Industries France S.A.S.",
+          "ingreso_entidad": 1500000,
+          "gasto_entidad": 0
+        },
+        {
+          "entidad_vinculada": "Global Industries Portugal Lda.",
+          "ingreso_entidad": 800000,
+          "gasto_entidad": 0
+        }
+      ]
+    }
+  ],
+
+  "servicios_oovv": [
+    {
+      "servicio_oovv": "Compras de mercaderías",
+      "entidades_oovv": [
+        {
+          "entidad_oovv": "Global Manufacturing Poland Sp.z.o.o.",
+          "ingreso_ent_oovv": 0,
+          "gasto_ent_oovv": 45000000
+        },
+        {
+          "entidad_oovv": "Global Industries China Ltd.",
+          "ingreso_ent_oovv": 0,
+          "gasto_ent_oovv": 12000000
+        }
+      ]
+    }
+  ],
+
+  "cumplimiento_resumen_local_1": "si",
+  "cumplimiento_resumen_local_2": "parcial",
+  "cumplimiento_resumen_local_3": "si",
+
+  "impacto_1": "si",
+  "afectacion_pre_1": "alto",
+  "texto_mitigacion_1": "La reestructuración ha sido documentada conforme a las Directrices de la OCDE, incluyendo valoración de activos transferidos.",
+  "afectacion_final_1": "medio",
+
+  "impacto_2": "si",
+  "afectacion_pre_2": "alto",
+  "texto_mitigacion_2": "Los intangibles transferidos han sido valorados por experto independiente. Se mantiene documentación de los flujos de caja proyectados.",
+  "afectacion_final_2": "medio",
+
+  "impacto_3": "posible",
+  "afectacion_pre_3": "medio",
+  "texto_mitigacion_3": "Se dispone de contratos de cesión y análisis de arm's length para los cánones.",
+  "afectacion_final_3": "bajo",
+
+  "impacto_4": "si",
+  "afectacion_pre_4": "alto",
+  "texto_mitigacion_4": "Los royalties están soportados por estudio de comparabilidad y se aplica metodología CUP.",
+  "afectacion_final_4": "medio",
+
+  "impacto_5": "si",
+  "afectacion_pre_5": "alto",
+  "texto_mitigacion_5": "Los servicios están debidamente documentados con análisis de beneficio esperado y test de duplicación.",
+  "afectacion_final_5": "medio",
+
+  "impacto_6": "si",
+  "afectacion_pre_6": "alto",
+  "texto_mitigacion_6": "Las pérdidas se deben a condiciones de mercado excepcionales y reestructuración. La Compañía presenta rentabilidad positiva histórica.",
+  "afectacion_final_6": "medio",
+
+  "impacto_7": "si",
+  "afectacion_pre_7": "alto",
+  "texto_mitigacion_7": "El préstamo intragrupo tiene condiciones de mercado documentadas con análisis de tipo de interés comparable.",
+  "afectacion_final_7": "medio",
+
+  "impacto_8": "si",
+  "afectacion_pre_8": "medio",
+  "texto_mitigacion_8": "La Compañía actúa como distribuidor de riesgo limitado con margen neto dentro de rango de mercado.",
+  "afectacion_final_8": "bajo",
+
+  "impacto_9": "posible",
+  "afectacion_pre_9": "medio",
+  "texto_mitigacion_9": "Los servicios intragrupo están debidamente facturados conforme a política de precios del grupo.",
+  "afectacion_final_9": "bajo",
+
+  "impacto_10": "posible",
+  "afectacion_pre_10": "alto",
+  "texto_mitigacion_10": "El análisis funcional demuestra que la principal generación de valor se produce en España. Se mantiene sustancia económica adecuada.",
+  "afectacion_final_10": "medio",
+
+  "impacto_11": "posible",
+  "afectacion_pre_11": "medio",
+  "texto_mitigacion_11": "La estructura societaria responde a razones empresariales válidas y no busca exclusivamente ventajas fiscales.",
+  "afectacion_final_11": "bajo",
+
+  "impacto_12": "no",
+  "afectacion_pre_12": "bajo",
+  "texto_mitigacion_12": "",
+  "afectacion_final_12": "bajo",
+
+  "cumplido_local_1": "si",
+  "texto_cumplido_local_1": "",
+  "cumplido_local_2": "si",
+  "texto_cumplido_local_2": "",
+  "cumplido_local_3": "si",
+  "texto_cumplido_local_3": "",
+  "cumplido_local_4": "parcial",
+  "texto_cumplido_local_4": "Se recomienda actualizar el análisis funcional para reflejar los cambios derivados de la reestructuración.",
+  "cumplido_local_5": "si",
+  "texto_cumplido_local_5": "",
+  "cumplido_local_6": "parcial",
+  "texto_cumplido_local_6": "Los análisis de comparabilidad deberían actualizarse con datos más recientes del mercado.",
+  "cumplido_local_7": "si",
+  "texto_cumplido_local_7": "",
+  "cumplido_local_8": "no",
+  "texto_cumplido_local_8": "Falta documentación detallada sobre los criterios de reparto de costes del acuerdo de I+D.",
+  "cumplido_local_9": "si",
+  "texto_cumplido_local_9": "",
+  "cumplido_local_10": "si",
+  "texto_cumplido_local_10": "",
+  "cumplido_local_11": "si",
+  "texto_cumplido_local_11": "",
+  "cumplido_local_12": "parcial",
+  "texto_cumplido_local_12": "Se recomienda mayor nivel de detalle en la justificación del beneficio esperado de los servicios recibidos.",
+  "cumplido_local_13": "si",
+  "texto_cumplido_local_13": "",
+  "cumplido_local_14": "si",
+  "texto_cumplido_local_14": ""
+}
