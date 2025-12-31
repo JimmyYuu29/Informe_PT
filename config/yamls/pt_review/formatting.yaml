@@ -7,6 +7,26 @@
 # ============================================================================
 
 date_formats:
+  english_short:
+    description: "English short date format (primary for fecha_fin_fiscal)"
+    pattern: "{day} {month_abbr} {year}"
+    example: "31 Dec 2025"
+    months:
+      1: "Jan"
+      2: "Feb"
+      3: "Mar"
+      4: "Apr"
+      5: "May"
+      6: "Jun"
+      7: "Jul"
+      8: "Aug"
+      9: "Sep"
+      10: "Oct"
+      11: "Nov"
+      12: "Dec"
+    applies_to:
+      - fecha_fin_fiscal
+
   spanish_long:
     description: "Spanish long date format"
     pattern: "{day} de {month} de {year}"
@@ -24,8 +44,6 @@ date_formats:
       10: "octubre"
       11: "noviembre"
       12: "diciembre"
-    applies_to:
-      - fecha_fin_fiscal
 
   iso:
     description: "ISO date format"

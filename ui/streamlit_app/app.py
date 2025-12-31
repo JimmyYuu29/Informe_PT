@@ -7,6 +7,7 @@ Run with: streamlit run ui/streamlit_app/app.py
 """
 import streamlit as st
 import sys
+import json
 from pathlib import Path
 from datetime import date
 
@@ -85,6 +86,28 @@ def main():
 
         st.divider()
 
+        # JSON Import Section
+        st.header("Import Data")
+        uploaded_file = st.file_uploader(
+            "Import JSON Metadata",
+            type=["json"],
+            help="Upload a JSON file with form data to pre-fill the form",
+        )
+
+        if uploaded_file is not None:
+            try:
+                json_data = json.load(uploaded_file)
+                if st.button("Load JSON Data", use_container_width=True):
+                    load_json_data(json_data)
+                    st.success("JSON data loaded successfully!")
+                    st.rerun()
+            except json.JSONDecodeError as e:
+                st.error(f"Invalid JSON file: {e}")
+            except Exception as e:
+                st.error(f"Error loading JSON: {e}")
+
+        st.divider()
+
         # Actions
         st.header("Actions")
 
@@ -122,6 +145,35 @@ def main():
 
     # Show results
     show_results()
+
+
+def load_json_data(json_data: dict) -> None:
+    """
+    Load JSON data into the form state.
+
+    Handles both simple fields and complex list structures.
+    """
+    # Remove metadata if present
+    if "_metadata" in json_data:
+        del json_data["_metadata"]
+
+    # Process each field
+    for key, value in json_data.items():
+        if isinstance(value, list):
+            # Handle list fields
+            if key in st.session_state.list_items:
+                st.session_state.list_items[key] = []
+            else:
+                st.session_state.list_items[key] = []
+
+            for item in value:
+                if isinstance(item, dict):
+                    state.add_list_item(key, item)
+                else:
+                    state.add_list_item(key, {"value": item})
+        else:
+            # Handle scalar fields
+            state.set_field_value(key, value)
 
 
 def generate_document(plugin_id: str, form_data: dict) -> None:

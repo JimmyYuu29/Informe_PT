@@ -8,7 +8,7 @@ from typing import Any, Optional
 from .plugin_loader import PluginPack
 
 
-# Spanish month names
+# Spanish month names (full)
 SPANISH_MONTHS = {
     1: "enero",
     2: "febrero",
@@ -24,11 +24,33 @@ SPANISH_MONTHS = {
     12: "diciembre",
 }
 
+# English month abbreviations
+ENGLISH_MONTH_ABBR = {
+    1: "Jan",
+    2: "Feb",
+    3: "Mar",
+    4: "Apr",
+    5: "May",
+    6: "Jun",
+    7: "Jul",
+    8: "Aug",
+    9: "Sep",
+    10: "Oct",
+    11: "Nov",
+    12: "Dec",
+}
+
 
 def format_spanish_date(d: date) -> str:
     """Format a date in Spanish long format: '31 de diciembre de 2025'."""
     month_name = SPANISH_MONTHS.get(d.month, str(d.month))
     return f"{d.day} de {month_name} de {d.year}"
+
+
+def format_date_short_english(d: date) -> str:
+    """Format a date in short English format: '31 Dec 2025'."""
+    month_abbr = ENGLISH_MONTH_ABBR.get(d.month, str(d.month))
+    return f"{d.day} {month_abbr} {d.year}"
 
 
 def format_currency_eur(value: Any) -> str:
@@ -59,6 +81,26 @@ def format_percentage(value: Any, precision: int = 2) -> str:
         return f"{formatted} %"
     except Exception:
         return str(value)
+
+
+def sanitize_template_value(value: Any) -> Any:
+    """
+    Sanitize a value for safe insertion into DOCX template.
+    Ensures proper formatting and no unwanted whitespace that could
+    disrupt table layouts.
+    """
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        # Strip leading/trailing whitespace that could affect alignment
+        return value.strip()
+    if isinstance(value, (int, float, Decimal)):
+        return value
+    if isinstance(value, list):
+        return [sanitize_template_value(v) for v in value]
+    if isinstance(value, dict):
+        return {k: sanitize_template_value(v) for k, v in value.items()}
+    return value
 
 
 def calculate_derived_fields(data: dict, derived_defs: dict) -> dict:
@@ -281,20 +323,24 @@ class ContextBuilder:
         # Add fixed lists
         context["fixed_lists"] = self.plugin.texts.get("fixed_lists", {})
 
+        # Sanitize all values to ensure proper template insertion
+        # This helps preserve table layouts by removing unwanted whitespace
+        context = sanitize_template_value(context)
+
         return context
 
     def _format_fields(self, context: dict) -> dict:
         """Apply formatting to fields."""
-        # Format date
+        # Format date - using short English format: "31 Dec 2025"
         if "fecha_fin_fiscal" in context:
             fecha = context["fecha_fin_fiscal"]
             if isinstance(fecha, date):
-                context["fecha_fin_fiscal_formatted"] = format_spanish_date(fecha)
+                context["fecha_fin_fiscal_formatted"] = format_date_short_english(fecha)
             elif isinstance(fecha, str):
                 try:
                     parts = fecha.split("-")
                     d = date(int(parts[0]), int(parts[1]), int(parts[2]))
-                    context["fecha_fin_fiscal_formatted"] = format_spanish_date(d)
+                    context["fecha_fin_fiscal_formatted"] = format_date_short_english(d)
                 except Exception:
                     context["fecha_fin_fiscal_formatted"] = fecha
 

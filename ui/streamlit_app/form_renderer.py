@@ -6,6 +6,7 @@ import streamlit as st
 from typing import Any, Optional
 import sys
 from pathlib import Path
+from decimal import Decimal, ROUND_HALF_UP
 
 # Add modules to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -184,10 +185,29 @@ def render_section(
             return
 
     with st.expander(section_label, expanded=True):
-        for field_name in field_names:
-            field_def = fields_def.get(field_name)
-            if field_def:
-                render_field(field_name, field_def, context)
+        # Use specialized renderers for specific sections
+        if section_id == "sec_financials":
+            render_financial_data_table(context, fields_def)
+        elif section_id == "sec_operations":
+            render_operaciones_intragrupo_table(context, fields_def)
+            st.divider()
+            render_operaciones_vinculadas_detail_table(context, fields_def)
+        elif section_id == "sec_services":
+            render_metodo_elegido_table(context, fields_def)
+        elif section_id == "sec_compliance_local":
+            render_cumplimiento_resumen_table(context, fields_def)
+        elif section_id == "sec_risks" or "risk_elements" in field_names:
+            render_risk_table(context, fields_def)
+        elif section_id == "sec_local_detail" or "local_file_compliance" in field_names:
+            render_local_file_compliance_detail(context, fields_def)
+        elif section_id == "sec_master_detail" or "master_file_compliance" in field_names:
+            render_master_file_compliance_detail(context, fields_def)
+        else:
+            # Default rendering
+            for field_name in field_names:
+                field_def = fields_def.get(field_name)
+                if field_def:
+                    render_field(field_name, field_def, context)
 
 
 def render_form(plugin: PluginPack) -> dict:
@@ -330,3 +350,731 @@ def render_compliance_table(
                     label="Comentario",
                     required=comment_required,
                 )
+
+
+def calculate_variation(val_1: Any, val_0: Any) -> str:
+    """Calculate year-over-year variation percentage."""
+    try:
+        if val_1 is None or val_0 is None:
+            return "N/A"
+        v1 = Decimal(str(val_1)) if val_1 else Decimal(0)
+        v0 = Decimal(str(val_0)) if val_0 else Decimal(0)
+        if v0 == 0:
+            return "N/A"
+        variation = ((v1 - v0) / abs(v0)) * 100
+        variation = variation.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        return f"{variation:+.2f}".replace(".", ",")
+    except Exception:
+        return "N/A"
+
+
+def render_financial_data_table(context: dict, fields_def: dict) -> None:
+    """
+    Render the financial data table with two columns for ejercicio actual and anterior,
+    and automatic variation calculation.
+    """
+    st.subheader("Datos Financieros")
+
+    # Define the financial rows
+    financial_rows = [
+        {
+            "label": "Cifra de negocios",
+            "field_1": "cifra_1",
+            "field_0": "cifra_0",
+            "is_currency": True,
+        },
+        {
+            "label": "EBIT",
+            "field_1": "ebit_1",
+            "field_0": "ebit_0",
+            "is_currency": True,
+        },
+        {
+            "label": "Resultado Financiero",
+            "field_1": "resultado_fin_1",
+            "field_0": "resultado_fin_0",
+            "is_currency": True,
+        },
+        {
+            "label": "EBT",
+            "field_1": "ebt_1",
+            "field_0": "ebt_0",
+            "is_currency": True,
+        },
+        {
+            "label": "Resultado Neto",
+            "field_1": "resultado_net_1",
+            "field_0": "resultado_net_0",
+            "is_currency": True,
+        },
+    ]
+
+    # Get fiscal year for column headers
+    anyo_actual = state.get_field_value("anyo_ejercicio", "Actual")
+    anyo_anterior = state.get_field_value("anyo_ejercicio_ant", "Anterior")
+
+    # Calculate years from fecha_fin_fiscal if available
+    fecha = state.get_field_value("fecha_fin_fiscal")
+    if fecha:
+        try:
+            from datetime import date
+            if isinstance(fecha, date):
+                anyo_actual = fecha.year
+                anyo_anterior = fecha.year - 1
+            elif isinstance(fecha, str):
+                anyo_actual = int(fecha.split("-")[0])
+                anyo_anterior = anyo_actual - 1
+        except Exception:
+            pass
+
+    # Table header
+    cols_header = st.columns([0.25, 0.20, 0.25, 0.30])
+    with cols_header[0]:
+        st.markdown("**Partidas Contables**")
+    with cols_header[1]:
+        st.markdown(f"**Variación (%)**")
+    with cols_header[2]:
+        st.markdown(f"**Ejercicio {anyo_actual} (EUR)**")
+    with cols_header[3]:
+        st.markdown(f"**Ejercicio {anyo_anterior} (EUR)**")
+
+    st.divider()
+
+    # Render each row
+    for row in financial_rows:
+        cols = st.columns([0.25, 0.20, 0.25, 0.30])
+
+        with cols[0]:
+            st.markdown(f"**{row['label']}**")
+
+        # Input for ejercicio actual (current year)
+        with cols[2]:
+            val_1 = components.render_number_input(
+                field_name=row["field_1"],
+                label="",
+                required=True,
+                is_currency=row["is_currency"],
+            )
+
+        # Input for ejercicio anterior (prior year)
+        with cols[3]:
+            val_0 = components.render_number_input(
+                field_name=row["field_0"],
+                label="",
+                required=True,
+                is_currency=row["is_currency"],
+            )
+
+        # Calculate and display variation
+        with cols[1]:
+            variation = calculate_variation(val_1, val_0)
+            st.markdown(f"**{variation} %**")
+
+    st.divider()
+
+    # Derived rows (calculated automatically)
+    st.caption("Los siguientes valores se calculan automáticamente:")
+
+    # Calculate derived values
+    cifra_1 = state.get_field_value("cifra_1", 0)
+    cifra_0 = state.get_field_value("cifra_0", 0)
+    ebit_1 = state.get_field_value("ebit_1", 0)
+    ebit_0 = state.get_field_value("ebit_0", 0)
+
+    try:
+        cost_1 = float(cifra_1 or 0) - float(ebit_1 or 0)
+        cost_0 = float(cifra_0 or 0) - float(ebit_0 or 0)
+        om_1 = (float(ebit_1 or 0) / float(cifra_1 or 1)) * 100 if cifra_1 else 0
+        om_0 = (float(ebit_0 or 0) / float(cifra_0 or 1)) * 100 if cifra_0 else 0
+        ncp_1 = (float(ebit_1 or 0) / float(cost_1 or 1)) * 100 if cost_1 else 0
+        ncp_0 = (float(ebit_0 or 0) / float(cost_0 or 1)) * 100 if cost_0 else 0
+    except Exception:
+        cost_1 = cost_0 = om_1 = om_0 = ncp_1 = ncp_0 = 0
+
+    derived_rows = [
+        {"label": "Total costes operativos", "val_1": cost_1, "val_0": cost_0, "is_currency": True},
+        {"label": "Operating Margin (OM)", "val_1": om_1, "val_0": om_0, "is_percent": True},
+        {"label": "Net Cost Plus (NCP)", "val_1": ncp_1, "val_0": ncp_0, "is_percent": True},
+    ]
+
+    for row in derived_rows:
+        cols = st.columns([0.25, 0.20, 0.25, 0.30])
+
+        with cols[0]:
+            st.markdown(f"*{row['label']}*")
+
+        with cols[1]:
+            variation = calculate_variation(row["val_1"], row["val_0"])
+            st.markdown(f"*{variation} %*")
+
+        with cols[2]:
+            if row.get("is_currency"):
+                formatted = f"{row['val_1']:,.2f} €".replace(",", "X").replace(".", ",").replace("X", ".")
+            else:
+                formatted = f"{row['val_1']:.2f} %".replace(".", ",")
+            st.markdown(f"*{formatted}*")
+
+        with cols[3]:
+            if row.get("is_currency"):
+                formatted = f"{row['val_0']:,.2f} €".replace(",", "X").replace(".", ",").replace("X", ".")
+            else:
+                formatted = f"{row['val_0']:.2f} %".replace(".", ",")
+            st.markdown(f"*{formatted}*")
+
+
+def render_operaciones_intragrupo_table(context: dict, fields_def: dict) -> None:
+    """
+    Render the operaciones intragrupo (related party operations) table
+    matching the template layout.
+    """
+    st.subheader("Operaciones Intragrupo")
+
+    items = state.get_list_items("servicios_vinculados")
+
+    # Table header
+    cols_header = st.columns([0.1, 0.9])
+    with cols_header[0]:
+        st.markdown("**#**")
+    with cols_header[1]:
+        st.markdown("**Operaciones intragrupo**")
+
+    st.divider()
+
+    # Render existing items
+    for idx, item in enumerate(items):
+        cols = st.columns([0.1, 0.9])
+        with cols[0]:
+            st.markdown(f"**{idx + 1}**")
+        with cols[1]:
+            widget_key = state.get_stable_key("servicios_vinculados", idx, "servicio_vinculado")
+            current_value = item.get("servicio_vinculado", "")
+            new_value = st.text_input(
+                "Tipo de operación",
+                value=current_value,
+                key=widget_key,
+                label_visibility="collapsed",
+            )
+            state.update_list_item("servicios_vinculados", idx, "servicio_vinculado", new_value)
+
+            # Remove button
+            if len(items) > 1:
+                if st.button("Eliminar", key=f"remove_servicio_{idx}"):
+                    state.remove_list_item("servicios_vinculados", idx)
+                    st.rerun()
+
+    # Add button
+    if st.button("+ Añadir operación", key="add_servicio"):
+        state.add_list_item("servicios_vinculados", {
+            "servicio_vinculado": "",
+            "entidades_vinculadas": []
+        })
+        st.rerun()
+
+
+def render_operaciones_vinculadas_detail_table(context: dict, fields_def: dict) -> None:
+    """
+    Render the detailed operaciones vinculadas table with entity breakdown,
+    matching the template layout.
+    """
+    st.subheader("Detalle de Operaciones Vinculadas")
+
+    # Get fiscal year for column header
+    anyo_actual = state.get_field_value("anyo_ejercicio", "Actual")
+    fecha = state.get_field_value("fecha_fin_fiscal")
+    if fecha:
+        try:
+            from datetime import date
+            if isinstance(fecha, date):
+                anyo_actual = fecha.year
+            elif isinstance(fecha, str):
+                anyo_actual = int(fecha.split("-")[0])
+        except Exception:
+            pass
+
+    servicios = state.get_list_items("servicios_vinculados")
+
+    # Table header
+    cols_header = st.columns([0.35, 0.30, 0.35])
+    with cols_header[0]:
+        st.markdown("**Tipo de operación vinculada**")
+    with cols_header[1]:
+        st.markdown("**Entidad vinculada**")
+    with cols_header[2]:
+        st.markdown(f"**Ingreso FY {anyo_actual} (EUR)**")
+
+    st.divider()
+
+    total_ingreso = 0
+    total_gasto = 0
+
+    for serv_idx, servicio in enumerate(servicios):
+        servicio_name = servicio.get("servicio_vinculado", f"Servicio {serv_idx + 1}")
+        entidades = servicio.get("entidades_vinculadas", [])
+
+        if not entidades:
+            entidades = [{"entidad_vinculada": "", "ingreso_entidad": 0, "gasto_entidad": 0}]
+            servicio["entidades_vinculadas"] = entidades
+
+        for ent_idx, entidad in enumerate(entidades):
+            cols = st.columns([0.35, 0.30, 0.35])
+
+            with cols[0]:
+                if ent_idx == 0:
+                    st.markdown(f"**{servicio_name}**")
+                else:
+                    st.markdown("")
+
+            with cols[1]:
+                widget_key = f"entidad_{serv_idx}_{ent_idx}_nombre"
+                current_value = entidad.get("entidad_vinculada", "")
+                new_value = st.text_input(
+                    "Entidad",
+                    value=current_value,
+                    key=widget_key,
+                    label_visibility="collapsed",
+                )
+                if "entidades_vinculadas" not in servicio:
+                    servicio["entidades_vinculadas"] = []
+                while len(servicio["entidades_vinculadas"]) <= ent_idx:
+                    servicio["entidades_vinculadas"].append({})
+                servicio["entidades_vinculadas"][ent_idx]["entidad_vinculada"] = new_value
+
+            with cols[2]:
+                widget_key = f"entidad_{serv_idx}_{ent_idx}_ingreso"
+                current_ingreso = entidad.get("ingreso_entidad", 0)
+                try:
+                    current_float = float(current_ingreso) if current_ingreso else 0.0
+                except (TypeError, ValueError):
+                    current_float = 0.0
+                new_ingreso = st.number_input(
+                    "Ingreso",
+                    value=current_float,
+                    key=widget_key,
+                    format="%.2f",
+                    label_visibility="collapsed",
+                )
+                servicio["entidades_vinculadas"][ent_idx]["ingreso_entidad"] = new_ingreso
+                total_ingreso += new_ingreso
+
+        # Add entity button for this service
+        if st.button(f"+ Añadir entidad a '{servicio_name}'", key=f"add_entidad_{serv_idx}"):
+            if "entidades_vinculadas" not in servicio:
+                servicio["entidades_vinculadas"] = []
+            servicio["entidades_vinculadas"].append({
+                "entidad_vinculada": "",
+                "ingreso_entidad": 0,
+                "gasto_entidad": 0
+            })
+            st.rerun()
+
+        st.divider()
+
+    # Show totals
+    cols_total = st.columns([0.65, 0.35])
+    with cols_total[0]:
+        st.markdown("**Total ingreso oovv**")
+    with cols_total[1]:
+        formatted_total = f"{total_ingreso:,.2f} €".replace(",", "X").replace(".", ",").replace("X", ".")
+        st.markdown(f"**{formatted_total}**")
+
+
+def render_metodo_elegido_table(context: dict, fields_def: dict) -> None:
+    """
+    Render the método elegido (benchmark) table matching the template layout.
+    """
+    st.subheader("Análisis de Servicios OOVV - Método Elegido")
+
+    servicios_oovv = state.get_list_items("servicios_oovv")
+
+    # Table header
+    cols_header = st.columns([0.25, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125])
+    headers = ["Método Elegido", "Min", "LQ", "Med", "UQ", "Max", ""]
+    for col, header in zip(cols_header, headers):
+        with col:
+            st.markdown(f"**{header}**")
+
+    st.divider()
+
+    for idx, servicio in enumerate(servicios_oovv):
+        cols = st.columns([0.25, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125])
+
+        # Método
+        with cols[0]:
+            widget_key = f"servicio_oovv_{idx}_metodo"
+            current_value = servicio.get("metodo", "")
+            new_value = st.text_input(
+                "Método",
+                value=current_value,
+                key=widget_key,
+                label_visibility="collapsed",
+            )
+            servicio["metodo"] = new_value
+
+        # Min
+        with cols[1]:
+            widget_key = f"servicio_oovv_{idx}_min"
+            try:
+                current_val = float(servicio.get("min", 0))
+            except (TypeError, ValueError):
+                current_val = 0.0
+            new_val = st.number_input(
+                "Min %",
+                value=current_val,
+                key=widget_key,
+                format="%.2f",
+                label_visibility="collapsed",
+            )
+            servicio["min"] = new_val
+
+        # LQ
+        with cols[2]:
+            widget_key = f"servicio_oovv_{idx}_lq"
+            try:
+                current_val = float(servicio.get("lq", 0))
+            except (TypeError, ValueError):
+                current_val = 0.0
+            new_val = st.number_input(
+                "LQ %",
+                value=current_val,
+                key=widget_key,
+                format="%.2f",
+                label_visibility="collapsed",
+            )
+            servicio["lq"] = new_val
+
+        # Med
+        with cols[3]:
+            widget_key = f"servicio_oovv_{idx}_med"
+            try:
+                current_val = float(servicio.get("med", 0))
+            except (TypeError, ValueError):
+                current_val = 0.0
+            new_val = st.number_input(
+                "Med %",
+                value=current_val,
+                key=widget_key,
+                format="%.2f",
+                label_visibility="collapsed",
+            )
+            servicio["med"] = new_val
+
+        # UQ
+        with cols[4]:
+            widget_key = f"servicio_oovv_{idx}_uq"
+            try:
+                current_val = float(servicio.get("uq", 0))
+            except (TypeError, ValueError):
+                current_val = 0.0
+            new_val = st.number_input(
+                "UQ %",
+                value=current_val,
+                key=widget_key,
+                format="%.2f",
+                label_visibility="collapsed",
+            )
+            servicio["uq"] = new_val
+
+        # Max
+        with cols[5]:
+            widget_key = f"servicio_oovv_{idx}_max"
+            try:
+                current_val = float(servicio.get("max", 0))
+            except (TypeError, ValueError):
+                current_val = 0.0
+            new_val = st.number_input(
+                "Max %",
+                value=current_val,
+                key=widget_key,
+                format="%.2f",
+                label_visibility="collapsed",
+            )
+            servicio["max"] = new_val
+
+        # Remove button
+        with cols[6]:
+            if len(servicios_oovv) > 0:
+                if st.button("X", key=f"remove_servicio_oovv_{idx}"):
+                    state.remove_list_item("servicios_oovv", idx)
+                    st.rerun()
+
+    # Add button
+    if st.button("+ Añadir servicio OOVV", key="add_servicio_oovv"):
+        state.add_list_item("servicios_oovv", {
+            "enabled": True,
+            "titulo_servicio_oovv": "",
+            "texto_intro_servicio": "",
+            "descripcion_tabla": "",
+            "metodo": "",
+            "min": 0,
+            "lq": 0,
+            "med": 0,
+            "uq": 0,
+            "max": 0,
+            "texto_conclusion_servicio": "",
+        })
+        st.rerun()
+
+
+def render_cumplimiento_resumen_table(context: dict, fields_def: dict) -> None:
+    """
+    Render the cumplimiento resumen (compliance summary) table
+    matching the template layout.
+    """
+    st.subheader("Resumen de Cumplimiento - Local File")
+
+    sections = [
+        {"num": 1, "label": "Información del contribuyente"},
+        {"num": 2, "label": "Información de las operaciones vinculadas"},
+        {"num": 3, "label": "Información económico-financiera del contribuyente"},
+    ]
+
+    cumplimiento_options = ["si", "no"]
+
+    # Table header
+    cols_header = st.columns([0.1, 0.6, 0.3])
+    with cols_header[0]:
+        st.markdown("**#**")
+    with cols_header[1]:
+        st.markdown("**Secciones (Artículo 16 del Reglamento)**")
+    with cols_header[2]:
+        st.markdown("**Cumplimiento**")
+
+    st.divider()
+
+    for section in sections:
+        cols = st.columns([0.1, 0.6, 0.3])
+
+        with cols[0]:
+            st.markdown(f"**{section['num']}**")
+
+        with cols[1]:
+            st.markdown(section["label"])
+
+        with cols[2]:
+            field_name = f"cumplimiento_resumen_local_{section['num']}"
+            components.render_enum_input(
+                field_name=field_name,
+                label="",
+                options=cumplimiento_options,
+                required=True,
+            )
+
+
+def render_risk_table(context: dict, fields_def: dict) -> None:
+    """
+    Render the risk assessment table (Evaluación de Riesgos) matching template layout.
+
+    Table structure:
+    | # | Elemento de Riesgo | Impacto | Afectación Preliminar | Mitigadores | Afectación Final |
+    """
+    risk_labels = [
+        "Restructuraciones empresariales",
+        "Valoración de transmisiones intragrupo de activos intangibles",
+        "Pagos por cánones derivados de la cesión de intangibles",
+        "Pagos por servicios intragrupo",
+        "Existencia de pérdidas reiteradas",
+        "Operaciones financieras entre partes vinculadas",
+        "Estructuras funcionales de bajo riesgo",
+        "Falta de declaración de ingresos intragrupo",
+        "Erosión de bases imponibles",
+        "Revisión de las formas societarias",
+        "Operaciones con establecimientos permanentes",
+        "Peso de las operaciones vinculadas relevante",
+    ]
+
+    impacto_options = ["si", "no", "posible"]
+    afectacion_options = ["bajo", "medio", "alto"]
+
+    st.subheader("Evaluación de Riesgos")
+
+    # Table header
+    cols_header = st.columns([0.05, 0.30, 0.13, 0.13, 0.26, 0.13])
+    headers = ["#", "Elemento de riesgo", "Impacto", "Afect. Prelim.", "Mitigadores", "Afect. Final"]
+    for col, header in zip(cols_header, headers):
+        with col:
+            st.markdown(f"**{header}**")
+
+    st.divider()
+
+    for i, label in enumerate(risk_labels, 1):
+        cols = st.columns([0.05, 0.30, 0.13, 0.13, 0.26, 0.13])
+
+        with cols[0]:
+            st.markdown(f"**{i}**")
+
+        with cols[1]:
+            st.markdown(label)
+
+        with cols[2]:
+            field_name = f"impacto_{i}"
+            components.render_enum_input(
+                field_name=field_name,
+                label="",
+                options=impacto_options,
+                required=True,
+            )
+
+        with cols[3]:
+            field_name = f"afectacion_pre_{i}"
+            components.render_enum_input(
+                field_name=field_name,
+                label="",
+                options=afectacion_options,
+                required=True,
+            )
+
+        with cols[4]:
+            field_name = f"texto_mitigacion_{i}"
+            components.render_text_input(
+                field_name=field_name,
+                label="",
+                required=False,
+            )
+
+        with cols[5]:
+            field_name = f"afectacion_final_{i}"
+            components.render_enum_input(
+                field_name=field_name,
+                label="",
+                options=afectacion_options,
+                required=True,
+            )
+
+
+def render_local_file_compliance_detail(context: dict, fields_def: dict) -> None:
+    """
+    Render the detailed Local File compliance table (ANEXO 2 - Table 08).
+
+    Table structure:
+    | # | Contenido | Cumplido | Comentario |
+    """
+    local_file_items = [
+        "Estructura organizativa del obligado tributario",
+        "Descripción de las actividades de la entidad",
+        "Principales competidores",
+        "Funciones ejercidas y riesgos asumidos",
+        "Información detallada de las operaciones vinculadas",
+        "Análisis de comparabilidad",
+        "Método de valoración elegido",
+        "Información financiera del contribuyente",
+        "Criterios de reparto de costes",
+        "Acuerdos de reparto de costes",
+        "Acuerdos previos de valoración",
+        "Información sobre establecimientos permanentes",
+        "Información sobre operaciones con paraísos fiscales",
+        "Información general sobre el grupo",
+    ]
+
+    cumplido_options = ["si", "parcial", "no"]
+
+    st.subheader("Cumplimiento Local File - Detalle")
+
+    # Table header
+    cols_header = st.columns([0.05, 0.50, 0.15, 0.30])
+    headers = ["#", "Contenido", "Cumplido", "Comentario"]
+    for col, header in zip(cols_header, headers):
+        with col:
+            st.markdown(f"**{header}**")
+
+    st.divider()
+
+    for i, item in enumerate(local_file_items, 1):
+        cols = st.columns([0.05, 0.50, 0.15, 0.30])
+
+        with cols[0]:
+            st.markdown(f"**{i}**")
+
+        with cols[1]:
+            st.markdown(item)
+
+        with cols[2]:
+            field_name = f"cumplido_local_{i}"
+            components.render_enum_input(
+                field_name=field_name,
+                label="",
+                options=cumplido_options,
+                required=True,
+            )
+
+        with cols[3]:
+            # Comment required if cumplido is 'no' or 'parcial'
+            cumplido_value = state.get_field_value(f"cumplido_local_{i}", "si")
+            comment_required = cumplido_value in ("no", "parcial")
+
+            field_name = f"texto_cumplido_local_{i}"
+            components.render_text_input(
+                field_name=field_name,
+                label="",
+                required=comment_required,
+            )
+
+
+def render_master_file_compliance_detail(context: dict, fields_def: dict) -> None:
+    """
+    Render the detailed Master File compliance table (ANEXO 2 - Table 09).
+
+    Table structure:
+    | # | Contenido | Cumplido | Comentario |
+    """
+    master_file_items = [
+        "Estructura organizativa del grupo multinacional",
+        "Descripción del negocio del grupo",
+        "Intangibles del grupo",
+        "Actividades financieras intragrupo",
+        "Situación financiera y fiscal del grupo",
+        "Descripción de la cadena de suministro",
+        "Lista de acuerdos importantes de servicios",
+        "Descripción funcional y estrategia del grupo",
+        "Principales operaciones de reestructuración",
+        "Descripción de la estrategia del grupo respecto a intangibles",
+        "Lista de intangibles importantes",
+        "Descripción de acuerdos de coste",
+        "Descripción de préstamos intragrupo",
+        "Estados financieros consolidados",
+        "Lista de APAs unilaterales",
+        "Información sobre resoluciones fiscales",
+        "Información sobre operaciones con paraísos fiscales",
+    ]
+
+    cumplido_options = ["si", "parcial", "no"]
+
+    st.subheader("Cumplimiento Master File - Detalle")
+
+    # Table header
+    cols_header = st.columns([0.05, 0.50, 0.15, 0.30])
+    headers = ["#", "Contenido", "Cumplido", "Comentario"]
+    for col, header in zip(cols_header, headers):
+        with col:
+            st.markdown(f"**{header}**")
+
+    st.divider()
+
+    for i, item in enumerate(master_file_items, 1):
+        cols = st.columns([0.05, 0.50, 0.15, 0.30])
+
+        with cols[0]:
+            st.markdown(f"**{i}**")
+
+        with cols[1]:
+            st.markdown(item)
+
+        with cols[2]:
+            field_name = f"cumplido_mast_{i}"
+            components.render_enum_input(
+                field_name=field_name,
+                label="",
+                options=cumplido_options,
+                required=True,
+            )
+
+        with cols[3]:
+            # Comment required if cumplido is 'no' or 'parcial'
+            cumplido_value = state.get_field_value(f"cumplido_mast_{i}", "si")
+            comment_required = cumplido_value in ("no", "parcial")
+
+            field_name = f"texto_cumplido_mast_{i}"
+            components.render_text_input(
+                field_name=field_name,
+                label="",
+                required=comment_required,
+            )
