@@ -132,10 +132,10 @@ def validate_field_value(field_name: str, value: Any, field_def: dict) -> list[s
     field_type = field_def.get("type", "text")
     required = field_def.get("required", False)
     validation = field_def.get("validation", {})
+    label = field_def.get("label", field_name)
 
     # Check required
     if required and (value is None or value == ""):
-        label = field_def.get("label", field_name)
         errors.append(f"Field '{label}' is required")
         return errors
 
@@ -145,18 +145,20 @@ def validate_field_value(field_name: str, value: Any, field_def: dict) -> list[s
     # Type-specific validation
     if field_type == "text":
         if not isinstance(value, str):
-            errors.append(f"Field '{field_name}' must be a string")
+            errors.append(f"Field '{label}' must be a string")
         else:
+            # Strip whitespace for length validation
+            stripped_value = value.strip()
             min_len = validation.get("min_length", 0)
             max_len = validation.get("max_length")
-            if len(value) < min_len:
-                errors.append(f"Field '{field_name}' must be at least {min_len} characters")
-            if max_len and len(value) > max_len:
-                errors.append(f"Field '{field_name}' must be at most {max_len} characters")
+            if len(stripped_value) < min_len:
+                errors.append(f"Field '{label}' must be at least {min_len} characters (current: {len(stripped_value)})")
+            if max_len and len(stripped_value) > max_len:
+                errors.append(f"Field '{label}' must be at most {max_len} characters (current: {len(stripped_value)})")
 
     elif field_type == "date":
         if not isinstance(value, (date, str)):
-            errors.append(f"Field '{field_name}' must be a date")
+            errors.append(f"Field '{label}' must be a date")
 
     elif field_type == "enum":
         allowed_values = field_def.get("values", [])
@@ -166,28 +168,28 @@ def validate_field_value(field_name: str, value: Any, field_def: dict) -> list[s
         else:
             allowed = allowed_values
         if value not in allowed:
-            errors.append(f"Field '{field_name}' must be one of: {allowed}")
+            errors.append(f"Field '{label}' must be one of: {allowed}")
 
     elif field_type in ("currency", "decimal", "int"):
         try:
             float(value)
         except (TypeError, ValueError):
-            errors.append(f"Field '{field_name}' must be a number")
+            errors.append(f"Field '{label}' must be a number")
 
     elif field_type == "list":
         if not isinstance(value, list):
-            errors.append(f"Field '{field_name}' must be a list")
+            errors.append(f"Field '{label}' must be a list")
         else:
             min_items = field_def.get("min_items", 0)
             if len(value) < min_items:
-                errors.append(f"Field '{field_name}' must have at least {min_items} items")
+                errors.append(f"Field '{label}' must have at least {min_items} items")
 
     # Format validation
     fmt = field_def.get("format")
     if fmt == "email" and value:
         email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         if not re.match(email_pattern, str(value)):
-            errors.append(f"Field '{field_name}' must be a valid email address")
+            errors.append(f"Field '{label}' must be a valid email address")
 
     return errors
 

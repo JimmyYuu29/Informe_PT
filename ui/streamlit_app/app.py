@@ -35,22 +35,34 @@ st.set_page_config(
 
 def main():
     """Main application entry point."""
-    st.title("📄 Enterprise Document Generation Platform")
+    st.title("Enterprise Document Generation Platform")
+
+    # Get available plugins first
+    available_plugins = list_plugins()
+    if not available_plugins:
+        st.error("No plugins found in config/yamls/")
+        st.stop()
+
+    # Initialize session state with default plugin
+    default_plugin = available_plugins[0]
+    current_plugin = st.session_state.get("plugin_id", default_plugin)
+    if current_plugin not in available_plugins:
+        current_plugin = default_plugin
+    state.init_session_state(current_plugin)
 
     # Sidebar - Plugin selection
     with st.sidebar:
         st.header("Plugin Selection")
 
-        available_plugins = list_plugins()
-        if not available_plugins:
-            st.error("No plugins found in config/yamls/")
-            st.stop()
-
         selected_plugin = st.selectbox(
             "Select Plugin",
             options=available_plugins,
-            index=0,
+            index=available_plugins.index(current_plugin) if current_plugin in available_plugins else 0,
         )
+
+        # Update session state if plugin changed
+        if selected_plugin != st.session_state.get("plugin_id"):
+            st.session_state.plugin_id = selected_plugin
 
         # Plugin info
         if selected_plugin:
@@ -108,15 +120,25 @@ def main():
 
         st.divider()
 
+        # JSON Export Section
+        st.header("Export Data")
+        export_data = export_form_data()
+        st.download_button(
+            label="Export to JSON",
+            data=export_data,
+            file_name="form_data.json",
+            mime="application/json",
+            use_container_width=True,
+        )
+
+        st.divider()
+
         # Actions
         st.header("Actions")
 
         if st.button("Clear Form", use_container_width=True):
             state.clear_form_data()
             st.rerun()
-
-    # Initialize state
-    state.init_session_state(selected_plugin)
 
     # Load plugin
     try:
@@ -145,6 +167,36 @@ def main():
 
     # Show results
     show_results()
+
+
+def export_form_data() -> str:
+    """
+    Export current form data to JSON string.
+
+    Returns:
+        JSON string of form data, or empty string if no data.
+    """
+    all_data = state.get_all_form_data()
+
+    # Convert date objects to ISO format strings
+    def serialize_value(v):
+        if isinstance(v, date):
+            return v.isoformat()
+        elif isinstance(v, list):
+            return [serialize_value(item) for item in v]
+        elif isinstance(v, dict):
+            return {k: serialize_value(val) for k, val in v.items()}
+        return v
+
+    serialized = {k: serialize_value(v) for k, v in all_data.items()}
+
+    # Add metadata
+    serialized["_metadata"] = {
+        "exported_at": date.today().isoformat(),
+        "plugin_id": st.session_state.get("plugin_id", "unknown"),
+    }
+
+    return json.dumps(serialized, ensure_ascii=False, indent=2)
 
 
 def load_json_data(json_data: dict) -> None:
