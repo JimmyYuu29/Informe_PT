@@ -29,7 +29,6 @@ def render_text_input(
             key=widget_key,
             help=help_text,
             max_chars=max_length,
-            on_change=state.create_sync_callback(field_name, widget_key),
         )
     else:
         value = st.text_input(
@@ -38,7 +37,6 @@ def render_text_input(
             key=widget_key,
             help=help_text,
             max_chars=max_length,
-            on_change=state.create_sync_callback(field_name, widget_key),
         )
 
     state.set_field_value(field_name, value)
@@ -71,7 +69,6 @@ def render_date_input(
         value=default_value,
         key=widget_key,
         help=help_text,
-        on_change=state.create_sync_callback(field_name, widget_key),
     )
 
     state.set_field_value(field_name, value)
@@ -108,7 +105,6 @@ def render_number_input(
         key=widget_key,
         help=help_text,
         format="%.2f" if is_currency else "%.0f",
-        on_change=state.create_sync_callback(field_name, widget_key),
     )
 
     state.set_field_value(field_name, value)
@@ -148,7 +144,6 @@ def render_enum_input(
         index=default_index,
         key=widget_key,
         help=help_text,
-        on_change=state.create_sync_callback(field_name, widget_key),
     )
 
     # Get actual value
@@ -176,7 +171,6 @@ def render_checkbox(
         value=bool(default_value),
         key=widget_key,
         help=help_text,
-        on_change=state.create_sync_callback(field_name, widget_key),
     )
 
     state.set_field_value(field_name, value)
