@@ -1,0 +1,138 @@
+{
+  "_metadata": {
+    "name": "pt_review_minimal",
+    "description": "Minimal valid input - No Master File access, no service analysis",
+    "decisions_covered": ["d1_master_file_access (no access)", "d4_service_activation (no services)"],
+    "generated": "2025-12-31"
+  },
+
+  "fecha_fin_fiscal": "2024-12-31",
+  "entidad_cliente": "Ejemplo Distribución S.A.U.",
+  "master_file": 0,
+  "descripcion_actividad": "La Compañía se dedica a la distribución de productos de consumo a nivel nacional, actuando como intermediario entre fabricantes internacionales y puntos de venta minoristas en España.",
+
+  "texto_anexo3": "",
+
+  "contacto1": "María García López",
+  "cargo_contacto1": "Socia - Precios de Transferencia",
+  "correo_contacto1": "maria.garcia@forvismazars.com",
+  "contacto2": "Carlos Rodríguez Martín",
+  "cargo_contacto2": "Manager - Precios de Transferencia",
+  "correo_contacto2": "carlos.rodriguez@forvismazars.com",
+  "contacto3": "Ana Fernández Ruiz",
+  "cargo_contacto3": "Senior - Precios de Transferencia",
+  "correo_contacto3": "ana.fernandez@forvismazars.com",
+
+  "cifra_1": 15000000,
+  "ebit_1": 1200000,
+  "resultado_fin_1": -50000,
+  "ebt_1": 1150000,
+  "resultado_net_1": 862500,
+
+  "cifra_0": 14500000,
+  "ebit_0": 1100000,
+  "resultado_fin_0": -45000,
+  "ebt_0": 1055000,
+  "resultado_net_0": 791250,
+
+  "documentacion_facilitada": [
+    "Documentación de contribuyente en materia de precios de transferencia o Local File de la Compañía relativo al ejercicio finalizado el 31 de diciembre de 2024"
+  ],
+
+  "servicios_vinculados": [
+    {
+      "servicio_vinculado": "Servicios de gestión administrativa",
+      "entidades_vinculadas": [
+        {
+          "entidad_vinculada": "Ejemplo Group Holdings B.V.",
+          "ingreso_entidad": 0,
+          "gasto_entidad": 250000
+        }
+      ]
+    }
+  ],
+
+  "servicios_oovv": [],
+
+  "cumplimiento_resumen_local_1": "si",
+  "cumplimiento_resumen_local_2": "si",
+  "cumplimiento_resumen_local_3": "si",
+
+  "impacto_1": "no",
+  "afectacion_pre_1": "bajo",
+  "texto_mitigacion_1": "No aplica",
+  "afectacion_final_1": "bajo",
+  "impacto_2": "no",
+  "afectacion_pre_2": "bajo",
+  "texto_mitigacion_2": "No aplica",
+  "afectacion_final_2": "bajo",
+  "impacto_3": "no",
+  "afectacion_pre_3": "bajo",
+  "texto_mitigacion_3": "No aplica",
+  "afectacion_final_3": "bajo",
+  "impacto_4": "si",
+  "afectacion_pre_4": "medio",
+  "texto_mitigacion_4": "La Compañía dispone de documentación que justifica el beneficio recibido por los servicios",
+  "afectacion_final_4": "bajo",
+  "impacto_5": "no",
+  "afectacion_pre_5": "bajo",
+  "texto_mitigacion_5": "No aplica",
+  "afectacion_final_5": "bajo",
+  "impacto_6": "no",
+  "afectacion_pre_6": "bajo",
+  "texto_mitigacion_6": "No aplica",
+  "afectacion_final_6": "bajo",
+  "impacto_7": "posible",
+  "afectacion_pre_7": "medio",
+  "texto_mitigacion_7": "Análisis funcional detallado disponible en Local File",
+  "afectacion_final_7": "bajo",
+  "impacto_8": "no",
+  "afectacion_pre_8": "bajo",
+  "texto_mitigacion_8": "No aplica",
+  "afectacion_final_8": "bajo",
+  "impacto_9": "no",
+  "afectacion_pre_9": "bajo",
+  "texto_mitigacion_9": "No aplica",
+  "afectacion_final_9": "bajo",
+  "impacto_10": "no",
+  "afectacion_pre_10": "bajo",
+  "texto_mitigacion_10": "No aplica",
+  "afectacion_final_10": "bajo",
+  "impacto_11": "no",
+  "afectacion_pre_11": "bajo",
+  "texto_mitigacion_11": "No aplica",
+  "afectacion_final_11": "bajo",
+  "impacto_12": "no",
+  "afectacion_pre_12": "bajo",
+  "texto_mitigacion_12": "Peso de operaciones vinculadas por debajo del umbral de relevancia",
+  "afectacion_final_12": "bajo",
+
+  "cumplido_local_1": "si",
+  "texto_cumplido_local_1": "",
+  "cumplido_local_2": "si",
+  "texto_cumplido_local_2": "",
+  "cumplido_local_3": "si",
+  "texto_cumplido_local_3": "",
+  "cumplido_local_4": "si",
+  "texto_cumplido_local_4": "",
+  "cumplido_local_5": "si",
+  "texto_cumplido_local_5": "",
+  "cumplido_local_6": "si",
+  "texto_cumplido_local_6": "",
+  "cumplido_local_7": "si",
+  "texto_cumplido_local_7": "",
+  "cumplido_local_8": "si",
+  "texto_cumplido_local_8": "",
+  "cumplido_local_9": "si",
+  "texto_cumplido_local_9": "",
+  "cumplido_local_10": "si",
+  "texto_cumplido_local_10": "",
+  "cumplido_local_11": "si",
+  "texto_cumplido_local_11": "",
+  "cumplido_local_12": "si",
+  "texto_cumplido_local_12": "",
+  "cumplido_local_13": "si",
+  "texto_cumplido_local_13": "",
+  "cumplido_local_14": "si",
+  "texto_cumplido_local_14": ""
+}
