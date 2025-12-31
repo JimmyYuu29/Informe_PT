@@ -103,21 +103,21 @@ def main():
         st.stop()
 
     # Main content - Form
-    with st.form("generation_form"):
-        st.header("Input Data")
+    # Note: Not using st.form() because dynamic lists require st.button()
+    # for add/remove functionality, which is not allowed inside forms.
+    st.header("Input Data")
 
-        # Render dynamic form
-        form_data = form_renderer.render_form(plugin)
+    # Render dynamic form
+    form_data = form_renderer.render_form(plugin)
 
-        # Generate button
-        submitted = st.form_submit_button(
-            "Generate Document",
-            type="primary",
-            use_container_width=True,
-        )
+    st.divider()
 
-    # Handle form submission
-    if submitted:
+    # Generate button
+    if st.button(
+        "Generate Document",
+        type="primary",
+        use_container_width=True,
+    ):
         generate_document(selected_plugin, form_data)
 
     # Show results
