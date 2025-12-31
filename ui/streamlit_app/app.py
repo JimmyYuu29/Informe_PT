@@ -18,9 +18,9 @@ from modules.plugin_loader import load_plugin, list_plugins
 from modules.generate import generate, GenerationOptions
 from modules.validate_plugin import validate_plugin
 
-from . import state_store as state
-from . import components
-from . import form_renderer
+from ui.streamlit_app import state_store as state
+from ui.streamlit_app import components
+from ui.streamlit_app import form_renderer
 
 
 # Page configuration
