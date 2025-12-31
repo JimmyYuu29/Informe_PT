@@ -1,0 +1,366 @@
+# derived.yaml - Derived Field Calculations
+# Plugin ID: pt_review
+# Generated: 2025-12-31 | Step 2 - YAML Pack Generation
+# All derivation rules traceable to Step 1 conditional_logic_catalog.md
+
+derived_fields:
+
+  # ============================================================================
+  # DATE-BASED DERIVATIONS
+  # ============================================================================
+
+  anyo_ejercicio:
+    field_id: anyo_ejercicio
+    type: int
+    description: "Fiscal year extracted from fecha_fin_fiscal"
+    formula: "YEAR(fecha_fin_fiscal)"
+    dependencies:
+      - fecha_fin_fiscal
+    example:
+      input: "2025-12-31"
+      output: 2025
+    source_ref: DERIV_001
+    source_block_ids:
+      - SEC1_PARA_02
+    note_refs:
+      - note_03
+
+  anyo_ejercicio_ant:
+    field_id: anyo_ejercicio_ant
+    type: int
+    description: "Prior fiscal year (current year - 1)"
+    formula: "anyo_ejercicio - 1"
+    dependencies:
+      - anyo_ejercicio
+    example:
+      input:
+        anyo_ejercicio: 2025
+      output: 2024
+    source_ref: DERIV_002
+    source_block_ids:
+      - SEC2_TABLE_02
+    note_refs:
+      - note_07
+
+  # ============================================================================
+  # FINANCIAL DERIVATIONS - Current Year
+  # ============================================================================
+
+  cost_1:
+    field_id: cost_1
+    type: currency
+    description: "Total operating costs for current year"
+    formula: "cifra_1 - ebit_1"
+    dependencies:
+      - cifra_1
+      - ebit_1
+    example:
+      input:
+        cifra_1: 10000000
+        ebit_1: 1500000
+      output: 8500000
+    source_ref: DERIV_003
+    source_block_ids:
+      - SEC2_TABLE_02
+    note_refs:
+      - note_07
+
+  om_1:
+    field_id: om_1
+    type: decimal
+    description: "Operating Margin for current year (as percentage)"
+    formula: "(ebit_1 / cifra_1) * 100"
+    dependencies:
+      - ebit_1
+      - cifra_1
+    format: percentage
+    precision: 2
+    example:
+      input:
+        ebit_1: 1500000
+        cifra_1: 10000000
+      output: 15.00
+    source_ref: DERIV_004
+    source_block_ids:
+      - SEC2_TABLE_02
+    note_refs:
+      - note_07
+
+  ncp_1:
+    field_id: ncp_1
+    type: decimal
+    description: "Net Cost Plus for current year (as percentage)"
+    formula: "(ebit_1 / cost_1) * 100"
+    dependencies:
+      - ebit_1
+      - cost_1
+    format: percentage
+    precision: 2
+    example:
+      input:
+        ebit_1: 1500000
+        cost_1: 8500000
+      output: 17.65
+    source_ref: DERIV_005
+    source_block_ids:
+      - SEC2_TABLE_02
+    note_refs:
+      - note_07
+
+  # ============================================================================
+  # FINANCIAL DERIVATIONS - Prior Year
+  # ============================================================================
+
+  cost_0:
+    field_id: cost_0
+    type: currency
+    description: "Total operating costs for prior year"
+    formula: "cifra_0 - ebit_0"
+    dependencies:
+      - cifra_0
+      - ebit_0
+    example:
+      input:
+        cifra_0: 9500000
+        ebit_0: 1400000
+      output: 8100000
+    source_ref: DERIV_003
+    source_block_ids:
+      - SEC2_TABLE_02
+
+  om_0:
+    field_id: om_0
+    type: decimal
+    description: "Operating Margin for prior year (as percentage)"
+    formula: "(ebit_0 / cifra_0) * 100"
+    dependencies:
+      - ebit_0
+      - cifra_0
+    format: percentage
+    precision: 2
+    source_ref: DERIV_004
+    source_block_ids:
+      - SEC2_TABLE_02
+
+  ncp_0:
+    field_id: ncp_0
+    type: decimal
+    description: "Net Cost Plus for prior year (as percentage)"
+    formula: "(ebit_0 / cost_0) * 100"
+    dependencies:
+      - ebit_0
+      - cost_0
+    format: percentage
+    precision: 2
+    source_ref: DERIV_005
+    source_block_ids:
+      - SEC2_TABLE_02
+
+  # ============================================================================
+  # VARIATION DERIVATIONS
+  # ============================================================================
+
+  var_cifra:
+    field_id: var_cifra
+    type: decimal
+    description: "Year-over-year variation in revenue"
+    formula: "((cifra_1 - cifra_0) / cifra_0) * 100"
+    dependencies:
+      - cifra_1
+      - cifra_0
+    format: percentage
+    precision: 2
+    handle_zero_division: "N/A"
+    source_ref: DERIV_010
+    source_block_ids:
+      - SEC2_TABLE_02
+
+  var_cost:
+    field_id: var_cost
+    type: decimal
+    description: "Year-over-year variation in operating costs"
+    formula: "((cost_1 - cost_0) / cost_0) * 100"
+    dependencies:
+      - cost_1
+      - cost_0
+    format: percentage
+    precision: 2
+    handle_zero_division: "N/A"
+    source_ref: DERIV_010
+    source_block_ids:
+      - SEC2_TABLE_02
+
+  var_ebit:
+    field_id: var_ebit
+    type: decimal
+    description: "Year-over-year variation in EBIT"
+    formula: "((ebit_1 - ebit_0) / ebit_0) * 100"
+    dependencies:
+      - ebit_1
+      - ebit_0
+    format: percentage
+    precision: 2
+    handle_zero_division: "N/A"
+    source_ref: DERIV_010
+    source_block_ids:
+      - SEC2_TABLE_02
+
+  var_resfin:
+    field_id: var_resfin
+    type: decimal
+    description: "Year-over-year variation in financial result"
+    formula: "((resultado_fin_1 - resultado_fin_0) / ABS(resultado_fin_0)) * 100"
+    dependencies:
+      - resultado_fin_1
+      - resultado_fin_0
+    format: percentage
+    precision: 2
+    handle_zero_division: "N/A"
+    source_ref: DERIV_010
+    source_block_ids:
+      - SEC2_TABLE_02
+
+  var_ebt:
+    field_id: var_ebt
+    type: decimal
+    description: "Year-over-year variation in EBT"
+    formula: "((ebt_1 - ebt_0) / ABS(ebt_0)) * 100"
+    dependencies:
+      - ebt_1
+      - ebt_0
+    format: percentage
+    precision: 2
+    handle_zero_division: "N/A"
+    source_ref: DERIV_010
+    source_block_ids:
+      - SEC2_TABLE_02
+
+  var_resnet:
+    field_id: var_resnet
+    type: decimal
+    description: "Year-over-year variation in net result"
+    formula: "((resultado_net_1 - resultado_net_0) / ABS(resultado_net_0)) * 100"
+    dependencies:
+      - resultado_net_1
+      - resultado_net_0
+    format: percentage
+    precision: 2
+    handle_zero_division: "N/A"
+    source_ref: DERIV_010
+    source_block_ids:
+      - SEC2_TABLE_02
+
+  var_om:
+    field_id: var_om
+    type: decimal
+    description: "Year-over-year change in Operating Margin (percentage points)"
+    formula: "om_1 - om_0"
+    dependencies:
+      - om_1
+      - om_0
+    format: percentage_points
+    precision: 2
+    source_ref: DERIV_010
+    source_block_ids:
+      - SEC2_TABLE_02
+
+  var_ncp:
+    field_id: var_ncp
+    type: decimal
+    description: "Year-over-year change in Net Cost Plus (percentage points)"
+    formula: "ncp_1 - ncp_0"
+    dependencies:
+      - ncp_1
+      - ncp_0
+    format: percentage_points
+    precision: 2
+    source_ref: DERIV_010
+    source_block_ids:
+      - SEC2_TABLE_02
+
+  # ============================================================================
+  # AGGREGATE DERIVATIONS - Linked Operations
+  # ============================================================================
+
+  total_ingreso_oov:
+    field_id: total_ingreso_oov
+    type: currency
+    description: "Total income from all linked operations"
+    formula: "SUM(servicios_vinculados[*].entidades_vinculadas[*].ingreso_entidad)"
+    dependencies:
+      - servicios_vinculados
+    aggregate: true
+    source_ref: DERIV_008
+    source_block_ids:
+      - SEC2_TABLE_03
+    note_refs:
+      - note_08
+
+  total_gasto_oov:
+    field_id: total_gasto_oov
+    type: currency
+    description: "Total expenses from all linked operations"
+    formula: "SUM(servicios_vinculados[*].entidades_vinculadas[*].gasto_entidad)"
+    dependencies:
+      - servicios_vinculados
+    aggregate: true
+    source_ref: DERIV_009
+    source_block_ids:
+      - SEC2_TABLE_03
+    note_refs:
+      - note_08
+
+  peso_oov_sobre_incn:
+    field_id: peso_oov_sobre_incn
+    type: decimal
+    description: "Weight of linked income over revenue (INCN)"
+    formula: "(total_ingreso_oov / cifra_1) * 100"
+    dependencies:
+      - total_ingreso_oov
+      - cifra_1
+    format: percentage
+    precision: 2
+    source_ref: DERIV_006
+    source_block_ids:
+      - SEC2_TABLE_03
+    note_refs:
+      - note_08
+
+  peso_oov_sobre_costes:
+    field_id: peso_oov_sobre_costes
+    type: decimal
+    description: "Weight of linked expenses over operating costs"
+    formula: "(total_gasto_oov / cost_1) * 100"
+    dependencies:
+      - total_gasto_oov
+      - cost_1
+    format: percentage
+    precision: 2
+    source_ref: DERIV_007
+    source_block_ids:
+      - SEC2_TABLE_03
+    note_refs:
+      - note_08
+
+# ============================================================================
+# CALCULATION ORDER
+# ============================================================================
+
+calculation_order:
+  - group: "Date-based"
+    fields: [anyo_ejercicio, anyo_ejercicio_ant]
+
+  - group: "Base financials"
+    fields: [cost_1, cost_0]
+
+  - group: "Ratios"
+    fields: [om_1, om_0, ncp_1, ncp_0]
+
+  - group: "Variations"
+    fields: [var_cifra, var_cost, var_ebit, var_resfin, var_ebt, var_resnet, var_om, var_ncp]
+
+  - group: "Aggregates"
+    fields: [total_ingreso_oov, total_gasto_oov]
+
+  - group: "Weights"
+    fields: [peso_oov_sobre_incn, peso_oov_sobre_costes]

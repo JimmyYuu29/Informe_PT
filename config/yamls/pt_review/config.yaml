@@ -1,0 +1,109 @@
+# config.yaml - Runtime Configuration
+# Plugin ID: pt_review
+# Generated: 2025-12-31 | Step 2 - YAML Pack Generation
+
+plugin_id: pt_review
+
+output:
+  filename_pattern: "PT_Review_{{ entidad_cliente }}_{{ anyo_ejercicio }}.docx"
+  default_format: "docx"
+
+ui:
+  title: "Informe de Revisión de Precios de Transferencia"
+  description: "Generador de informes de revisión de precios de transferencia para auditoría fiscal"
+
+  sections:
+    - id: sec_general
+      label: "Información General"
+      fields:
+        - fecha_fin_fiscal
+        - entidad_cliente
+        - master_file
+        - descripcion_actividad
+
+    - id: sec_financials
+      label: "Datos Financieros"
+      fields:
+        - cifra_1
+        - cifra_0
+        - ebit_1
+        - ebit_0
+        - resultado_fin_1
+        - resultado_fin_0
+        - ebt_1
+        - ebt_0
+        - resultado_net_1
+        - resultado_net_0
+
+    - id: sec_documents
+      label: "Documentación Facilitada"
+      fields:
+        - documentacion_facilitada
+
+    - id: sec_operations
+      label: "Operaciones Vinculadas"
+      fields:
+        - servicios_vinculados
+
+    - id: sec_services
+      label: "Análisis de Servicios OOVV"
+      fields:
+        - servicios_oovv
+
+    - id: sec_compliance_local
+      label: "Cumplimiento Local File (Resumen)"
+      fields:
+        - cumplimiento_resumen_local_1
+        - cumplimiento_resumen_local_2
+        - cumplimiento_resumen_local_3
+
+    - id: sec_compliance_master
+      label: "Cumplimiento Master File (Resumen)"
+      condition: "master_file == 1"
+      fields:
+        - cumplimiento_resumen_mast_1
+        - cumplimiento_resumen_mast_2
+        - cumplimiento_resumen_mast_3
+        - cumplimiento_resumen_mast_4
+
+    - id: sec_risks
+      label: "Evaluación de Riesgos"
+      fields:
+        - risk_elements
+
+    - id: sec_local_detail
+      label: "Cumplimiento Local File (Detalle)"
+      fields:
+        - local_file_compliance
+
+    - id: sec_master_detail
+      label: "Cumplimiento Master File (Detalle)"
+      condition: "master_file == 1"
+      fields:
+        - master_file_compliance
+
+    - id: sec_anexo3
+      label: "Anexo III - Comentarios"
+      fields:
+        - texto_anexo3
+
+    - id: sec_contacts
+      label: "Contactos"
+      fields:
+        - contacto1
+        - cargo_contacto1
+        - correo_contacto1
+        - contacto2
+        - cargo_contacto2
+        - correo_contacto2
+        - contacto3
+        - cargo_contacto3
+        - correo_contacto3
+
+validation:
+  run_on_generate: true
+  strict_mode: true
+
+logging:
+  level: "INFO"
+  mask_sensitive: true

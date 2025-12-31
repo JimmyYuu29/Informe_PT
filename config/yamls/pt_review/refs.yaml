@@ -1,0 +1,443 @@
+# refs.yaml - Traceability Index
+# Plugin ID: pt_review
+# Generated: 2025-12-31 | Step 2 - YAML Pack Generation
+# Maps all YAML elements to Step 1 source_block_ids
+
+# ============================================================================
+# FIELDS TRACEABILITY
+# ============================================================================
+
+fields:
+  fecha_fin_fiscal:
+    source_block_ids: [COVER_TITLE]
+    step1_catalog: variable_dictionary.md
+    note_refs: [note_01]
+
+  entidad_cliente:
+    source_block_ids: [COVER_SUBTITLE_01, SEC1_INTRO_PARA, ANEXO3_LIST_04]
+    step1_catalog: variable_dictionary.md
+    note_refs: [note_01]
+
+  master_file:
+    source_block_ids: [SEC1_TEXTBLOCK_01, SEC2_TEXTBLOCK_03, SEC2_TABLE_06, ANEXO2_TABLE_09]
+    step1_catalog: variable_dictionary.md
+    note_refs: [note_02, note_10, note_12]
+
+  descripcion_actividad:
+    source_block_ids: [SEC2_PARA_01]
+    step1_catalog: variable_dictionary.md
+    note_refs: [note_06]
+
+  texto_anexo3:
+    source_block_ids: [ANEXO3_LIST_03]
+    step1_catalog: variable_dictionary.md
+
+  anyo_ejercicio:
+    source_block_ids: [SEC1_PARA_02, SEC2_TABLE_02, SEC2_TABLE_03]
+    step1_catalog: variable_dictionary.md
+    note_refs: [note_03]
+    derived_from: [fecha_fin_fiscal]
+
+  anyo_ejercicio_ant:
+    source_block_ids: [SEC2_TABLE_02]
+    step1_catalog: variable_dictionary.md
+    note_refs: [note_07]
+    derived_from: [anyo_ejercicio]
+
+  documentacion_facilitada:
+    source_block_ids: [SEC1_LIST_DOC]
+    step1_catalog: variable_dictionary.md
+    note_refs: [note_04]
+
+  servicios_vinculados:
+    source_block_ids: [SEC1_TABLE_01, SEC2_TABLE_03]
+    step1_catalog: variable_dictionary.md
+    note_refs: [note_05, note_08]
+
+  servicios_oovv:
+    source_block_ids: [SEC2_SERVICE_TITLE, SEC2_SERVICE_INTRO, SEC2_TABLE_04, SEC2_SERVICE_CONCLUSION]
+    step1_catalog: variable_dictionary.md
+    note_refs: [note_09]
+
+  # Financial fields (current year)
+  cifra_1:
+    source_block_ids: [SEC2_TABLE_02]
+    step1_catalog: variable_dictionary.md
+    note_refs: [note_07]
+
+  ebit_1:
+    source_block_ids: [SEC2_TABLE_02]
+    step1_catalog: variable_dictionary.md
+    note_refs: [note_07]
+
+  resultado_fin_1:
+    source_block_ids: [SEC2_TABLE_02]
+    step1_catalog: variable_dictionary.md
+
+  ebt_1:
+    source_block_ids: [SEC2_TABLE_02]
+    step1_catalog: variable_dictionary.md
+
+  resultado_net_1:
+    source_block_ids: [SEC2_TABLE_02]
+    step1_catalog: variable_dictionary.md
+
+  # Financial fields (prior year)
+  cifra_0:
+    source_block_ids: [SEC2_TABLE_02]
+    step1_catalog: variable_dictionary.md
+
+  ebit_0:
+    source_block_ids: [SEC2_TABLE_02]
+    step1_catalog: variable_dictionary.md
+
+  resultado_fin_0:
+    source_block_ids: [SEC2_TABLE_02]
+    step1_catalog: variable_dictionary.md
+
+  ebt_0:
+    source_block_ids: [SEC2_TABLE_02]
+    step1_catalog: variable_dictionary.md
+
+  resultado_net_0:
+    source_block_ids: [SEC2_TABLE_02]
+    step1_catalog: variable_dictionary.md
+
+  # Contacts
+  contacto1:
+    source_block_ids: [CONTACTS_BLOCK]
+    step1_catalog: variable_dictionary.md
+
+  cargo_contacto1:
+    source_block_ids: [CONTACTS_BLOCK]
+    step1_catalog: variable_dictionary.md
+
+  correo_contacto1:
+    source_block_ids: [CONTACTS_BLOCK]
+    step1_catalog: variable_dictionary.md
+
+  contacto2:
+    source_block_ids: [CONTACTS_BLOCK]
+    step1_catalog: variable_dictionary.md
+
+  cargo_contacto2:
+    source_block_ids: [CONTACTS_BLOCK]
+    step1_catalog: variable_dictionary.md
+
+  correo_contacto2:
+    source_block_ids: [CONTACTS_BLOCK]
+    step1_catalog: variable_dictionary.md
+
+  contacto3:
+    source_block_ids: [CONTACTS_BLOCK]
+    step1_catalog: variable_dictionary.md
+
+  cargo_contacto3:
+    source_block_ids: [CONTACTS_BLOCK]
+    step1_catalog: variable_dictionary.md
+
+  correo_contacto3:
+    source_block_ids: [CONTACTS_BLOCK]
+    step1_catalog: variable_dictionary.md
+
+  # Compliance summary - Local File
+  cumplimiento_resumen_local_1:
+    source_block_ids: [SEC2_TABLE_05]
+    step1_catalog: variable_dictionary.md
+
+  cumplimiento_resumen_local_2:
+    source_block_ids: [SEC2_TABLE_05]
+    step1_catalog: variable_dictionary.md
+
+  cumplimiento_resumen_local_3:
+    source_block_ids: [SEC2_TABLE_05]
+    step1_catalog: variable_dictionary.md
+
+  # Compliance summary - Master File
+  cumplimiento_resumen_mast_1:
+    source_block_ids: [SEC2_TABLE_06]
+    step1_catalog: variable_dictionary.md
+
+  cumplimiento_resumen_mast_2:
+    source_block_ids: [SEC2_TABLE_06]
+    step1_catalog: variable_dictionary.md
+
+  cumplimiento_resumen_mast_3:
+    source_block_ids: [SEC2_TABLE_06]
+    step1_catalog: variable_dictionary.md
+
+  cumplimiento_resumen_mast_4:
+    source_block_ids: [SEC2_TABLE_06]
+    step1_catalog: variable_dictionary.md
+
+  # Risk elements (sample - pattern applies to all 12)
+  impacto_1:
+    source_block_ids: [ANEXO1_TABLE_07]
+    step1_catalog: variable_dictionary.md
+    note_refs: [note_11]
+
+  afectacion_pre_1:
+    source_block_ids: [ANEXO1_TABLE_07]
+    step1_catalog: variable_dictionary.md
+    note_refs: [note_11]
+
+  texto_mitigacion_1:
+    source_block_ids: [ANEXO1_TABLE_07]
+    step1_catalog: variable_dictionary.md
+
+  afectacion_final_1:
+    source_block_ids: [ANEXO1_TABLE_07]
+    step1_catalog: variable_dictionary.md
+    note_refs: [note_11]
+
+  # Local File compliance (sample - pattern applies to all 14)
+  cumplido_local_1:
+    source_block_ids: [ANEXO2_TABLE_08]
+    step1_catalog: variable_dictionary.md
+    note_refs: [note_12]
+
+  texto_cumplido_local_1:
+    source_block_ids: [ANEXO2_TABLE_08]
+    step1_catalog: variable_dictionary.md
+    note_refs: [note_12]
+
+  # Master File compliance (sample - pattern applies to all 17)
+  cumplido_mast_1:
+    source_block_ids: [ANEXO2_TABLE_09]
+    step1_catalog: variable_dictionary.md
+    note_refs: [note_12]
+
+  texto_cumplido_mast_1:
+    source_block_ids: [ANEXO2_TABLE_09]
+    step1_catalog: variable_dictionary.md
+    note_refs: [note_12]
+
+# ============================================================================
+# TEXTS TRACEABILITY
+# ============================================================================
+
+texts:
+  s_header_main:
+    source_block_ids: [HEADER_01]
+    step1_catalog: document_structure_catalog.md
+
+  s1_intro_main:
+    source_block_ids: [SEC1_INTRO_PARA]
+    step1_catalog: document_structure_catalog.md
+
+  s1_master_file_no_access:
+    source_block_ids: [SEC1_TEXTBLOCK_01]
+    step1_catalog: author_notes_catalog.md
+    note_refs: [note_02]
+    condition_ref: COND_001
+
+  s1_transactions_ref:
+    source_block_ids: [SEC1_PARA_02]
+    step1_catalog: document_structure_catalog.md
+
+  s1_documentation_analysis:
+    source_block_ids: [SEC1_PARA_03]
+    step1_catalog: document_structure_catalog.md
+
+  s2_formal_perspective_intro:
+    source_block_ids: [SEC2_TEXTBLOCK_02]
+    step1_catalog: author_notes_catalog.md
+
+  s2_formal_perspective_conclusion:
+    source_block_ids: [SEC2_TEXTBLOCK_03]
+    step1_catalog: author_notes_catalog.md
+    note_refs: [note_10]
+    condition_ref: COND_002
+
+  s_anexo1_intro:
+    source_block_ids: [ANEXO1_PARA_01]
+    step1_catalog: document_structure_catalog.md
+
+  s_anexo3_intro:
+    source_block_ids: [ANEXO3_PARA_01]
+    step1_catalog: document_structure_catalog.md
+
+  s_legal_footer_1:
+    source_block_ids: [LEGAL_FOOTER_01]
+    step1_catalog: document_structure_catalog.md
+
+# ============================================================================
+# TABLES TRACEABILITY
+# ============================================================================
+
+tables:
+  t1_operaciones_intragrupo:
+    source_block_ids: [SEC1_TABLE_01]
+    step1_catalog: tables_catalog.md
+    note_refs: [note_05]
+
+  t2_situacion_negocio:
+    source_block_ids: [SEC2_TABLE_02]
+    step1_catalog: tables_catalog.md
+    note_refs: [note_07]
+
+  t3_operaciones_vinculadas:
+    source_block_ids: [SEC2_TABLE_03]
+    step1_catalog: tables_catalog.md
+    note_refs: [note_08]
+
+  t4_analisis_servicio:
+    source_block_ids: [SEC2_TABLE_04]
+    step1_catalog: tables_catalog.md
+    note_refs: [note_09]
+    condition_ref: COND_004
+
+  t5_local_file_resumen:
+    source_block_ids: [SEC2_TABLE_05]
+    step1_catalog: tables_catalog.md
+
+  t6_master_file_resumen:
+    source_block_ids: [SEC2_TABLE_06]
+    step1_catalog: tables_catalog.md
+    condition_ref: COND_002
+
+  t7_revision_riesgos:
+    source_block_ids: [ANEXO1_TABLE_07]
+    step1_catalog: tables_catalog.md
+    note_refs: [note_11]
+
+  t8_cumplimiento_local_file:
+    source_block_ids: [ANEXO2_TABLE_08]
+    step1_catalog: tables_catalog.md
+    note_refs: [note_12]
+
+  t9_cumplimiento_master_file:
+    source_block_ids: [ANEXO2_TABLE_09]
+    step1_catalog: tables_catalog.md
+    note_refs: [note_12]
+    condition_ref: COND_003
+
+# ============================================================================
+# LOGIC RULES TRACEABILITY
+# ============================================================================
+
+rules:
+  r001:
+    source_block_ids: [SEC1_TEXTBLOCK_01]
+    step1_catalog: conditional_logic_catalog.md
+    condition_ref: COND_001
+
+  r002:
+    source_block_ids: [SEC2_TEXTBLOCK_03]
+    step1_catalog: conditional_logic_catalog.md
+    condition_ref: COND_002
+
+  r003:
+    source_block_ids: [SEC2_TABLE_06]
+    step1_catalog: conditional_logic_catalog.md
+    condition_ref: COND_002
+
+  r004:
+    source_block_ids: [ANEXO2_TABLE_09]
+    step1_catalog: conditional_logic_catalog.md
+    condition_ref: COND_003
+
+  r005:
+    source_block_ids: [SEC2_SERVICE_TITLE, SEC2_SERVICE_INTRO, SEC2_TABLE_04, SEC2_SERVICE_CONCLUSION]
+    step1_catalog: conditional_logic_catalog.md
+    condition_ref: COND_004
+
+  r006:
+    source_block_ids: [ANEXO2_TABLE_08]
+    step1_catalog: conditional_logic_catalog.md
+    condition_ref: COND_005
+
+  r007:
+    source_block_ids: [ANEXO2_TABLE_09]
+    step1_catalog: conditional_logic_catalog.md
+    condition_ref: COND_005
+
+# ============================================================================
+# DERIVED FIELDS TRACEABILITY
+# ============================================================================
+
+derived:
+  anyo_ejercicio:
+    source_block_ids: [SEC1_PARA_02]
+    step1_catalog: conditional_logic_catalog.md
+    deriv_ref: DERIV_001
+
+  anyo_ejercicio_ant:
+    source_block_ids: [SEC2_TABLE_02]
+    step1_catalog: conditional_logic_catalog.md
+    deriv_ref: DERIV_002
+
+  cost_1:
+    source_block_ids: [SEC2_TABLE_02]
+    step1_catalog: conditional_logic_catalog.md
+    deriv_ref: DERIV_003
+
+  cost_0:
+    source_block_ids: [SEC2_TABLE_02]
+    step1_catalog: conditional_logic_catalog.md
+    deriv_ref: DERIV_003
+
+  om_1:
+    source_block_ids: [SEC2_TABLE_02]
+    step1_catalog: conditional_logic_catalog.md
+    deriv_ref: DERIV_004
+
+  om_0:
+    source_block_ids: [SEC2_TABLE_02]
+    step1_catalog: conditional_logic_catalog.md
+    deriv_ref: DERIV_004
+
+  ncp_1:
+    source_block_ids: [SEC2_TABLE_02]
+    step1_catalog: conditional_logic_catalog.md
+    deriv_ref: DERIV_005
+
+  ncp_0:
+    source_block_ids: [SEC2_TABLE_02]
+    step1_catalog: conditional_logic_catalog.md
+    deriv_ref: DERIV_005
+
+  total_ingreso_oov:
+    source_block_ids: [SEC2_TABLE_03]
+    step1_catalog: conditional_logic_catalog.md
+    deriv_ref: DERIV_008
+
+  total_gasto_oov:
+    source_block_ids: [SEC2_TABLE_03]
+    step1_catalog: conditional_logic_catalog.md
+    deriv_ref: DERIV_009
+
+  peso_oov_sobre_incn:
+    source_block_ids: [SEC2_TABLE_03]
+    step1_catalog: conditional_logic_catalog.md
+    deriv_ref: DERIV_006
+
+  peso_oov_sobre_costes:
+    source_block_ids: [SEC2_TABLE_03]
+    step1_catalog: conditional_logic_catalog.md
+    deriv_ref: DERIV_007
+
+  var_cifra:
+    source_block_ids: [SEC2_TABLE_02]
+    step1_catalog: conditional_logic_catalog.md
+    deriv_ref: DERIV_010
+
+  var_cost:
+    source_block_ids: [SEC2_TABLE_02]
+    step1_catalog: conditional_logic_catalog.md
+    deriv_ref: DERIV_010
+
+  var_ebit:
+    source_block_ids: [SEC2_TABLE_02]
+    step1_catalog: conditional_logic_catalog.md
+    deriv_ref: DERIV_010
+
+  var_om:
+    source_block_ids: [SEC2_TABLE_02]
+    step1_catalog: conditional_logic_catalog.md
+    deriv_ref: DERIV_010
+
+  var_ncp:
+    source_block_ids: [SEC2_TABLE_02]
+    step1_catalog: conditional_logic_catalog.md
+    deriv_ref: DERIV_010

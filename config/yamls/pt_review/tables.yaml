@@ -1,0 +1,452 @@
+# tables.yaml - Table Schemas
+# Plugin ID: pt_review
+# Generated: 2025-12-31 | Step 2 - YAML Pack Generation
+
+tables:
+
+  # ============================================================================
+  # TABLE 1: Operaciones Intragrupo
+  # ============================================================================
+
+  t1_operaciones_intragrupo:
+    table_id: t1_operaciones_intragrupo
+    caption: "Tabla 1. Identificación de las operaciones intragrupo en el Ejercicio {{ anyo_ejercicio }}"
+    location: "Section 1"
+    repeat: true
+    repeat_source: servicios_vinculados
+    columns:
+      - name: "#"
+        type: auto_index
+        width: 10
+      - name: "Operaciones intragrupo"
+        type: text
+        field: servicio_vinculado
+        width: 90
+    source_block_ids:
+      - SEC1_TABLE_01
+
+  # ============================================================================
+  # TABLE 2: Situación de Negocio
+  # ============================================================================
+
+  t2_situacion_negocio:
+    table_id: t2_situacion_negocio
+    caption: "Tabla 2. Situación de negocio de la Compañía en los Ejercicios {{ anyo_ejercicio }}, {{ anyo_ejercicio_ant }}"
+    location: "Section 2"
+    repeat: false
+    columns:
+      - name: "Partidas Contables"
+        type: text
+        width: 25
+      - name: "Variación {{ anyo_ejercicio_ant }}-{{ anyo_ejercicio }} (%)"
+        type: percentage
+        width: 25
+      - name: "Ejercicio {{ anyo_ejercicio }} (EUR)"
+        type: currency
+        width: 25
+      - name: "Ejercicio {{ anyo_ejercicio_ant }} (EUR)"
+        type: currency
+        width: 25
+    rows:
+      - label: "Cifra de negocios"
+        fields: [var_cifra, cifra_1, cifra_0]
+      - label: "Total costes operativos"
+        fields: [var_cost, cost_1, cost_0]
+        derived: [cost_1, cost_0]
+      - label: "EBIT"
+        fields: [var_ebit, ebit_1, ebit_0]
+      - label: "Resultado Financiero"
+        fields: [var_resfin, resultado_fin_1, resultado_fin_0]
+      - label: "EBT"
+        fields: [var_ebt, ebt_1, ebt_0]
+      - label: "Resultado Neto"
+        fields: [var_resnet, resultado_net_1, resultado_net_0]
+      - label: "Operating Margin (OM)"
+        fields: [var_om, om_1, om_0]
+        derived: [om_1, om_0, var_om]
+      - label: "Net Cost Plus (NCP)"
+        fields: [var_ncp, ncp_1, ncp_0]
+        derived: [ncp_1, ncp_0, var_ncp]
+    source_block_ids:
+      - SEC2_TABLE_02
+
+  # ============================================================================
+  # TABLE 3: Operaciones Vinculadas
+  # ============================================================================
+
+  t3_operaciones_vinculadas:
+    table_id: t3_operaciones_vinculadas
+    caption: "Tabla 3. Operaciones vinculadas llevadas a cabo durante el Ejercicio {{ anyo_ejercicio }}"
+    location: "Section 2"
+    repeat: true
+    repeat_source: servicios_vinculados
+    nested_repeat: entidades_vinculadas
+    columns:
+      - name: "Tipo de operación vinculada"
+        type: text
+        field: servicio_vinculado
+        width: 25
+      - name: "Entidad vinculada"
+        type: text
+        field: entidad_vinculada
+        width: 25
+      - name: "Ingreso FY {{ anyo_ejercicio }}"
+        type: currency
+        field: ingreso_entidad
+        width: 25
+      - name: "Gasto FY {{ anyo_ejercicio }}"
+        type: currency
+        field: gasto_entidad
+        width: 25
+    aggregate_rows:
+      - label: "Total ingreso oovv"
+        field: total_ingreso_oov
+        column: 2
+        derived: true
+      - label: "Total gasto oovv"
+        field: total_gasto_oov
+        column: 3
+        derived: true
+      - label: "Peso oovv sobre INCN"
+        field: peso_oov_sobre_incn
+        column: 2
+        format: percentage
+        derived: true
+      - label: "Peso oovv sobre total costes"
+        field: peso_oov_sobre_costes
+        column: 3
+        format: percentage
+        derived: true
+    source_block_ids:
+      - SEC2_TABLE_03
+
+  # ============================================================================
+  # TABLE 4: Análisis de Servicio (per-service, repeating)
+  # ============================================================================
+
+  t4_analisis_servicio:
+    table_id: t4_analisis_servicio
+    caption: "{{ servicio.descripcion_tabla }}"
+    location: "Section 2 - Conclusions"
+    repeat: true
+    repeat_source: servicios_oovv
+    condition: "servicio.enabled == true"
+    columns:
+      - name: "Método Elegido"
+        type: text
+        field: metodo
+        width: 30
+      - name: "Min"
+        type: percentage
+        field: min
+        width: 14
+      - name: "LQ"
+        type: percentage
+        field: lq
+        width: 14
+      - name: "Med"
+        type: percentage
+        field: med
+        width: 14
+      - name: "UQ"
+        type: percentage
+        field: uq
+        width: 14
+      - name: "Max"
+        type: percentage
+        field: max
+        width: 14
+    source_block_ids:
+      - SEC2_TABLE_04
+
+  # ============================================================================
+  # TABLE 5: Local File Resumen (Summary)
+  # ============================================================================
+
+  t5_local_file_resumen:
+    table_id: t5_local_file_resumen
+    caption: "Tabla 7. Grado de cumplimiento formal tras la revisión realizada (Local File)"
+    location: "Section 2 - Formal Perspective"
+    repeat: false
+    columns:
+      - name: "#"
+        type: index
+        width: 5
+      - name: "Secciones (Artículo 16 del Reglamento)"
+        type: text
+        width: 70
+      - name: "Cumplimiento"
+        type: enum
+        width: 25
+        formatting: compliance_color
+    rows:
+      - index: 1
+        label: "Información del contribuyente"
+        field: cumplimiento_resumen_local_1
+      - index: 2
+        label: "Información de las operaciones vinculadas"
+        field: cumplimiento_resumen_local_2
+      - index: 3
+        label: "Información económico-financiera del contribuyente"
+        field: cumplimiento_resumen_local_3
+    source_block_ids:
+      - SEC2_TABLE_05
+
+  # ============================================================================
+  # TABLE 6: Master File Resumen (Summary) - Conditional
+  # ============================================================================
+
+  t6_master_file_resumen:
+    table_id: t6_master_file_resumen
+    caption: "Tabla 8. Grado de cumplimiento formal tras la revisión realizada (Master File)"
+    location: "Section 2 - Formal Perspective"
+    condition: "master_file == 1"
+    repeat: false
+    columns:
+      - name: "#"
+        type: index
+        width: 5
+      - name: "Secciones (Artículo 15 del Reglamento)"
+        type: text
+        width: 70
+      - name: "Cumplimiento"
+        type: enum
+        width: 25
+        formatting: compliance_color
+    rows:
+      - index: 1
+        label: "Información relativa a la estructura y actividades del Grupo"
+        field: cumplimiento_resumen_mast_1
+      - index: 2
+        label: "Información relativa a los activos intangibles del Grupo"
+        field: cumplimiento_resumen_mast_2
+      - index: 3
+        label: "Información relativa a la actividad financiera"
+        field: cumplimiento_resumen_mast_3
+      - index: 4
+        label: "Situación financiera y fiscal del Grupo"
+        field: cumplimiento_resumen_mast_4
+    source_block_ids:
+      - SEC2_TABLE_06
+
+  # ============================================================================
+  # TABLE 7: Revisión de Riesgos
+  # ============================================================================
+
+  t7_revision_riesgos:
+    table_id: t7_revision_riesgos
+    caption: "Tabla 9. Revisión de elementos identificados como categorías de riesgo en materia de precios de transferencia por parte de la Administración"
+    location: "Anexo I"
+    repeat: false
+    columns:
+      - name: "#"
+        type: index
+        width: 5
+      - name: "Elementos de riesgo en materia fiscal"
+        type: text
+        fixed: true
+        width: 35
+      - name: "Impacto"
+        type: enum
+        width: 10
+        formatting: none
+      - name: "Nivel Afectación Preliminar"
+        type: enum
+        width: 15
+        formatting: afectacion_color
+      - name: "Mitigadores de Riesgo"
+        type: text
+        width: 20
+      - name: "Nivel Afectación Final"
+        type: enum
+        width: 15
+        formatting: afectacion_color
+    rows:
+      - index: 1
+        fixed_label: "Restructuraciones empresariales"
+        fields: [impacto_1, afectacion_pre_1, texto_mitigacion_1, afectacion_final_1]
+      - index: 2
+        fixed_label: "Valoración de transmisiones intragrupo de distintos activos intangibles"
+        fields: [impacto_2, afectacion_pre_2, texto_mitigacion_2, afectacion_final_2]
+      - index: 3
+        fixed_label: "Pagos por cánones derivados de la cesión de intangibles"
+        fields: [impacto_3, afectacion_pre_3, texto_mitigacion_3, afectacion_final_3]
+      - index: 4
+        fixed_label: "Pagos por servicios intragrupo"
+        fields: [impacto_4, afectacion_pre_4, texto_mitigacion_4, afectacion_final_4]
+      - index: 5
+        fixed_label: "Existencia de pérdidas reiteradas"
+        fields: [impacto_5, afectacion_pre_5, texto_mitigacion_5, afectacion_final_5]
+      - index: 6
+        fixed_label: "Operaciones financieras entre partes vinculadas"
+        fields: [impacto_6, afectacion_pre_6, texto_mitigacion_6, afectacion_final_6]
+      - index: 7
+        fixed_label: "Estructuras funcionales de bajo riesgo"
+        fields: [impacto_7, afectacion_pre_7, texto_mitigacion_7, afectacion_final_7]
+      - index: 8
+        fixed_label: "Falta de declaración de ingresos intragrupo"
+        fields: [impacto_8, afectacion_pre_8, texto_mitigacion_8, afectacion_final_8]
+      - index: 9
+        fixed_label: "Erosión de bases imponibles"
+        fields: [impacto_9, afectacion_pre_9, texto_mitigacion_9, afectacion_final_9]
+      - index: 10
+        fixed_label: "Revisión de las formas societarias"
+        fields: [impacto_10, afectacion_pre_10, texto_mitigacion_10, afectacion_final_10]
+      - index: 11
+        fixed_label: "Operaciones con establecimientos permanentes"
+        fields: [impacto_11, afectacion_pre_11, texto_mitigacion_11, afectacion_final_11]
+      - index: 12
+        fixed_label: "Peso de las operaciones vinculadas relevante"
+        fields: [impacto_12, afectacion_pre_12, texto_mitigacion_12, afectacion_final_12]
+    source_block_ids:
+      - ANEXO1_TABLE_07
+
+  # ============================================================================
+  # TABLE 8: Cumplimiento Local File (Detailed)
+  # ============================================================================
+
+  t8_cumplimiento_local_file:
+    table_id: t8_cumplimiento_local_file
+    caption: "Tabla 10. Grado de cumplimiento formal tras la revisión realizada – Local File"
+    location: "Anexo II"
+    repeat: false
+    columns:
+      - name: "#"
+        type: index
+        width: 5
+      - name: "Secciones (Artículo 16 del Reglamento)"
+        type: text
+        fixed: true
+        width: 50
+      - name: "Cumplimiento"
+        type: enum
+        width: 15
+        formatting: cumplido_color
+      - name: "Comentario"
+        type: text
+        width: 30
+    rows:
+      - index: 1
+        fixed_label: "Estructura de dirección, organigrama..."
+        fields: [cumplido_local_1, texto_cumplido_local_1]
+      - index: 2
+        fixed_label: "Descripción de las actividades del contribuyente..."
+        fields: [cumplido_local_2, texto_cumplido_local_2]
+      - index: 3
+        fixed_label: "Principales competidores"
+        fields: [cumplido_local_3, texto_cumplido_local_3]
+      - index: 4
+        fixed_label: "Descripción detallada de la naturaleza..."
+        fields: [cumplido_local_4, texto_cumplido_local_4]
+      - index: 5
+        fixed_label: "Nombre y apellidos o razón social..."
+        fields: [cumplido_local_5, texto_cumplido_local_5]
+      - index: 6
+        fixed_label: "Análisis de comparabilidad detallado"
+        fields: [cumplido_local_6, texto_cumplido_local_6]
+      - index: 7
+        fixed_label: "Explicación relativa a la selección del método..."
+        fields: [cumplido_local_7, texto_cumplido_local_7]
+      - index: 8
+        fixed_label: "En su caso, criterios de reparto de gastos..."
+        fields: [cumplido_local_8, texto_cumplido_local_8]
+      - index: 9
+        fixed_label: "Copia de los acuerdos previos de valoración..."
+        fields: [cumplido_local_9, texto_cumplido_local_9]
+      - index: 10
+        fixed_label: "Cualquier otra información relevante..."
+        fields: [cumplido_local_10, texto_cumplido_local_10]
+      - index: 11
+        fixed_label: "Estados financieros anuales del contribuyente"
+        fields: [cumplido_local_11, texto_cumplido_local_11]
+      - index: 12
+        fixed_label: "Conciliación entre los datos utilizados..."
+        fields: [cumplido_local_12, texto_cumplido_local_12]
+      - index: 13
+        fixed_label: "Datos financieros de los comparables..."
+        fields: [cumplido_local_13, texto_cumplido_local_13]
+      - index: 14
+        fixed_label: "Si, para determinar el valor de mercado..."
+        fields: [cumplido_local_14, texto_cumplido_local_14]
+    source_block_ids:
+      - ANEXO2_TABLE_08
+
+  # ============================================================================
+  # TABLE 9: Cumplimiento Master File (Detailed) - Conditional
+  # ============================================================================
+
+  t9_cumplimiento_master_file:
+    table_id: t9_cumplimiento_master_file
+    caption: "Tabla 11. Grado de cumplimiento formal tras la revisión realizada – Master File"
+    location: "Anexo II"
+    condition: "master_file == 1"
+    repeat: false
+    columns:
+      - name: "#"
+        type: index
+        width: 5
+      - name: "Secciones (Artículo 15 del Reglamento)"
+        type: text
+        fixed: true
+        width: 50
+      - name: "Cumplimiento"
+        type: enum
+        width: 15
+        formatting: cumplido_color
+      - name: "Comentario"
+        type: text
+        width: 30
+    rows:
+      - index: 1
+        fixed_label: "Descripción general de la estructura organizativa..."
+        fields: [cumplido_mast_1, texto_cumplido_mast_1]
+      - index: 2
+        fixed_label: "Identificación de las distintas entidades..."
+        fields: [cumplido_mast_2, texto_cumplido_mast_2]
+      - index: 3
+        fixed_label: "Actividades principales del grupo..."
+        fields: [cumplido_mast_3, texto_cumplido_mast_3]
+      - index: 4
+        fixed_label: "Descripción general de las funciones ejercidas..."
+        fields: [cumplido_mast_4, texto_cumplido_mast_4]
+      - index: 5
+        fixed_label: "Descripción de la política del grupo..."
+        fields: [cumplido_mast_5, texto_cumplido_mast_5]
+      - index: 6
+        fixed_label: "Relación y breve descripción de los acuerdos..."
+        fields: [cumplido_mast_6, texto_cumplido_mast_6]
+      - index: 7
+        fixed_label: "Descripción de las operaciones de reorganización..."
+        fields: [cumplido_mast_7, texto_cumplido_mast_7]
+      - index: 8
+        fixed_label: "Descripción general de la estrategia global..."
+        fields: [cumplido_mast_8, texto_cumplido_mast_8]
+      - index: 9
+        fixed_label: "Relación de los activos intangibles del grupo..."
+        fields: [cumplido_mast_9, texto_cumplido_mast_9]
+      - index: 10
+        fixed_label: "Importe de las contraprestaciones..."
+        fields: [cumplido_mast_10, texto_cumplido_mast_10]
+      - index: 11
+        fixed_label: "Relación de acuerdos entre las entidades..."
+        fields: [cumplido_mast_11, texto_cumplido_mast_11]
+      - index: 12
+        fixed_label: "Descripción general de cualquier transferencia..."
+        fields: [cumplido_mast_12, texto_cumplido_mast_12]
+      - index: 13
+        fixed_label: "Descripción general de la forma de financiación..."
+        fields: [cumplido_mast_13, texto_cumplido_mast_13]
+      - index: 14
+        fixed_label: "Identificación de las entidades del grupo..."
+        fields: [cumplido_mast_14, texto_cumplido_mast_14]
+      - index: 15
+        fixed_label: "Descripción general de la política de precios..."
+        fields: [cumplido_mast_15, texto_cumplido_mast_15]
+      - index: 16
+        fixed_label: "Estados financieros anuales consolidados..."
+        fields: [cumplido_mast_16, texto_cumplido_mast_16]
+      - index: 17
+        fixed_label: "Relación y breve descripción de los acuerdos..."
+        fields: [cumplido_mast_17, texto_cumplido_mast_17]
+    source_block_ids:
+      - ANEXO2_TABLE_09

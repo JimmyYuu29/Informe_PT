@@ -1,0 +1,250 @@
+# logic.yaml - Conditional Logic Rules (Controlled DSL)
+# Plugin ID: pt_review
+# Generated: 2025-12-31 | Step 2 - YAML Pack Generation
+# Max nesting depth: 3 | First-match evaluation | Allowlisted operators only
+
+# ============================================================================
+# ALLOWED OPERATORS (from enterprise_docgen_platform.superprompt.en.md)
+# ============================================================================
+# and, or, not
+# equals, not_equals, gt, gte, lt, lte
+# in, not_in
+# exists, not_exists, is_empty, not_empty
+# contains, not_contains, starts_with, ends_with
+# ============================================================================
+
+rules:
+
+  # ============================================================================
+  # CONDITION RULES - Master File Access
+  # ============================================================================
+
+  r001:
+    rule_id: r001
+    name: "Show Master File No Access Block"
+    description: "Display warning block when Master File is not accessible"
+    decision_id: d1_master_file_access
+    condition:
+      operator: equals
+      field: master_file
+      value: 0
+    action:
+      type: include_text
+      text_key: s1_master_file_no_access
+    precedence: 1
+    source_block_ids:
+      - SEC1_TEXTBLOCK_01
+      - COND_001
+
+  r002:
+    rule_id: r002
+    name: "Show Master File Formal Perspective Block"
+    description: "Display Master File compliance summary when accessible"
+    decision_id: d2_master_file_formal
+    condition:
+      operator: equals
+      field: master_file
+      value: 1
+    action:
+      type: include_text
+      text_key: s2_formal_perspective_conclusion
+    precedence: 2
+    source_block_ids:
+      - SEC2_TEXTBLOCK_03
+      - COND_002
+
+  r003:
+    rule_id: r003
+    name: "Show Master File Summary Table"
+    description: "Display Master File summary compliance table (Table 6)"
+    decision_id: d2_master_file_formal
+    condition:
+      operator: equals
+      field: master_file
+      value: 1
+    action:
+      type: include_table
+      table_key: t6_master_file_resumen
+    precedence: 2
+    source_block_ids:
+      - SEC2_TABLE_06
+      - COND_002
+
+  r004:
+    rule_id: r004
+    name: "Show Master File Detailed Table"
+    description: "Display Master File detailed compliance table (Table 9) in Anexo II"
+    decision_id: d3_master_file_detailed
+    condition:
+      operator: equals
+      field: master_file
+      value: 1
+    action:
+      type: include_table
+      table_key: t9_cumplimiento_master_file
+    precedence: 3
+    source_block_ids:
+      - ANEXO2_TABLE_09
+      - COND_003
+
+  # ============================================================================
+  # CONDITION RULES - Service Block Activation
+  # ============================================================================
+
+  r005:
+    rule_id: r005
+    name: "Service Block Activation"
+    description: "Include service analysis block only when service is enabled"
+    decision_id: d4_service_activation
+    for_each: servicios_oovv
+    condition:
+      operator: equals
+      field: "servicio.enabled"
+      value: true
+    action:
+      type: include_block
+      block_type: service_analysis
+      includes:
+        - titulo_servicio_oovv
+        - texto_intro_servicio
+        - descripcion_tabla
+        - t4_analisis_servicio
+        - texto_conclusion_servicio
+    precedence: 4
+    source_block_ids:
+      - SEC2_SERVICE_TITLE
+      - SEC2_SERVICE_INTRO
+      - SEC2_TABLE_04
+      - SEC2_SERVICE_CONCLUSION
+      - COND_004
+
+  # ============================================================================
+  # VALIDATION RULES - Compliance Comments
+  # ============================================================================
+
+  r006:
+    rule_id: r006
+    name: "Local File Comment Required When Not Compliant"
+    description: "Require texto_cumplido_local_* when cumplido_local_* is 'no' or 'parcial'"
+    decision_id: d5_compliance_comment
+    for_each_index: 1..14
+    condition:
+      operator: or
+      conditions:
+        - operator: equals
+          field: "cumplido_local_{i}"
+          value: "no"
+        - operator: equals
+          field: "cumplido_local_{i}"
+          value: "parcial"
+    action:
+      type: require_field
+      field: "texto_cumplido_local_{i}"
+      validation: not_empty
+    precedence: 5
+    source_block_ids:
+      - ANEXO2_TABLE_08
+      - COND_005
+
+  r007:
+    rule_id: r007
+    name: "Master File Comment Required When Not Compliant"
+    description: "Require texto_cumplido_mast_* when cumplido_mast_* is 'no' or 'parcial' (and master_file==1)"
+    decision_id: d5_compliance_comment
+    for_each_index: 1..17
+    condition:
+      operator: and
+      conditions:
+        - operator: equals
+          field: master_file
+          value: 1
+        - operator: or
+          conditions:
+            - operator: equals
+              field: "cumplido_mast_{i}"
+              value: "no"
+            - operator: equals
+              field: "cumplido_mast_{i}"
+              value: "parcial"
+    action:
+      type: require_field
+      field: "texto_cumplido_mast_{i}"
+      validation: not_empty
+    precedence: 5
+    source_block_ids:
+      - ANEXO2_TABLE_09
+      - COND_005
+
+  # ============================================================================
+  # VALIDATION RULES - Master File Fields Required When Accessible
+  # ============================================================================
+
+  r008:
+    rule_id: r008
+    name: "Master File Summary Fields Required"
+    description: "Require Master File summary compliance fields when master_file==1"
+    decision_id: d6_master_file_fields
+    condition:
+      operator: equals
+      field: master_file
+      value: 1
+    action:
+      type: require_fields
+      fields:
+        - cumplimiento_resumen_mast_1
+        - cumplimiento_resumen_mast_2
+        - cumplimiento_resumen_mast_3
+        - cumplimiento_resumen_mast_4
+    precedence: 6
+    source_block_ids:
+      - SEC2_TABLE_06
+
+  r009:
+    rule_id: r009
+    name: "Master File Detailed Fields Required"
+    description: "Require Master File detailed compliance fields when master_file==1"
+    decision_id: d6_master_file_fields
+    condition:
+      operator: equals
+      field: master_file
+      value: 1
+    action:
+      type: require_fields
+      fields:
+        - cumplido_mast_1
+        - cumplido_mast_2
+        - cumplido_mast_3
+        - cumplido_mast_4
+        - cumplido_mast_5
+        - cumplido_mast_6
+        - cumplido_mast_7
+        - cumplido_mast_8
+        - cumplido_mast_9
+        - cumplido_mast_10
+        - cumplido_mast_11
+        - cumplido_mast_12
+        - cumplido_mast_13
+        - cumplido_mast_14
+        - cumplido_mast_15
+        - cumplido_mast_16
+        - cumplido_mast_17
+    precedence: 6
+    source_block_ids:
+      - ANEXO2_TABLE_09
+
+# ============================================================================
+# EVALUATION ORDER
+# ============================================================================
+
+evaluation_order:
+  - name: "Master File Visibility"
+    rules: [r001, r002, r003, r004]
+    description: "Determine which Master File blocks/tables to show"
+
+  - name: "Service Block Visibility"
+    rules: [r005]
+    description: "Determine which service analysis blocks to include"
+
+  - name: "Field Validation"
+    rules: [r006, r007, r008, r009]
+    description: "Validate required fields based on conditions"

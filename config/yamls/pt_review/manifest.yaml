@@ -1,0 +1,51 @@
+# manifest.yaml - Plugin Metadata
+# Plugin ID: pt_review
+# Generated: 2025-12-31 | Step 2 - YAML Pack Generation
+
+plugin_id: pt_review
+version: "1.0.0"
+name: "Transfer Pricing Review Report"
+name_es: "Informe de Revisión de Precios de Transferencia"
+description: |
+  Generates a comprehensive transfer pricing audit review report for tax compliance.
+  Includes formal compliance assessment, risk evaluation, and executive summary.
+
+author: "Forvis Mazars Tax & Legal, S.L.P."
+created: "2025-12-31"
+updated: "2025-12-31"
+
+template:
+  path: "config/template_final.docx"
+  format: "docx"
+  engine: "docxtpl"
+
+language: "es"
+locale: "es_ES"
+
+sensitive_fields:
+  - correo_contacto1
+  - correo_contacto2
+  - correo_contacto3
+
+required_files:
+  - manifest.yaml
+  - config.yaml
+  - fields.yaml
+  - texts.yaml
+  - tables.yaml
+  - logic.yaml
+  - decision_map.yaml
+  - refs.yaml
+  - derived.yaml
+  - formatting.yaml
+
+validation:
+  schema_version: "1.0"
+  max_nesting_depth: 3
+  allow_regex: false
+
+tags:
+  - transfer-pricing
+  - tax-audit
+  - compliance
+  - spanish-law

@@ -1,0 +1,1082 @@
+# fields.yaml - Input Field Definitions
+# Plugin ID: pt_review
+# Generated: 2025-12-31 | Step 2 - YAML Pack Generation
+# All fields traceable to Step 1 variable_dictionary.md
+
+fields:
+
+  # ============================================================================
+  # GLOBAL VARIABLES - Single Value Inputs
+  # ============================================================================
+
+  fecha_fin_fiscal:
+    type: date
+    required: true
+    label: "Fecha fin del ejercicio fiscal"
+    description: "Fecha de cierre del ejercicio fiscal auditado"
+    format: "spanish_long"  # e.g., "31 de diciembre de 2025"
+    validation:
+      min_year: 2000
+      max_year: 2099
+    source_block_ids:
+      - COVER_TITLE
+
+  entidad_cliente:
+    type: text
+    required: true
+    label: "Nombre de la entidad cliente"
+    description: "Razón social completa de la compañía auditada"
+    validation:
+      min_length: 1
+      max_length: 500
+    source_block_ids:
+      - COVER_SUBTITLE_01
+      - SEC1_INTRO_PARA
+      - ANEXO3_LIST_04
+
+  master_file:
+    type: enum
+    required: true
+    label: "Acceso al Master File"
+    description: "Indica si se tiene acceso al Master File del grupo"
+    values:
+      - value: 0
+        label: "No hay acceso"
+      - value: 1
+        label: "Hay acceso"
+    default: 0
+    source_block_ids:
+      - SEC1_TEXTBLOCK_01
+      - SEC2_TEXTBLOCK_03
+      - SEC2_TABLE_06
+      - ANEXO2_TABLE_09
+
+  descripcion_actividad:
+    type: text
+    required: true
+    label: "Descripción de la actividad"
+    description: "Descripción de las actividades de la compañía"
+    multiline: true
+    validation:
+      min_length: 50
+      max_length: 5000
+    source_block_ids:
+      - SEC2_PARA_01
+
+  texto_anexo3:
+    type: text
+    required: false
+    label: "Comentario adicional Anexo III"
+    description: "Comentarios técnicos adicionales para el Anexo III"
+    multiline: true
+    default: ""
+    source_block_ids:
+      - ANEXO3_LIST_03
+
+  # ============================================================================
+  # CONTACT VARIABLES
+  # ============================================================================
+
+  contacto1:
+    type: text
+    required: true
+    label: "Nombre del contacto 1"
+    source_block_ids:
+      - CONTACTS_BLOCK
+
+  cargo_contacto1:
+    type: text
+    required: true
+    label: "Cargo del contacto 1"
+    source_block_ids:
+      - CONTACTS_BLOCK
+
+  correo_contacto1:
+    type: text
+    required: true
+    label: "Correo del contacto 1"
+    format: email
+    sensitive: true
+    source_block_ids:
+      - CONTACTS_BLOCK
+
+  contacto2:
+    type: text
+    required: true
+    label: "Nombre del contacto 2"
+    source_block_ids:
+      - CONTACTS_BLOCK
+
+  cargo_contacto2:
+    type: text
+    required: true
+    label: "Cargo del contacto 2"
+    source_block_ids:
+      - CONTACTS_BLOCK
+
+  correo_contacto2:
+    type: text
+    required: true
+    label: "Correo del contacto 2"
+    format: email
+    sensitive: true
+    source_block_ids:
+      - CONTACTS_BLOCK
+
+  contacto3:
+    type: text
+    required: true
+    label: "Nombre del contacto 3"
+    source_block_ids:
+      - CONTACTS_BLOCK
+
+  cargo_contacto3:
+    type: text
+    required: true
+    label: "Cargo del contacto 3"
+    source_block_ids:
+      - CONTACTS_BLOCK
+
+  correo_contacto3:
+    type: text
+    required: true
+    label: "Correo del contacto 3"
+    format: email
+    sensitive: true
+    source_block_ids:
+      - CONTACTS_BLOCK
+
+  # ============================================================================
+  # FINANCIAL DATA - Current Year (suffix _1)
+  # ============================================================================
+
+  cifra_1:
+    type: currency
+    required: true
+    label: "Cifra de negocios (ejercicio actual)"
+    description: "Cifra de negocios del ejercicio actual en EUR"
+    currency: EUR
+    source_block_ids:
+      - SEC2_TABLE_02
+
+  ebit_1:
+    type: currency
+    required: true
+    label: "EBIT (ejercicio actual)"
+    description: "Resultado operativo del ejercicio actual en EUR"
+    currency: EUR
+    source_block_ids:
+      - SEC2_TABLE_02
+
+  resultado_fin_1:
+    type: currency
+    required: true
+    label: "Resultado Financiero (ejercicio actual)"
+    currency: EUR
+    source_block_ids:
+      - SEC2_TABLE_02
+
+  ebt_1:
+    type: currency
+    required: true
+    label: "EBT (ejercicio actual)"
+    description: "Resultado antes de impuestos del ejercicio actual"
+    currency: EUR
+    source_block_ids:
+      - SEC2_TABLE_02
+
+  resultado_net_1:
+    type: currency
+    required: true
+    label: "Resultado Neto (ejercicio actual)"
+    currency: EUR
+    source_block_ids:
+      - SEC2_TABLE_02
+
+  # ============================================================================
+  # FINANCIAL DATA - Prior Year (suffix _0)
+  # ============================================================================
+
+  cifra_0:
+    type: currency
+    required: true
+    label: "Cifra de negocios (ejercicio anterior)"
+    currency: EUR
+    source_block_ids:
+      - SEC2_TABLE_02
+
+  ebit_0:
+    type: currency
+    required: true
+    label: "EBIT (ejercicio anterior)"
+    currency: EUR
+    source_block_ids:
+      - SEC2_TABLE_02
+
+  resultado_fin_0:
+    type: currency
+    required: true
+    label: "Resultado Financiero (ejercicio anterior)"
+    currency: EUR
+    source_block_ids:
+      - SEC2_TABLE_02
+
+  ebt_0:
+    type: currency
+    required: true
+    label: "EBT (ejercicio anterior)"
+    currency: EUR
+    source_block_ids:
+      - SEC2_TABLE_02
+
+  resultado_net_0:
+    type: currency
+    required: true
+    label: "Resultado Neto (ejercicio anterior)"
+    currency: EUR
+    source_block_ids:
+      - SEC2_TABLE_02
+
+  # ============================================================================
+  # LIST VARIABLES - Dynamic Repeating
+  # ============================================================================
+
+  documentacion_facilitada:
+    type: list
+    item_type: text
+    required: true
+    label: "Documentación facilitada"
+    description: "Lista de documentos proporcionados para la revisión"
+    min_items: 1
+    source_block_ids:
+      - SEC1_LIST_DOC
+
+  servicios_vinculados:
+    type: list
+    required: true
+    label: "Servicios vinculados"
+    description: "Lista de tipos de operaciones vinculadas con sus entidades"
+    min_items: 1
+    item_schema:
+      servicio_vinculado:
+        type: text
+        required: true
+        label: "Tipo de servicio vinculado"
+      entidades_vinculadas:
+        type: list
+        required: true
+        min_items: 1
+        item_schema:
+          entidad_vinculada:
+            type: text
+            required: true
+            label: "Nombre de entidad vinculada"
+          ingreso_entidad:
+            type: currency
+            required: true
+            label: "Ingreso del ejercicio"
+            currency: EUR
+          gasto_entidad:
+            type: currency
+            required: true
+            label: "Gasto del ejercicio"
+            currency: EUR
+    source_block_ids:
+      - SEC1_TABLE_01
+      - SEC2_TABLE_03
+
+  servicios_oovv:
+    type: list
+    required: false
+    label: "Servicios OOVV para análisis"
+    description: "Bloques de análisis por servicio (opcional)"
+    item_schema:
+      enabled:
+        type: bool
+        required: true
+        label: "Incluir este servicio"
+        default: false
+      titulo_servicio_oovv:
+        type: text
+        required: true
+        label: "Título del servicio"
+      texto_intro_servicio:
+        type: text
+        required: true
+        multiline: true
+        label: "Texto introductorio"
+      descripcion_tabla:
+        type: text
+        required: true
+        label: "Descripción de la tabla"
+      metodo:
+        type: text
+        required: true
+        label: "Método elegido"
+      min:
+        type: decimal
+        required: true
+        label: "Min (%)"
+      lq:
+        type: decimal
+        required: true
+        label: "LQ (%)"
+      med:
+        type: decimal
+        required: true
+        label: "Med (%)"
+      uq:
+        type: decimal
+        required: true
+        label: "UQ (%)"
+      max:
+        type: decimal
+        required: true
+        label: "Max (%)"
+      texto_conclusion_servicio:
+        type: text
+        required: true
+        multiline: true
+        label: "Texto conclusión"
+    source_block_ids:
+      - SEC2_SERVICE_TITLE
+      - SEC2_SERVICE_INTRO
+      - SEC2_TABLE_04
+      - SEC2_SERVICE_CONCLUSION
+
+  # ============================================================================
+  # COMPLIANCE SUMMARY - Local File (3 rows)
+  # ============================================================================
+
+  cumplimiento_resumen_local_1:
+    type: enum
+    required: true
+    label: "Cumplimiento: Información del contribuyente"
+    values: ["si", "no"]
+    source_block_ids:
+      - SEC2_TABLE_05
+
+  cumplimiento_resumen_local_2:
+    type: enum
+    required: true
+    label: "Cumplimiento: Operaciones vinculadas"
+    values: ["si", "no"]
+    source_block_ids:
+      - SEC2_TABLE_05
+
+  cumplimiento_resumen_local_3:
+    type: enum
+    required: true
+    label: "Cumplimiento: Info económico-financiera"
+    values: ["si", "no"]
+    source_block_ids:
+      - SEC2_TABLE_05
+
+  # ============================================================================
+  # COMPLIANCE SUMMARY - Master File (4 rows) - Conditional on master_file==1
+  # ============================================================================
+
+  cumplimiento_resumen_mast_1:
+    type: enum
+    required: false
+    label: "Cumplimiento MF: Estructura y actividades"
+    values: ["si", "no"]
+    condition: "master_file == 1"
+    source_block_ids:
+      - SEC2_TABLE_06
+
+  cumplimiento_resumen_mast_2:
+    type: enum
+    required: false
+    label: "Cumplimiento MF: Activos intangibles"
+    values: ["si", "no"]
+    condition: "master_file == 1"
+    source_block_ids:
+      - SEC2_TABLE_06
+
+  cumplimiento_resumen_mast_3:
+    type: enum
+    required: false
+    label: "Cumplimiento MF: Actividad financiera"
+    values: ["si", "no"]
+    condition: "master_file == 1"
+    source_block_ids:
+      - SEC2_TABLE_06
+
+  cumplimiento_resumen_mast_4:
+    type: enum
+    required: false
+    label: "Cumplimiento MF: Situación fiscal"
+    values: ["si", "no"]
+    condition: "master_file == 1"
+    source_block_ids:
+      - SEC2_TABLE_06
+
+  # ============================================================================
+  # RISK ELEMENTS TABLE (12 rows)
+  # ============================================================================
+
+  impacto_1:
+    type: enum
+    required: true
+    label: "Impacto - Restructuraciones empresariales"
+    values: ["si", "no", "posible"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  afectacion_pre_1:
+    type: enum
+    required: true
+    label: "Afectación preliminar - Restructuraciones"
+    values: ["bajo", "medio", "alto"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  texto_mitigacion_1:
+    type: text
+    required: false
+    label: "Mitigadores - Restructuraciones"
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  afectacion_final_1:
+    type: enum
+    required: true
+    label: "Afectación final - Restructuraciones"
+    values: ["bajo", "medio", "alto"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  impacto_2:
+    type: enum
+    required: true
+    label: "Impacto - Valoración intangibles"
+    values: ["si", "no", "posible"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  afectacion_pre_2:
+    type: enum
+    required: true
+    values: ["bajo", "medio", "alto"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  texto_mitigacion_2:
+    type: text
+    required: false
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  afectacion_final_2:
+    type: enum
+    required: true
+    values: ["bajo", "medio", "alto"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  impacto_3:
+    type: enum
+    required: true
+    values: ["si", "no", "posible"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  afectacion_pre_3:
+    type: enum
+    required: true
+    values: ["bajo", "medio", "alto"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  texto_mitigacion_3:
+    type: text
+    required: false
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  afectacion_final_3:
+    type: enum
+    required: true
+    values: ["bajo", "medio", "alto"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  impacto_4:
+    type: enum
+    required: true
+    values: ["si", "no", "posible"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  afectacion_pre_4:
+    type: enum
+    required: true
+    values: ["bajo", "medio", "alto"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  texto_mitigacion_4:
+    type: text
+    required: false
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  afectacion_final_4:
+    type: enum
+    required: true
+    values: ["bajo", "medio", "alto"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  impacto_5:
+    type: enum
+    required: true
+    values: ["si", "no", "posible"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  afectacion_pre_5:
+    type: enum
+    required: true
+    values: ["bajo", "medio", "alto"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  texto_mitigacion_5:
+    type: text
+    required: false
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  afectacion_final_5:
+    type: enum
+    required: true
+    values: ["bajo", "medio", "alto"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  impacto_6:
+    type: enum
+    required: true
+    values: ["si", "no", "posible"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  afectacion_pre_6:
+    type: enum
+    required: true
+    values: ["bajo", "medio", "alto"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  texto_mitigacion_6:
+    type: text
+    required: false
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  afectacion_final_6:
+    type: enum
+    required: true
+    values: ["bajo", "medio", "alto"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  impacto_7:
+    type: enum
+    required: true
+    values: ["si", "no", "posible"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  afectacion_pre_7:
+    type: enum
+    required: true
+    values: ["bajo", "medio", "alto"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  texto_mitigacion_7:
+    type: text
+    required: false
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  afectacion_final_7:
+    type: enum
+    required: true
+    values: ["bajo", "medio", "alto"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  impacto_8:
+    type: enum
+    required: true
+    values: ["si", "no", "posible"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  afectacion_pre_8:
+    type: enum
+    required: true
+    values: ["bajo", "medio", "alto"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  texto_mitigacion_8:
+    type: text
+    required: false
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  afectacion_final_8:
+    type: enum
+    required: true
+    values: ["bajo", "medio", "alto"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  impacto_9:
+    type: enum
+    required: true
+    values: ["si", "no", "posible"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  afectacion_pre_9:
+    type: enum
+    required: true
+    values: ["bajo", "medio", "alto"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  texto_mitigacion_9:
+    type: text
+    required: false
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  afectacion_final_9:
+    type: enum
+    required: true
+    values: ["bajo", "medio", "alto"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  impacto_10:
+    type: enum
+    required: true
+    values: ["si", "no", "posible"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  afectacion_pre_10:
+    type: enum
+    required: true
+    values: ["bajo", "medio", "alto"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  texto_mitigacion_10:
+    type: text
+    required: false
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  afectacion_final_10:
+    type: enum
+    required: true
+    values: ["bajo", "medio", "alto"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  impacto_11:
+    type: enum
+    required: true
+    values: ["si", "no", "posible"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  afectacion_pre_11:
+    type: enum
+    required: true
+    values: ["bajo", "medio", "alto"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  texto_mitigacion_11:
+    type: text
+    required: false
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  afectacion_final_11:
+    type: enum
+    required: true
+    values: ["bajo", "medio", "alto"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  impacto_12:
+    type: enum
+    required: true
+    values: ["si", "no", "posible"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  afectacion_pre_12:
+    type: enum
+    required: true
+    values: ["bajo", "medio", "alto"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  texto_mitigacion_12:
+    type: text
+    required: false
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  afectacion_final_12:
+    type: enum
+    required: true
+    values: ["bajo", "medio", "alto"]
+    source_block_ids: [ANEXO1_TABLE_07]
+
+  # ============================================================================
+  # LOCAL FILE DETAILED COMPLIANCE (14 rows)
+  # ============================================================================
+
+  cumplido_local_1:
+    type: enum
+    required: true
+    values: ["si", "no", "parcial"]
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  texto_cumplido_local_1:
+    type: text
+    required: false
+    validation_rule: "required_if_cumplido_not_si"
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  cumplido_local_2:
+    type: enum
+    required: true
+    values: ["si", "no", "parcial"]
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  texto_cumplido_local_2:
+    type: text
+    required: false
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  cumplido_local_3:
+    type: enum
+    required: true
+    values: ["si", "no", "parcial"]
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  texto_cumplido_local_3:
+    type: text
+    required: false
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  cumplido_local_4:
+    type: enum
+    required: true
+    values: ["si", "no", "parcial"]
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  texto_cumplido_local_4:
+    type: text
+    required: false
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  cumplido_local_5:
+    type: enum
+    required: true
+    values: ["si", "no", "parcial"]
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  texto_cumplido_local_5:
+    type: text
+    required: false
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  cumplido_local_6:
+    type: enum
+    required: true
+    values: ["si", "no", "parcial"]
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  texto_cumplido_local_6:
+    type: text
+    required: false
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  cumplido_local_7:
+    type: enum
+    required: true
+    values: ["si", "no", "parcial"]
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  texto_cumplido_local_7:
+    type: text
+    required: false
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  cumplido_local_8:
+    type: enum
+    required: true
+    values: ["si", "no", "parcial"]
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  texto_cumplido_local_8:
+    type: text
+    required: false
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  cumplido_local_9:
+    type: enum
+    required: true
+    values: ["si", "no", "parcial"]
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  texto_cumplido_local_9:
+    type: text
+    required: false
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  cumplido_local_10:
+    type: enum
+    required: true
+    values: ["si", "no", "parcial"]
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  texto_cumplido_local_10:
+    type: text
+    required: false
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  cumplido_local_11:
+    type: enum
+    required: true
+    values: ["si", "no", "parcial"]
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  texto_cumplido_local_11:
+    type: text
+    required: false
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  cumplido_local_12:
+    type: enum
+    required: true
+    values: ["si", "no", "parcial"]
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  texto_cumplido_local_12:
+    type: text
+    required: false
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  cumplido_local_13:
+    type: enum
+    required: true
+    values: ["si", "no", "parcial"]
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  texto_cumplido_local_13:
+    type: text
+    required: false
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  cumplido_local_14:
+    type: enum
+    required: true
+    values: ["si", "no", "parcial"]
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  texto_cumplido_local_14:
+    type: text
+    required: false
+    source_block_ids: [ANEXO2_TABLE_08]
+
+  # ============================================================================
+  # MASTER FILE DETAILED COMPLIANCE (17 rows) - Conditional
+  # ============================================================================
+
+  cumplido_mast_1:
+    type: enum
+    required: false
+    values: ["si", "no", "parcial"]
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  texto_cumplido_mast_1:
+    type: text
+    required: false
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  cumplido_mast_2:
+    type: enum
+    required: false
+    values: ["si", "no", "parcial"]
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  texto_cumplido_mast_2:
+    type: text
+    required: false
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  cumplido_mast_3:
+    type: enum
+    required: false
+    values: ["si", "no", "parcial"]
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  texto_cumplido_mast_3:
+    type: text
+    required: false
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  cumplido_mast_4:
+    type: enum
+    required: false
+    values: ["si", "no", "parcial"]
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  texto_cumplido_mast_4:
+    type: text
+    required: false
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  cumplido_mast_5:
+    type: enum
+    required: false
+    values: ["si", "no", "parcial"]
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  texto_cumplido_mast_5:
+    type: text
+    required: false
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  cumplido_mast_6:
+    type: enum
+    required: false
+    values: ["si", "no", "parcial"]
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  texto_cumplido_mast_6:
+    type: text
+    required: false
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  cumplido_mast_7:
+    type: enum
+    required: false
+    values: ["si", "no", "parcial"]
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  texto_cumplido_mast_7:
+    type: text
+    required: false
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  cumplido_mast_8:
+    type: enum
+    required: false
+    values: ["si", "no", "parcial"]
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  texto_cumplido_mast_8:
+    type: text
+    required: false
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  cumplido_mast_9:
+    type: enum
+    required: false
+    values: ["si", "no", "parcial"]
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  texto_cumplido_mast_9:
+    type: text
+    required: false
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  cumplido_mast_10:
+    type: enum
+    required: false
+    values: ["si", "no", "parcial"]
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  texto_cumplido_mast_10:
+    type: text
+    required: false
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  cumplido_mast_11:
+    type: enum
+    required: false
+    values: ["si", "no", "parcial"]
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  texto_cumplido_mast_11:
+    type: text
+    required: false
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  cumplido_mast_12:
+    type: enum
+    required: false
+    values: ["si", "no", "parcial"]
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  texto_cumplido_mast_12:
+    type: text
+    required: false
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  cumplido_mast_13:
+    type: enum
+    required: false
+    values: ["si", "no", "parcial"]
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  texto_cumplido_mast_13:
+    type: text
+    required: false
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  cumplido_mast_14:
+    type: enum
+    required: false
+    values: ["si", "no", "parcial"]
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  texto_cumplido_mast_14:
+    type: text
+    required: false
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  cumplido_mast_15:
+    type: enum
+    required: false
+    values: ["si", "no", "parcial"]
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  texto_cumplido_mast_15:
+    type: text
+    required: false
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  cumplido_mast_16:
+    type: enum
+    required: false
+    values: ["si", "no", "parcial"]
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  texto_cumplido_mast_16:
+    type: text
+    required: false
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  cumplido_mast_17:
+    type: enum
+    required: false
+    values: ["si", "no", "parcial"]
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]
+
+  texto_cumplido_mast_17:
+    type: text
+    required: false
+    condition: "master_file == 1"
+    source_block_ids: [ANEXO2_TABLE_09]

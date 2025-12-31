@@ -1,0 +1,279 @@
+# decision_map.yaml - Human-Readable Governance Map
+# Plugin ID: pt_review
+# Generated: 2025-12-31 | Step 2 - YAML Pack Generation
+
+decisions:
+
+  # ============================================================================
+  # D1: Master File No Access
+  # ============================================================================
+
+  d1_master_file_access:
+    decision_id: d1_master_file_access
+    name: "Master File Access Decision"
+    description: |
+      Determines whether the "no access to Master File" warning block should be displayed.
+      This block informs the reader that the Master File was not reviewed due to lack of access.
+
+    business_context: |
+      Spanish tax regulations require companies above certain thresholds to maintain both
+      a Local File and a Master File. If the auditor does not have access to the Master File,
+      this must be clearly disclosed in the report.
+
+    trigger_condition: "master_file == 0"
+
+    outcomes:
+      when_true:
+        - "Display warning text block about Master File not being accessible"
+        - "Omit Master File compliance tables (Tables 6, 8, 9)"
+      when_false:
+        - "Omit the no-access warning block"
+        - "Include Master File compliance tables"
+
+    affected_elements:
+      texts:
+        - s1_master_file_no_access
+      tables: []
+      blocks:
+        - SEC1_TEXTBLOCK_01
+
+    rules: [r001]
+
+    source_block_ids:
+      - SEC1_TEXTBLOCK_01
+      - SEC1_NOTE_02
+      - COND_001
+
+  # ============================================================================
+  # D2: Master File Formal Perspective
+  # ============================================================================
+
+  d2_master_file_formal:
+    decision_id: d2_master_file_formal
+    name: "Master File Formal Perspective Decision"
+    description: |
+      Determines whether the Master File formal compliance section should be included
+      in Section 2 (Executive Summary) under "Conclusiones desde una perspectiva formal".
+
+    business_context: |
+      When the Master File is accessible, the report should include a summary of
+      compliance with Master File requirements alongside the Local File summary.
+
+    trigger_condition: "master_file == 1"
+
+    outcomes:
+      when_true:
+        - "Display Master File summary compliance table (Table 8)"
+        - "Display concluding text about formal perspective"
+      when_false:
+        - "Show only Local File summary table (Table 7)"
+
+    affected_elements:
+      texts:
+        - s2_formal_perspective_conclusion
+      tables:
+        - t6_master_file_resumen
+      blocks:
+        - SEC2_TEXTBLOCK_03
+        - SEC2_TABLE_06
+
+    rules: [r002, r003]
+
+    source_block_ids:
+      - SEC2_TEXTBLOCK_03
+      - SEC2_TABLE_06
+      - SEC2_NOTE_10
+      - COND_002
+
+  # ============================================================================
+  # D3: Master File Detailed Compliance
+  # ============================================================================
+
+  d3_master_file_detailed:
+    decision_id: d3_master_file_detailed
+    name: "Master File Detailed Compliance Table Decision"
+    description: |
+      Determines whether the detailed Master File compliance table (Table 11)
+      should be included in Anexo II.
+
+    business_context: |
+      Anexo II provides detailed breakdown of compliance per requirement from
+      Artículo 15 (Master File) and Artículo 16 (Local File) of the Reglamento.
+      The Master File table is only relevant when the document was reviewed.
+
+    trigger_condition: "master_file == 1"
+
+    outcomes:
+      when_true:
+        - "Display Table 11 with 17 Master File compliance requirements"
+      when_false:
+        - "Table 11 is not shown"
+
+    affected_elements:
+      texts: []
+      tables:
+        - t9_cumplimiento_master_file
+      blocks:
+        - ANEXO2_TABLE_09
+
+    rules: [r004]
+
+    source_block_ids:
+      - ANEXO2_TABLE_09
+      - ANEXO2_NOTE_12
+      - COND_003
+
+  # ============================================================================
+  # D4: Service Block Activation
+  # ============================================================================
+
+  d4_service_activation:
+    decision_id: d4_service_activation
+    name: "Service Analysis Block Activation Decision"
+    description: |
+      Determines which service analysis blocks should be included in the
+      "Conclusiones" section. Each service (OOVV) can be individually enabled
+      or disabled by the user.
+
+    business_context: |
+      The report may analyze multiple types of related-party services (OOVV).
+      Each service type requires a dedicated analysis block with introduction,
+      method comparison table, and conclusion. Users can select which services
+      are relevant for the current engagement.
+
+    trigger_condition: "FOR EACH servicio IN servicios_oovv: servicio.enabled == true"
+
+    outcomes:
+      when_true:
+        - "Include service heading with title"
+        - "Include intro text (texto_intro_servicio)"
+        - "Include table description (descripcion_tabla)"
+        - "Include analysis table (Table 4 per service)"
+        - "Include conclusion text (texto_conclusion_servicio)"
+      when_false:
+        - "Entire service block is omitted from report"
+
+    affected_elements:
+      texts: []
+      tables:
+        - t4_analisis_servicio
+      blocks:
+        - SEC2_SERVICE_TITLE
+        - SEC2_SERVICE_INTRO
+        - SEC2_TABLE_CAPTION_04
+        - SEC2_TABLE_04
+        - SEC2_SERVICE_CONCLUSION
+
+    rules: [r005]
+
+    source_block_ids:
+      - SEC2_SERVICE_TITLE
+      - SEC2_SERVICE_INTRO
+      - SEC2_TABLE_04
+      - SEC2_SERVICE_CONCLUSION
+      - SEC2_NOTE_09
+      - COND_004
+
+  # ============================================================================
+  # D5: Compliance Comment Requirement
+  # ============================================================================
+
+  d5_compliance_comment:
+    decision_id: d5_compliance_comment
+    name: "Compliance Comment Requirement Decision"
+    description: |
+      Determines when commentary fields (texto_cumplido_*) are required
+      based on the compliance status (cumplido_*) value.
+
+    business_context: |
+      When a compliance requirement is marked as "no" (not compliant) or
+      "parcial" (partially compliant), the auditor must provide an explanation
+      in the commentary field. This ensures all non-compliant items are
+      properly documented with context.
+
+    trigger_condition: "cumplido_* IN ['no', 'parcial']"
+
+    outcomes:
+      when_true:
+        - "texto_cumplido_* field becomes REQUIRED"
+        - "Validation fails if commentary is empty"
+      when_false:
+        - "texto_cumplido_* field is optional (can be empty)"
+
+    affected_elements:
+      texts: []
+      tables:
+        - t8_cumplimiento_local_file
+        - t9_cumplimiento_master_file
+      blocks:
+        - ANEXO2_TABLE_08
+        - ANEXO2_TABLE_09
+
+    rules: [r006, r007]
+
+    source_block_ids:
+      - ANEXO2_TABLE_08
+      - ANEXO2_TABLE_09
+      - ANEXO2_NOTE_12
+      - COND_005
+
+  # ============================================================================
+  # D6: Master File Fields Required
+  # ============================================================================
+
+  d6_master_file_fields:
+    decision_id: d6_master_file_fields
+    name: "Master File Fields Required Decision"
+    description: |
+      Determines when Master File-related input fields become required
+      based on the master_file access flag.
+
+    business_context: |
+      When the Master File is accessible (master_file == 1), all the
+      compliance status fields for Master File requirements become mandatory
+      to ensure complete reporting.
+
+    trigger_condition: "master_file == 1"
+
+    outcomes:
+      when_true:
+        - "cumplimiento_resumen_mast_* fields are REQUIRED"
+        - "cumplido_mast_* fields are REQUIRED"
+      when_false:
+        - "Master File fields are optional/ignored"
+
+    affected_elements:
+      texts: []
+      tables:
+        - t6_master_file_resumen
+        - t9_cumplimiento_master_file
+      blocks: []
+
+    rules: [r008, r009]
+
+    source_block_ids:
+      - SEC2_TABLE_06
+      - ANEXO2_TABLE_09
+
+# ============================================================================
+# DECISION FLOW SUMMARY
+# ============================================================================
+
+decision_flow:
+  description: |
+    1. User inputs `master_file` value (0 or 1)
+    2. D1 determines if no-access warning is shown
+    3. D2/D3 determine if Master File compliance sections are included
+    4. D6 determines if Master File input fields are required
+    5. User inputs service list with `enabled` flags
+    6. D4 determines which service blocks are rendered
+    7. User fills compliance fields
+    8. D5 validates that non-compliant items have comments
+
+  evaluation_order:
+    - d1_master_file_access
+    - d2_master_file_formal
+    - d3_master_file_detailed
+    - d6_master_file_fields
+    - d4_service_activation
+    - d5_compliance_comment

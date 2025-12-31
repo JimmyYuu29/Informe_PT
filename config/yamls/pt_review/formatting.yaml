@@ -1,0 +1,325 @@
+# formatting.yaml - Formatting Rules and Color Maps
+# Plugin ID: pt_review
+# Generated: 2025-12-31 | Step 2 - YAML Pack Generation
+
+# ============================================================================
+# DATE FORMATS
+# ============================================================================
+
+date_formats:
+  spanish_long:
+    description: "Spanish long date format"
+    pattern: "{day} de {month} de {year}"
+    example: "31 de diciembre de 2025"
+    months:
+      1: "enero"
+      2: "febrero"
+      3: "marzo"
+      4: "abril"
+      5: "mayo"
+      6: "junio"
+      7: "julio"
+      8: "agosto"
+      9: "septiembre"
+      10: "octubre"
+      11: "noviembre"
+      12: "diciembre"
+    applies_to:
+      - fecha_fin_fiscal
+
+  iso:
+    description: "ISO date format"
+    pattern: "YYYY-MM-DD"
+    example: "2025-12-31"
+
+# ============================================================================
+# CURRENCY FORMATS
+# ============================================================================
+
+currency_formats:
+  eur:
+    description: "Euro currency format"
+    symbol: "€"
+    symbol_position: "after"
+    decimal_separator: ","
+    thousands_separator: "."
+    decimal_places: 0
+    example: "1.500.000 €"
+    applies_to:
+      - cifra_1
+      - cifra_0
+      - cost_1
+      - cost_0
+      - ebit_1
+      - ebit_0
+      - resultado_fin_1
+      - resultado_fin_0
+      - ebt_1
+      - ebt_0
+      - resultado_net_1
+      - resultado_net_0
+      - total_ingreso_oov
+      - total_gasto_oov
+      - ingreso_entidad
+      - gasto_entidad
+
+  eur_detailed:
+    description: "Euro currency with 2 decimal places"
+    symbol: "€"
+    symbol_position: "after"
+    decimal_separator: ","
+    thousands_separator: "."
+    decimal_places: 2
+    example: "1.500.000,00 €"
+
+# ============================================================================
+# PERCENTAGE FORMATS
+# ============================================================================
+
+percentage_formats:
+  standard:
+    description: "Standard percentage format"
+    suffix: "%"
+    decimal_places: 2
+    decimal_separator: ","
+    example: "15,00 %"
+    applies_to:
+      - var_cifra
+      - var_cost
+      - var_ebit
+      - var_resfin
+      - var_ebt
+      - var_resnet
+      - var_om
+      - var_ncp
+      - om_1
+      - om_0
+      - ncp_1
+      - ncp_0
+      - peso_oov_sobre_incn
+      - peso_oov_sobre_costes
+
+  service_percentages:
+    description: "Percentage format for service analysis table"
+    suffix: "%"
+    decimal_places: 2
+    decimal_separator: ","
+    applies_to:
+      - min
+      - lq
+      - med
+      - uq
+      - max
+
+# ============================================================================
+# ENUM COLOR MAPS
+# ============================================================================
+
+enum_colors:
+
+  # Compliance summary (si/no only)
+  compliance_color:
+    description: "Color coding for summary compliance tables"
+    applies_to:
+      - cumplimiento_resumen_local_1
+      - cumplimiento_resumen_local_2
+      - cumplimiento_resumen_local_3
+      - cumplimiento_resumen_mast_1
+      - cumplimiento_resumen_mast_2
+      - cumplimiento_resumen_mast_3
+      - cumplimiento_resumen_mast_4
+    values:
+      si:
+        background: "#00B050"  # Green
+        text: "#FFFFFF"
+        label: "Sí"
+      no:
+        background: "#FFFF00"  # Yellow
+        text: "#000000"
+        label: "No"
+    source_ref: note_10
+
+  # Detailed compliance (si/no/parcial)
+  cumplido_color:
+    description: "Color coding for detailed compliance tables"
+    applies_to:
+      - cumplido_local_1
+      - cumplido_local_2
+      - cumplido_local_3
+      - cumplido_local_4
+      - cumplido_local_5
+      - cumplido_local_6
+      - cumplido_local_7
+      - cumplido_local_8
+      - cumplido_local_9
+      - cumplido_local_10
+      - cumplido_local_11
+      - cumplido_local_12
+      - cumplido_local_13
+      - cumplido_local_14
+      - cumplido_mast_1
+      - cumplido_mast_2
+      - cumplido_mast_3
+      - cumplido_mast_4
+      - cumplido_mast_5
+      - cumplido_mast_6
+      - cumplido_mast_7
+      - cumplido_mast_8
+      - cumplido_mast_9
+      - cumplido_mast_10
+      - cumplido_mast_11
+      - cumplido_mast_12
+      - cumplido_mast_13
+      - cumplido_mast_14
+      - cumplido_mast_15
+      - cumplido_mast_16
+      - cumplido_mast_17
+    values:
+      si:
+        background: "#00B050"  # Green
+        text: "#FFFFFF"
+        label: "Sí"
+      parcial:
+        background: "#FFFF00"  # Yellow
+        text: "#000000"
+        label: "Parcial"
+      no:
+        background: "#FF0000"  # Red
+        text: "#FFFFFF"
+        label: "No"
+    source_ref: note_12
+
+  # Risk impact (no color coding per note_11)
+  impacto_values:
+    description: "Impact enum values (no color coding)"
+    applies_to:
+      - impacto_1
+      - impacto_2
+      - impacto_3
+      - impacto_4
+      - impacto_5
+      - impacto_6
+      - impacto_7
+      - impacto_8
+      - impacto_9
+      - impacto_10
+      - impacto_11
+      - impacto_12
+    values:
+      si:
+        label: "Sí"
+      no:
+        label: "No"
+      posible:
+        label: "Posible"
+    source_ref: note_11
+
+  # Risk level (afectacion)
+  afectacion_color:
+    description: "Color coding for risk level (afectacion) fields"
+    applies_to:
+      - afectacion_pre_1
+      - afectacion_pre_2
+      - afectacion_pre_3
+      - afectacion_pre_4
+      - afectacion_pre_5
+      - afectacion_pre_6
+      - afectacion_pre_7
+      - afectacion_pre_8
+      - afectacion_pre_9
+      - afectacion_pre_10
+      - afectacion_pre_11
+      - afectacion_pre_12
+      - afectacion_final_1
+      - afectacion_final_2
+      - afectacion_final_3
+      - afectacion_final_4
+      - afectacion_final_5
+      - afectacion_final_6
+      - afectacion_final_7
+      - afectacion_final_8
+      - afectacion_final_9
+      - afectacion_final_10
+      - afectacion_final_11
+      - afectacion_final_12
+    values:
+      bajo:
+        background: "#00B050"  # Green
+        text: "#FFFFFF"
+        label: "Bajo"
+      medio:
+        background: "#FFFF00"  # Yellow
+        text: "#000000"
+        label: "Medio"
+      alto:
+        background: "#FF0000"  # Red
+        text: "#FFFFFF"
+        label: "Alto"
+    source_ref: note_11
+
+# ============================================================================
+# TEXT FORMATTING
+# ============================================================================
+
+text_formatting:
+  email:
+    description: "Email format validation"
+    pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+    applies_to:
+      - correo_contacto1
+      - correo_contacto2
+      - correo_contacto3
+
+  multiline:
+    description: "Multi-line text fields"
+    preserve_linebreaks: true
+    max_lines: null
+    applies_to:
+      - descripcion_actividad
+      - texto_intro_servicio
+      - texto_conclusion_servicio
+      - texto_anexo3
+
+# ============================================================================
+# LIST FORMATTING
+# ============================================================================
+
+list_formatting:
+  documentacion_facilitada:
+    description: "Document list formatting"
+    prefix: "• "
+    separator: "\n"
+    last_separator: "\n"
+    applies_to:
+      - documentacion_facilitada
+
+# ============================================================================
+# TABLE STYLES
+# ============================================================================
+
+table_styles:
+  default:
+    header_background: "#4472C4"
+    header_text: "#FFFFFF"
+    header_bold: true
+    row_alternate: true
+    alternate_background: "#D9E2F3"
+    border_color: "#8EAADB"
+    border_width: 1
+
+  risk_table:
+    description: "Style for risk assessment table"
+    header_background: "#4472C4"
+    header_text: "#FFFFFF"
+    applies_to:
+      - t7_revision_riesgos
+
+  compliance_table:
+    description: "Style for compliance tables"
+    header_background: "#4472C4"
+    header_text: "#FFFFFF"
+    applies_to:
+      - t5_local_file_resumen
+      - t6_master_file_resumen
+      - t8_cumplimiento_local_file
+      - t9_cumplimiento_master_file
