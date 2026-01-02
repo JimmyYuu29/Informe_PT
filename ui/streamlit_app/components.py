@@ -18,7 +18,13 @@ def render_text_input(
 ) -> str:
     """Render a text input field with stable state."""
     widget_key = state.get_stable_key(field_name)
-    default_value = state.get_field_value(field_name, "")
+
+    # Check if widget key already exists in session_state (from previous render)
+    # If so, use that value; otherwise use the value from form_data
+    if widget_key in st.session_state:
+        default_value = st.session_state[widget_key]
+    else:
+        default_value = state.get_field_value(field_name, "")
 
     label_display = f"{label} *" if required else label
 
@@ -39,6 +45,7 @@ def render_text_input(
             max_chars=max_length,
         )
 
+    # Always sync widget value back to form_data
     state.set_field_value(field_name, value)
     return value
 
@@ -117,10 +124,16 @@ def render_enum_input(
     options: list,
     required: bool = False,
     help_text: Optional[str] = None,
+    default: Optional[str] = None,
 ) -> Optional[str]:
     """Render an enum/select input field with stable state."""
     widget_key = state.get_stable_key(field_name)
-    default_value = state.get_field_value(field_name)
+
+    # Check if widget key already exists in session_state
+    if widget_key in st.session_state:
+        current_value = st.session_state[widget_key]
+    else:
+        current_value = state.get_field_value(field_name)
 
     # Process options
     if options and isinstance(options[0], dict):
@@ -130,11 +143,14 @@ def render_enum_input(
         option_labels = [str(opt) for opt in options]
         option_values = list(options)
 
-    # Find default index
-    try:
-        default_index = option_values.index(default_value) if default_value in option_values else 0
-    except ValueError:
-        default_index = 0
+    # Find index for current value, or use default
+    default_index = 0
+    if current_value in option_values:
+        default_index = option_values.index(current_value)
+    elif current_value in option_labels:
+        default_index = option_labels.index(current_value)
+    elif default is not None and default in option_values:
+        default_index = option_values.index(default)
 
     label_display = f"{label} *" if required else label
 
@@ -268,6 +284,7 @@ def render_simple_list(
 ) -> None:
     """
     Render a simple list input (list of strings).
+    Uses st.container to minimize page jumps on add/remove.
     """
     st.subheader(label)
     if help_text:
@@ -275,28 +292,52 @@ def render_simple_list(
 
     items = state.get_list_items(field_name)
 
-    for idx, item in enumerate(items):
-        cols = st.columns([0.9, 0.1])
+    # Check for pending add/remove actions to process after rendering
+    action_key = f"_action_{field_name}"
+    if action_key in st.session_state:
+        action = st.session_state[action_key]
+        if action["type"] == "remove":
+            state.remove_list_item(field_name, action["index"])
+        del st.session_state[action_key]
+        # Items list has changed, get fresh copy
+        items = state.get_list_items(field_name)
 
-        with cols[0]:
-            widget_key = state.get_stable_key(field_name, idx, "value")
-            current_value = item.get("value", "")
+    # Use a container with unique ID to prevent scroll jumps
+    list_container = st.container()
 
-            new_value = st.text_input(
-                f"Item {idx + 1}",
-                value=current_value,
-                key=widget_key,
-                label_visibility="collapsed",
-            )
-            state.update_list_item(field_name, idx, "value", new_value)
+    with list_container:
+        for idx, item in enumerate(items):
+            cols = st.columns([0.85, 0.15])
 
-        with cols[1]:
-            if len(items) > min_items:
-                if st.button("X", key=f"remove_{field_name}_{idx}"):
-                    state.remove_list_item(field_name, idx)
-                    st.rerun()
+            with cols[0]:
+                widget_key = state.get_stable_key(field_name, idx, "value")
+                # Check session state first for the widget value
+                if widget_key in st.session_state:
+                    current_value = st.session_state[widget_key]
+                else:
+                    current_value = item.get("value", "")
 
-    if st.button(f"+ Add item", key=f"add_{field_name}"):
+                new_value = st.text_input(
+                    f"Item {idx + 1}",
+                    value=current_value,
+                    key=widget_key,
+                    label_visibility="collapsed",
+                    placeholder="Ingrese documento...",
+                )
+                state.update_list_item(field_name, idx, "value", new_value)
+
+            with cols[1]:
+                if len(items) > min_items:
+                    # Use a unique key that includes item count to avoid stale key conflicts
+                    remove_key = f"rm_{field_name}_{idx}_{len(items)}_{item.get('_id', idx)}"
+                    if st.button("✕", key=remove_key, help="Eliminar"):
+                        # Schedule removal for next rerun
+                        st.session_state[action_key] = {"type": "remove", "index": idx}
+                        st.rerun()
+
+    # Add button - use unique key based on item count
+    add_key = f"add_{field_name}_{len(items)}"
+    if st.button(f"+ Añadir documento", key=add_key):
         state.add_list_item(field_name, {"value": ""})
         st.rerun()
 

@@ -1,0 +1,205 @@
+{
+  "_metadata": {
+    "name": "test_data_with_masterfile",
+    "description": "Complete test data WITH Master File access for document generation testing",
+    "generated": "2026-01-02"
+  },
+
+  "fecha_fin_fiscal": "2025-12-31",
+  "entidad_cliente": "KFC Restaurantes S.L.",
+  "master_file": 1,
+  "descripcion_actividad": "La empresa es una cadena de restaurantes de comida rápida estadounidense especializada en pollo frito, con sede en Louisville, Kentucky, y forma parte de Yum! Brands. Opera más de 30.000 locales franquiciados en 150 países, siendo la segunda mayor cadena de restauración mundial después de McDonald's.",
+
+  "texto_anexo3": "Se han revisado las operaciones vinculadas de la Compañía correspondientes al ejercicio 2025, verificando su adecuación a las normas de precios de transferencia establecidas en la normativa fiscal española.",
+
+  "contacto1": "María García López",
+  "cargo_contacto1": "Socia - Precios de Transferencia",
+  "correo_contacto1": "maria.garcia@forvismazars.com",
+  "contacto2": "Carlos Rodríguez Martín",
+  "cargo_contacto2": "Manager - Precios de Transferencia",
+  "correo_contacto2": "carlos.rodriguez@forvismazars.com",
+  "contacto3": "Ana Fernández Ruiz",
+  "cargo_contacto3": "Senior - Precios de Transferencia",
+  "correo_contacto3": "ana.fernandez@forvismazars.com",
+
+  "cifra_1": 25000000,
+  "ebit_1": 3750000,
+  "resultado_fin_1": -125000,
+  "ebt_1": 3625000,
+  "resultado_net_1": 2718750,
+
+  "cifra_0": 23500000,
+  "ebit_0": 3400000,
+  "resultado_fin_0": -110000,
+  "ebt_0": 3290000,
+  "resultado_net_0": 2467500,
+
+  "documentacion_facilitada": [
+    "Documentación Local File del ejercicio 2025",
+    "Documentación Master File del ejercicio 2025",
+    "Estados Financieros auditados 2025",
+    "Contratos intercompañía"
+  ],
+
+  "servicios_vinculados": [
+    {
+      "servicio_vinculado": "Servicios de gestión administrativa",
+      "entidades_vinculadas": [
+        {
+          "entidad_vinculada": "Yum! Brands Holdings B.V.",
+          "ingreso_entidad": 0,
+          "gasto_entidad": 450000
+        },
+        {
+          "entidad_vinculada": "KFC International Holdings",
+          "ingreso_entidad": 0,
+          "gasto_entidad": 225000
+        }
+      ]
+    },
+    {
+      "servicio_vinculado": "Royalties por marca",
+      "entidades_vinculadas": [
+        {
+          "entidad_vinculada": "Kentucky Fried Chicken International",
+          "ingreso_entidad": 0,
+          "gasto_entidad": 1250000
+        }
+      ]
+    }
+  ],
+
+  "servicios_oovv": [
+    {
+      "metodo_oovv": "Precio Libre Comparable (CUP)",
+      "min_oovv": 2.5,
+      "lq_oovv": 3.0,
+      "med_oovv": 4.0,
+      "uq_oovv": 5.0,
+      "max_oovv": 6.0,
+      "resultado_oovv": 4.2
+    }
+  ],
+
+  "cumplimiento_resumen_local_1": "si",
+  "cumplimiento_resumen_local_2": "si",
+  "cumplimiento_resumen_local_3": "si",
+
+  "cumplimiento_resumen_mast_1": "si",
+  "cumplimiento_resumen_mast_2": "si",
+  "cumplimiento_resumen_mast_3": "si",
+  "cumplimiento_resumen_mast_4": "si",
+
+  "impacto_1": "no",
+  "afectacion_pre_1": "bajo",
+  "texto_mitigacion_1": "",
+  "afectacion_final_1": "bajo",
+  "impacto_2": "no",
+  "afectacion_pre_2": "bajo",
+  "texto_mitigacion_2": "",
+  "afectacion_final_2": "bajo",
+  "impacto_3": "posible",
+  "afectacion_pre_3": "medio",
+  "texto_mitigacion_3": "Contratos detallados disponibles que justifican los pagos",
+  "afectacion_final_3": "bajo",
+  "impacto_4": "si",
+  "afectacion_pre_4": "medio",
+  "texto_mitigacion_4": "Documentación de beneficio recibido disponible en Local File",
+  "afectacion_final_4": "bajo",
+  "impacto_5": "no",
+  "afectacion_pre_5": "bajo",
+  "texto_mitigacion_5": "",
+  "afectacion_final_5": "bajo",
+  "impacto_6": "no",
+  "afectacion_pre_6": "bajo",
+  "texto_mitigacion_6": "",
+  "afectacion_final_6": "bajo",
+  "impacto_7": "no",
+  "afectacion_pre_7": "bajo",
+  "texto_mitigacion_7": "",
+  "afectacion_final_7": "bajo",
+  "impacto_8": "no",
+  "afectacion_pre_8": "bajo",
+  "texto_mitigacion_8": "",
+  "afectacion_final_8": "bajo",
+  "impacto_9": "no",
+  "afectacion_pre_9": "bajo",
+  "texto_mitigacion_9": "",
+  "afectacion_final_9": "bajo",
+  "impacto_10": "no",
+  "afectacion_pre_10": "bajo",
+  "texto_mitigacion_10": "",
+  "afectacion_final_10": "bajo",
+  "impacto_11": "no",
+  "afectacion_pre_11": "bajo",
+  "texto_mitigacion_11": "",
+  "afectacion_final_11": "bajo",
+  "impacto_12": "no",
+  "afectacion_pre_12": "bajo",
+  "texto_mitigacion_12": "",
+  "afectacion_final_12": "bajo",
+
+  "cumplido_local_1": "si",
+  "texto_cumplido_local_1": "",
+  "cumplido_local_2": "si",
+  "texto_cumplido_local_2": "",
+  "cumplido_local_3": "si",
+  "texto_cumplido_local_3": "",
+  "cumplido_local_4": "si",
+  "texto_cumplido_local_4": "",
+  "cumplido_local_5": "si",
+  "texto_cumplido_local_5": "",
+  "cumplido_local_6": "si",
+  "texto_cumplido_local_6": "",
+  "cumplido_local_7": "si",
+  "texto_cumplido_local_7": "",
+  "cumplido_local_8": "si",
+  "texto_cumplido_local_8": "",
+  "cumplido_local_9": "si",
+  "texto_cumplido_local_9": "",
+  "cumplido_local_10": "si",
+  "texto_cumplido_local_10": "",
+  "cumplido_local_11": "si",
+  "texto_cumplido_local_11": "",
+  "cumplido_local_12": "si",
+  "texto_cumplido_local_12": "",
+  "cumplido_local_13": "si",
+  "texto_cumplido_local_13": "",
+  "cumplido_local_14": "si",
+  "texto_cumplido_local_14": "",
+
+  "cumplido_mast_1": "si",
+  "texto_cumplido_mast_1": "",
+  "cumplido_mast_2": "si",
+  "texto_cumplido_mast_2": "",
+  "cumplido_mast_3": "si",
+  "texto_cumplido_mast_3": "",
+  "cumplido_mast_4": "si",
+  "texto_cumplido_mast_4": "",
+  "cumplido_mast_5": "si",
+  "texto_cumplido_mast_5": "",
+  "cumplido_mast_6": "si",
+  "texto_cumplido_mast_6": "",
+  "cumplido_mast_7": "si",
+  "texto_cumplido_mast_7": "",
+  "cumplido_mast_8": "si",
+  "texto_cumplido_mast_8": "",
+  "cumplido_mast_9": "si",
+  "texto_cumplido_mast_9": "",
+  "cumplido_mast_10": "si",
+  "texto_cumplido_mast_10": "",
+  "cumplido_mast_11": "si",
+  "texto_cumplido_mast_11": "",
+  "cumplido_mast_12": "si",
+  "texto_cumplido_mast_12": "",
+  "cumplido_mast_13": "si",
+  "texto_cumplido_mast_13": "",
+  "cumplido_mast_14": "si",
+  "texto_cumplido_mast_14": "",
+  "cumplido_mast_15": "si",
+  "texto_cumplido_mast_15": "",
+  "cumplido_mast_16": "si",
+  "texto_cumplido_mast_16": "",
+  "cumplido_mast_17": "si",
+  "texto_cumplido_mast_17": ""
+}

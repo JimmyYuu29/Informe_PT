@@ -574,7 +574,7 @@ def render_operaciones_intragrupo_table(context: dict, fields_def: dict) -> None
 def render_operaciones_vinculadas_detail_table(context: dict, fields_def: dict) -> None:
     """
     Render the detailed operaciones vinculadas table with entity breakdown,
-    matching the template layout.
+    matching the template layout. Includes gasto (expense) input for calculating totals.
     """
     st.subheader("Detalle de Operaciones Vinculadas")
 
@@ -593,14 +593,16 @@ def render_operaciones_vinculadas_detail_table(context: dict, fields_def: dict) 
 
     servicios = state.get_list_items("servicios_vinculados")
 
-    # Table header
-    cols_header = st.columns([0.35, 0.30, 0.35])
+    # Table header - now with 4 columns including gasto
+    cols_header = st.columns([0.25, 0.25, 0.25, 0.25])
     with cols_header[0]:
         st.markdown("**Tipo de operación vinculada**")
     with cols_header[1]:
         st.markdown("**Entidad vinculada**")
     with cols_header[2]:
         st.markdown(f"**Ingreso FY {anyo_actual} (EUR)**")
+    with cols_header[3]:
+        st.markdown(f"**Gasto FY {anyo_actual} (EUR)**")
 
     st.divider()
 
@@ -616,7 +618,7 @@ def render_operaciones_vinculadas_detail_table(context: dict, fields_def: dict) 
             servicio["entidades_vinculadas"] = entidades
 
         for ent_idx, entidad in enumerate(entidades):
-            cols = st.columns([0.35, 0.30, 0.35])
+            cols = st.columns([0.25, 0.25, 0.25, 0.25])
 
             with cols[0]:
                 if ent_idx == 0:
@@ -656,6 +658,23 @@ def render_operaciones_vinculadas_detail_table(context: dict, fields_def: dict) 
                 servicio["entidades_vinculadas"][ent_idx]["ingreso_entidad"] = new_ingreso
                 total_ingreso += new_ingreso
 
+            with cols[3]:
+                widget_key = f"entidad_{serv_idx}_{ent_idx}_gasto"
+                current_gasto = entidad.get("gasto_entidad", 0)
+                try:
+                    current_gasto_float = float(current_gasto) if current_gasto else 0.0
+                except (TypeError, ValueError):
+                    current_gasto_float = 0.0
+                new_gasto = st.number_input(
+                    "Gasto",
+                    value=current_gasto_float,
+                    key=widget_key,
+                    format="%.2f",
+                    label_visibility="collapsed",
+                )
+                servicio["entidades_vinculadas"][ent_idx]["gasto_entidad"] = new_gasto
+                total_gasto += new_gasto
+
         # Add entity button for this service
         if st.button(f"+ Añadir entidad a '{servicio_name}'", key=f"add_entidad_{serv_idx}"):
             if "entidades_vinculadas" not in servicio:
@@ -670,12 +689,15 @@ def render_operaciones_vinculadas_detail_table(context: dict, fields_def: dict) 
         st.divider()
 
     # Show totals
-    cols_total = st.columns([0.65, 0.35])
+    cols_total = st.columns([0.50, 0.25, 0.25])
     with cols_total[0]:
-        st.markdown("**Total ingreso oovv**")
+        st.markdown("**Totales OOVV**")
     with cols_total[1]:
-        formatted_total = f"{total_ingreso:,.2f} €".replace(",", "X").replace(".", ",").replace("X", ".")
-        st.markdown(f"**{formatted_total}**")
+        formatted_ingreso = f"{total_ingreso:,.2f} €".replace(",", "X").replace(".", ",").replace("X", ".")
+        st.markdown(f"**{formatted_ingreso}**")
+    with cols_total[2]:
+        formatted_gasto = f"{total_gasto:,.2f} €".replace(",", "X").replace(".", ",").replace("X", ".")
+        st.markdown(f"**{formatted_gasto}**")
 
 
 def render_metodo_elegido_table(context: dict, fields_def: dict) -> None:
@@ -912,6 +934,7 @@ def render_risk_table(context: dict, fields_def: dict) -> None:
                 label="",
                 options=impacto_options,
                 required=True,
+                default="no",  # Default impacto to "no"
             )
 
         with cols[3]:
@@ -921,6 +944,7 @@ def render_risk_table(context: dict, fields_def: dict) -> None:
                 label="",
                 options=afectacion_options,
                 required=True,
+                default="bajo",  # Default afectacion to "bajo"
             )
 
         with cols[4]:
@@ -938,6 +962,7 @@ def render_risk_table(context: dict, fields_def: dict) -> None:
                 label="",
                 options=afectacion_options,
                 required=True,
+                default="bajo",  # Default afectacion_final to "bajo"
             )
 
 
