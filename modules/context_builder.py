@@ -5,6 +5,7 @@ Context Builder - Build rendering context from input data and derived fields.
 from datetime import date
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Any, Optional
+from docxtpl import RichText
 from .plugin_loader import PluginPack
 
 
@@ -75,6 +76,12 @@ def format_date_short_spanish(d: date) -> str:
     return f"{d.day} {month_abbr} {d.year}"
 
 
+def format_date_dashed_spanish(d: date) -> str:
+    """Format a date in dashed Spanish format: '31-Ene-2025'."""
+    month_abbr = SPANISH_MONTH_ABBR.get(d.month, str(d.month))
+    return f"{d.day:02d}-{month_abbr}-{d.year}"
+
+
 def format_currency_eur(value: Any) -> str:
     """Format a currency value in EUR format: '1.500.000 €'."""
     if value is None:
@@ -132,11 +139,42 @@ def sanitize_template_value(value: Any) -> Any:
         return value.strip()
     if isinstance(value, (int, float, Decimal)):
         return value
+    if isinstance(value, RichText):
+        # RichText objects should be passed through unchanged
+        return value
     if isinstance(value, list):
         return [sanitize_template_value(v) for v in value]
     if isinstance(value, dict):
         return {k: sanitize_template_value(v) for k, v in value.items()}
     return value
+
+
+def format_bullet_list(items: list, bullet: str = "•") -> RichText:
+    """
+    Format a list of items as a bulleted RichText for Word documents.
+
+    Each item will be on its own line with a bullet prefix.
+    Uses paragraph breaks (\\a) to create proper line separation.
+
+    Args:
+        items: List of text items.
+        bullet: Bullet character to use (default: •).
+
+    Returns:
+        RichText object with formatted bullet list.
+    """
+    if not items:
+        return RichText("")
+
+    rt = RichText()
+    for i, item in enumerate(items):
+        # Add bullet and item text
+        rt.add(f"{bullet}\t{item}")
+        # Add paragraph break after each item except the last
+        if i < len(items) - 1:
+            rt.add("\a")  # Paragraph break in Word
+
+    return rt
 
 
 def calculate_derived_fields(data: dict, derived_defs: dict) -> dict:
@@ -387,9 +425,34 @@ class ContextBuilder:
         if "servicios_vinculados" not in context:
             context["servicios_vinculados"] = []
 
-        # Ensure servicios_oovv has a default empty list if not present
-        if "servicios_oovv" not in context:
-            context["servicios_oovv"] = []
+        # Build servicios_oovv from servicios_vinculados with analisis enabled
+        # This allows users to select which servicios get analyzed
+        servicios_oovv = []
+        for servicio in context.get("servicios_vinculados", []):
+            analisis = servicio.get("analisis", {})
+            if analisis.get("enabled", False):
+                # Add the analisis data as a servicios_oovv entry
+                servicios_oovv.append({
+                    "enabled": True,
+                    "titulo_servicio_oovv": analisis.get("titulo_servicio_oovv", servicio.get("servicio_vinculado", "")),
+                    "texto_intro_servicio": analisis.get("texto_intro_servicio", ""),
+                    "descripcion_tabla": analisis.get("descripcion_tabla", ""),
+                    "metodo": analisis.get("metodo", ""),
+                    "min": analisis.get("min", 0),
+                    "lq": analisis.get("lq", 0),
+                    "med": analisis.get("med", 0),
+                    "uq": analisis.get("uq", 0),
+                    "max": analisis.get("max", 0),
+                    "texto_conclusion_servicio": analisis.get("texto_conclusion_servicio", ""),
+                })
+        context["servicios_oovv"] = servicios_oovv
+
+        # Format documentacion_facilitada as a RichText bullet list
+        # This creates proper line breaks in Word without extra blank lines
+        if "documentacion_facilitada" in context:
+            doc_list = context["documentacion_facilitada"]
+            if isinstance(doc_list, list):
+                context["documentacion_facilitada_richtext"] = format_bullet_list(doc_list)
 
         # Provide default servicio object for templates that reference it outside loops
         # This prevents undefined variable errors when servicios_oovv is empty
@@ -416,17 +479,19 @@ class ContextBuilder:
 
     def _format_fields(self, context: dict) -> dict:
         """Apply formatting to fields."""
-        # Format date - using short Spanish format: "31 Dic 2025"
+        # Format date - using dashed Spanish format: "31-Ene-2025"
         if "fecha_fin_fiscal" in context:
             fecha = context["fecha_fin_fiscal"]
             if isinstance(fecha, date):
+                # Primary format: dashed Spanish (31-Ene-2025)
+                context["fecha_fin_fiscal"] = format_date_dashed_spanish(fecha)
+                # Also provide alternative format for backward compatibility
                 context["fecha_fin_fiscal_formatted"] = format_date_short_spanish(fecha)
-                # Also store the original date for templates that need it
-                context["fecha_fin_fiscal"] = fecha
             elif isinstance(fecha, str):
                 try:
                     parts = fecha.split("-")
                     d = date(int(parts[0]), int(parts[1]), int(parts[2]))
+                    context["fecha_fin_fiscal"] = format_date_dashed_spanish(d)
                     context["fecha_fin_fiscal_formatted"] = format_date_short_spanish(d)
                 except Exception:
                     context["fecha_fin_fiscal_formatted"] = fecha

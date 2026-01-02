@@ -139,11 +139,13 @@ def clear_form_data() -> None:
     # - field_: standard field widgets
     # - entidad_: entity detail table widgets
     # - servicio_oovv_: service OOVV table widgets
+    # - analizar_servicio_: service analysis checkbox widgets
     # - rm_/add_/remove_: list action buttons
     widget_prefixes = (
         "field_",
         "entidad_",
         "servicio_oovv_",
+        "analizar_servicio_",
         "rm_",
         "add_",
         "remove_",
