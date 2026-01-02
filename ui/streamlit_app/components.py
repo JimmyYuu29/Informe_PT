@@ -19,9 +19,11 @@ def render_text_input(
     """Render a text input field with stable state."""
     widget_key = state.get_stable_key(field_name)
 
-    # Check if widget key already exists in session_state (from previous render)
-    # If so, use that value; otherwise use the value from form_data
-    if widget_key in st.session_state:
+    # After JSON import, prioritize form_data over stale widget state
+    # Otherwise check if widget key already exists in session_state
+    if state.was_data_just_imported():
+        default_value = state.get_field_value(field_name, "")
+    elif widget_key in st.session_state:
         default_value = st.session_state[widget_key]
     else:
         default_value = state.get_field_value(field_name, "")
@@ -129,8 +131,11 @@ def render_enum_input(
     """Render an enum/select input field with stable state."""
     widget_key = state.get_stable_key(field_name)
 
-    # Check if widget key already exists in session_state
-    if widget_key in st.session_state:
+    # After JSON import, prioritize form_data over stale widget state
+    # Otherwise check if widget key already exists in session_state
+    if state.was_data_just_imported():
+        current_value = state.get_field_value(field_name)
+    elif widget_key in st.session_state:
         current_value = st.session_state[widget_key]
     else:
         current_value = state.get_field_value(field_name)
@@ -311,8 +316,11 @@ def render_simple_list(
 
             with cols[0]:
                 widget_key = state.get_stable_key(field_name, idx, "value")
-                # Check session state first for the widget value
-                if widget_key in st.session_state:
+                # After JSON import, prioritize form_data over stale widget state
+                # Otherwise check session state first for the widget value
+                if state.was_data_just_imported():
+                    current_value = item.get("value", "")
+                elif widget_key in st.session_state:
                     current_value = st.session_state[widget_key]
                 else:
                     current_value = item.get("value", "")

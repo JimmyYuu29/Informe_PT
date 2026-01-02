@@ -179,37 +179,40 @@ def render_section(
     section_condition = section.get("condition")
     field_names = section.get("fields", [])
 
-    # Check section condition with fresh context to handle dynamic changes
+    # Always get fresh context to handle dynamic changes from previous sections
+    # This ensures conditions are evaluated with the latest field values
+    fresh_context = state.get_all_form_data()
+
+    # Check section condition
     if section_condition:
-        # Get fresh context to ensure we have latest field values
-        fresh_context = state.get_all_form_data()
         if not evaluate_simple_condition(section_condition, fresh_context):
             return
 
     with st.expander(section_label, expanded=True):
         # Use specialized renderers for specific sections
+        # Pass fresh_context to ensure field conditions work correctly
         if section_id == "sec_financials":
-            render_financial_data_table(context, fields_def)
+            render_financial_data_table(fresh_context, fields_def)
         elif section_id == "sec_operations":
-            render_operaciones_intragrupo_table(context, fields_def)
+            render_operaciones_intragrupo_table(fresh_context, fields_def)
             st.divider()
-            render_operaciones_vinculadas_detail_table(context, fields_def)
+            render_operaciones_vinculadas_detail_table(fresh_context, fields_def)
         elif section_id == "sec_services":
-            render_metodo_elegido_table(context, fields_def)
+            render_metodo_elegido_table(fresh_context, fields_def)
         elif section_id == "sec_compliance_local":
-            render_cumplimiento_resumen_table(context, fields_def)
+            render_cumplimiento_resumen_table(fresh_context, fields_def)
         elif section_id == "sec_risks" or "risk_elements" in field_names:
-            render_risk_table(context, fields_def)
+            render_risk_table(fresh_context, fields_def)
         elif section_id == "sec_local_detail" or "local_file_compliance" in field_names:
-            render_local_file_compliance_detail(context, fields_def)
+            render_local_file_compliance_detail(fresh_context, fields_def)
         elif section_id == "sec_master_detail" or "master_file_compliance" in field_names:
-            render_master_file_compliance_detail(context, fields_def)
+            render_master_file_compliance_detail(fresh_context, fields_def)
         else:
-            # Default rendering
+            # Default rendering - use fresh_context for field conditions
             for field_name in field_names:
                 field_def = fields_def.get(field_name)
                 if field_def:
-                    render_field(field_name, field_def, context)
+                    render_field(field_name, field_def, fresh_context)
 
 
 def render_form(plugin: PluginPack) -> dict:

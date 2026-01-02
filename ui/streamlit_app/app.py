@@ -155,6 +155,10 @@ def main():
     # Render dynamic form
     form_data = form_renderer.render_form(plugin)
 
+    # Clear import flag after form rendering is complete
+    # This ensures the flag only affects the first render after import
+    state.clear_import_flag()
+
     st.divider()
 
     # Generate button
