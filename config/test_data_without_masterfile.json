@@ -1,0 +1,149 @@
+{
+  "_metadata": {
+    "name": "test_data_without_masterfile",
+    "description": "Complete test data WITHOUT Master File access for document generation testing",
+    "generated": "2026-01-02"
+  },
+
+  "fecha_fin_fiscal": "2025-12-31",
+  "entidad_cliente": "Restaurantes del Sur S.L.",
+  "master_file": 0,
+  "descripcion_actividad": "La Compañía se dedica a la operación de franquicias de restaurantes de comida rápida en el territorio español. Gestiona un total de 45 establecimientos distribuidos en las comunidades autónomas del sur de España, empleando a más de 500 trabajadores.",
+
+  "texto_anexo3": "Durante el ejercicio 2025, la Compañía ha mantenido operaciones vinculadas con entidades del grupo relacionadas principalmente con servicios de gestión y royalties por uso de marca.",
+
+  "contacto1": "Pedro Martínez Sánchez",
+  "cargo_contacto1": "Director - Área Fiscal",
+  "correo_contacto1": "pedro.martinez@forvismazars.com",
+  "contacto2": "Laura González Pérez",
+  "cargo_contacto2": "Senior Manager - Precios de Transferencia",
+  "correo_contacto2": "laura.gonzalez@forvismazars.com",
+  "contacto3": "David López Ruiz",
+  "cargo_contacto3": "Manager - Precios de Transferencia",
+  "correo_contacto3": "david.lopez@forvismazars.com",
+
+  "cifra_1": 12500000,
+  "ebit_1": 1875000,
+  "resultado_fin_1": -62500,
+  "ebt_1": 1812500,
+  "resultado_net_1": 1359375,
+
+  "cifra_0": 11800000,
+  "ebit_0": 1700000,
+  "resultado_fin_0": -55000,
+  "ebt_0": 1645000,
+  "resultado_net_0": 1233750,
+
+  "documentacion_facilitada": [
+    "Documentación Local File del ejercicio 2025",
+    "Estados Financieros auditados 2025",
+    "Balanza de sumas y saldos"
+  ],
+
+  "servicios_vinculados": [
+    {
+      "servicio_vinculado": "Servicios de gestión administrativa",
+      "entidades_vinculadas": [
+        {
+          "entidad_vinculada": "Grupo Restauración Holdings S.L.",
+          "ingreso_entidad": 0,
+          "gasto_entidad": 180000
+        }
+      ]
+    },
+    {
+      "servicio_vinculado": "Compraventa de materias primas",
+      "entidades_vinculadas": [
+        {
+          "entidad_vinculada": "Distribuidora Central S.A.",
+          "ingreso_entidad": 0,
+          "gasto_entidad": 2500000
+        }
+      ]
+    }
+  ],
+
+  "servicios_oovv": [],
+
+  "cumplimiento_resumen_local_1": "si",
+  "cumplimiento_resumen_local_2": "si",
+  "cumplimiento_resumen_local_3": "no",
+
+  "impacto_1": "no",
+  "afectacion_pre_1": "bajo",
+  "texto_mitigacion_1": "",
+  "afectacion_final_1": "bajo",
+  "impacto_2": "no",
+  "afectacion_pre_2": "bajo",
+  "texto_mitigacion_2": "",
+  "afectacion_final_2": "bajo",
+  "impacto_3": "no",
+  "afectacion_pre_3": "bajo",
+  "texto_mitigacion_3": "",
+  "afectacion_final_3": "bajo",
+  "impacto_4": "posible",
+  "afectacion_pre_4": "medio",
+  "texto_mitigacion_4": "La Compañía dispone de contratos que detallan los servicios recibidos",
+  "afectacion_final_4": "bajo",
+  "impacto_5": "no",
+  "afectacion_pre_5": "bajo",
+  "texto_mitigacion_5": "",
+  "afectacion_final_5": "bajo",
+  "impacto_6": "no",
+  "afectacion_pre_6": "bajo",
+  "texto_mitigacion_6": "",
+  "afectacion_final_6": "bajo",
+  "impacto_7": "no",
+  "afectacion_pre_7": "bajo",
+  "texto_mitigacion_7": "",
+  "afectacion_final_7": "bajo",
+  "impacto_8": "no",
+  "afectacion_pre_8": "bajo",
+  "texto_mitigacion_8": "",
+  "afectacion_final_8": "bajo",
+  "impacto_9": "no",
+  "afectacion_pre_9": "bajo",
+  "texto_mitigacion_9": "",
+  "afectacion_final_9": "bajo",
+  "impacto_10": "no",
+  "afectacion_pre_10": "bajo",
+  "texto_mitigacion_10": "",
+  "afectacion_final_10": "bajo",
+  "impacto_11": "no",
+  "afectacion_pre_11": "bajo",
+  "texto_mitigacion_11": "",
+  "afectacion_final_11": "bajo",
+  "impacto_12": "no",
+  "afectacion_pre_12": "bajo",
+  "texto_mitigacion_12": "",
+  "afectacion_final_12": "bajo",
+
+  "cumplido_local_1": "si",
+  "texto_cumplido_local_1": "",
+  "cumplido_local_2": "si",
+  "texto_cumplido_local_2": "",
+  "cumplido_local_3": "si",
+  "texto_cumplido_local_3": "",
+  "cumplido_local_4": "si",
+  "texto_cumplido_local_4": "",
+  "cumplido_local_5": "si",
+  "texto_cumplido_local_5": "",
+  "cumplido_local_6": "si",
+  "texto_cumplido_local_6": "",
+  "cumplido_local_7": "parcial",
+  "texto_cumplido_local_7": "Pendiente de completar algunos análisis funcionales",
+  "cumplido_local_8": "si",
+  "texto_cumplido_local_8": "",
+  "cumplido_local_9": "si",
+  "texto_cumplido_local_9": "",
+  "cumplido_local_10": "si",
+  "texto_cumplido_local_10": "",
+  "cumplido_local_11": "si",
+  "texto_cumplido_local_11": "",
+  "cumplido_local_12": "si",
+  "texto_cumplido_local_12": "",
+  "cumplido_local_13": "si",
+  "texto_cumplido_local_13": "",
+  "cumplido_local_14": "si",
+  "texto_cumplido_local_14": ""
+}

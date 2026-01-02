@@ -387,6 +387,27 @@ class ContextBuilder:
         if "servicios_vinculados" not in context:
             context["servicios_vinculados"] = []
 
+        # Ensure servicios_oovv has a default empty list if not present
+        if "servicios_oovv" not in context:
+            context["servicios_oovv"] = []
+
+        # Provide default servicio object for templates that reference it outside loops
+        # This prevents undefined variable errors when servicios_oovv is empty
+        if not context.get("servicio"):
+            context["servicio"] = {
+                "metodo": "",
+                "min": "",
+                "lq": "",
+                "med": "",
+                "uq": "",
+                "max": "",
+                "enabled": False,
+                "titulo_servicio_oovv": "",
+                "texto_intro_servicio": "",
+                "descripcion_tabla": "",
+                "texto_conclusion_servicio": "",
+            }
+
         # Sanitize all values to ensure proper template insertion
         # This helps preserve table layouts by removing unwanted whitespace
         context = sanitize_template_value(context)

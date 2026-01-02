@@ -421,6 +421,7 @@ fields:
     required: true
     label: "Impacto - Restructuraciones empresariales"
     values: ["si", "no", "posible"]
+    default: "no"
     source_block_ids: [ANEXO1_TABLE_07]
 
   afectacion_pre_1:
@@ -448,6 +449,7 @@ fields:
     required: true
     label: "Impacto - Valoración intangibles"
     values: ["si", "no", "posible"]
+    default: "no"
     source_block_ids: [ANEXO1_TABLE_07]
 
   afectacion_pre_2:
@@ -471,6 +473,7 @@ fields:
     type: enum
     required: true
     values: ["si", "no", "posible"]
+    default: "no"
     source_block_ids: [ANEXO1_TABLE_07]
 
   afectacion_pre_3:
@@ -494,6 +497,7 @@ fields:
     type: enum
     required: true
     values: ["si", "no", "posible"]
+    default: "no"
     source_block_ids: [ANEXO1_TABLE_07]
 
   afectacion_pre_4:
@@ -517,6 +521,7 @@ fields:
     type: enum
     required: true
     values: ["si", "no", "posible"]
+    default: "no"
     source_block_ids: [ANEXO1_TABLE_07]
 
   afectacion_pre_5:
@@ -540,6 +545,7 @@ fields:
     type: enum
     required: true
     values: ["si", "no", "posible"]
+    default: "no"
     source_block_ids: [ANEXO1_TABLE_07]
 
   afectacion_pre_6:
@@ -563,6 +569,7 @@ fields:
     type: enum
     required: true
     values: ["si", "no", "posible"]
+    default: "no"
     source_block_ids: [ANEXO1_TABLE_07]
 
   afectacion_pre_7:
@@ -586,6 +593,7 @@ fields:
     type: enum
     required: true
     values: ["si", "no", "posible"]
+    default: "no"
     source_block_ids: [ANEXO1_TABLE_07]
 
   afectacion_pre_8:
@@ -609,6 +617,7 @@ fields:
     type: enum
     required: true
     values: ["si", "no", "posible"]
+    default: "no"
     source_block_ids: [ANEXO1_TABLE_07]
 
   afectacion_pre_9:
@@ -632,6 +641,7 @@ fields:
     type: enum
     required: true
     values: ["si", "no", "posible"]
+    default: "no"
     source_block_ids: [ANEXO1_TABLE_07]
 
   afectacion_pre_10:
@@ -655,6 +665,7 @@ fields:
     type: enum
     required: true
     values: ["si", "no", "posible"]
+    default: "no"
     source_block_ids: [ANEXO1_TABLE_07]
 
   afectacion_pre_11:
@@ -678,6 +689,7 @@ fields:
     type: enum
     required: true
     values: ["si", "no", "posible"]
+    default: "no"
     source_block_ids: [ANEXO1_TABLE_07]
 
   afectacion_pre_12:
