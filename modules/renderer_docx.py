@@ -12,6 +12,8 @@ from docx import Document
 from docx.shared import RGBColor, Pt
 from docx.oxml.ns import nsdecls
 from docx.oxml import parse_xml
+from docx.oxml import OxmlElement
+from docx.enum.text import WD_BREAK
 
 from .plugin_loader import PluginPack
 from .context_builder import ContextBuilder
@@ -82,6 +84,12 @@ class DocxRenderer:
         if apply_cell_colors:
             self._apply_cell_colors(doc.docx, data)
 
+        # Handle [PAGE_BREAK] markers
+        self._process_page_breaks(doc.docx)
+
+        # Mark document to update fields (including TOC) when opened
+        self._set_update_fields_on_open(doc.docx)
+
         # Determine output path
         if output_path is None:
             output_path = self._generate_output_path(data)
@@ -117,32 +125,59 @@ class DocxRenderer:
         enum_colors = self.formatting.get("enum_colors", {})
 
         for table in doc.tables:
-            for row in table.rows:
-                for cell in row.cells:
+            for row_idx, row in enumerate(table.rows):
+                for cell_idx, cell in enumerate(row.cells):
                     text = cell.text.strip().lower()
-                    self._apply_color_if_match(cell, text, enum_colors)
+                    # Get column context from header row if available
+                    column_context = self._get_column_context(table, cell_idx)
+                    self._apply_color_if_match(cell, text, enum_colors, column_context)
 
-    def _apply_color_if_match(self, cell, text: str, enum_colors: dict) -> None:
+    def _get_column_context(self, table, cell_idx: int) -> str:
+        """Get context from column header to determine color rules."""
+        try:
+            if len(table.rows) > 0 and cell_idx < len(table.rows[0].cells):
+                header_text = table.rows[0].cells[cell_idx].text.strip().lower()
+                # Check if this column is for impacto (should not be colored)
+                if "impacto" in header_text:
+                    return "impacto"
+                # Check for compliance columns
+                if "cumplimiento" in header_text or "cumplido" in header_text:
+                    return "cumplido"
+                # Check for afectacion columns
+                if "afectación" in header_text or "afectacion" in header_text:
+                    return "afectacion"
+        except Exception:
+            pass
+        return ""
+
+    def _apply_color_if_match(self, cell, text: str, enum_colors: dict, column_context: str = "") -> None:
         """Apply color to a cell if the text matches an enum value."""
-        # Check compliance_color
-        compliance_map = enum_colors.get("compliance_color", {}).get("values", {})
-        if text in compliance_map:
-            color_def = compliance_map[text]
-            self._set_cell_background(cell, color_def.get("background", "#FFFFFF"))
+        # Skip coloring for impacto columns
+        if column_context == "impacto":
             return
 
-        # Check cumplido_color
-        cumplido_map = enum_colors.get("cumplido_color", {}).get("values", {})
-        if text in cumplido_map:
-            color_def = cumplido_map[text]
-            self._set_cell_background(cell, color_def.get("background", "#FFFFFF"))
-            return
-
-        # Check afectacion_color
+        # Check afectacion_color first (most specific - bajo/medio/alto)
         afectacion_map = enum_colors.get("afectacion_color", {}).get("values", {})
         if text in afectacion_map:
             color_def = afectacion_map[text]
-            self._set_cell_background(cell, color_def.get("background", "#FFFFFF"))
+            if "background" in color_def:
+                self._set_cell_background(cell, color_def.get("background"))
+            return
+
+        # Check cumplido_color (si/no/parcial)
+        cumplido_map = enum_colors.get("cumplido_color", {}).get("values", {})
+        if text in cumplido_map:
+            color_def = cumplido_map[text]
+            if "background" in color_def:
+                self._set_cell_background(cell, color_def.get("background"))
+            return
+
+        # Check compliance_color (si/no for summary tables)
+        compliance_map = enum_colors.get("compliance_color", {}).get("values", {})
+        if text in compliance_map:
+            color_def = compliance_map[text]
+            if "background" in color_def:
+                self._set_cell_background(cell, color_def.get("background"))
             return
 
     def _set_cell_background(self, cell, hex_color: str) -> None:
@@ -160,6 +195,76 @@ class DocxRenderer:
             cell._tc.get_or_add_tcPr().append(shading_elm)
         except Exception:
             pass  # Silently fail if color cannot be applied
+
+    def _process_page_breaks(self, doc: Document) -> None:
+        """
+        Process [PAGE_BREAK] markers in the document.
+        Replace them with actual page breaks and remove the marker text.
+        """
+        PAGE_BREAK_MARKER = "[PAGE_BREAK]"
+
+        for paragraph in doc.paragraphs:
+            if PAGE_BREAK_MARKER in paragraph.text:
+                # Find the run containing the marker
+                for run in paragraph.runs:
+                    if PAGE_BREAK_MARKER in run.text:
+                        # Replace marker with page break
+                        parts = run.text.split(PAGE_BREAK_MARKER)
+                        run.text = parts[0]
+
+                        # Add page break
+                        run.add_break(WD_BREAK.PAGE)
+
+                        # Add remaining text if any
+                        if len(parts) > 1 and parts[1].strip():
+                            run.add_text(parts[1])
+                        break
+
+        # Also check in table cells
+        for table in doc.tables:
+            for row in table.rows:
+                for cell in row.cells:
+                    for paragraph in cell.paragraphs:
+                        if PAGE_BREAK_MARKER in paragraph.text:
+                            for run in paragraph.runs:
+                                if PAGE_BREAK_MARKER in run.text:
+                                    parts = run.text.split(PAGE_BREAK_MARKER)
+                                    run.text = parts[0]
+                                    run.add_break(WD_BREAK.PAGE)
+                                    if len(parts) > 1 and parts[1].strip():
+                                        run.add_text(parts[1])
+                                    break
+
+    def _set_update_fields_on_open(self, doc: Document) -> None:
+        """
+        Set the document to update all fields (including TOC) when opened in Word.
+
+        This adds the w:updateFields setting to the document properties,
+        which prompts Word to update the Table of Contents and other fields
+        when the document is first opened.
+        """
+        try:
+            # Access the document's settings element
+            settings = doc.settings.element
+
+            # Create or find the updateFields element
+            # Namespace for Word settings
+            w_ns = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+
+            # Check if updateFields element exists
+            update_fields = settings.find(f"{w_ns}updateFields")
+
+            if update_fields is None:
+                # Create the updateFields element
+                update_fields = OxmlElement("w:updateFields")
+                update_fields.set(f"{w_ns}val", "true")
+                settings.append(update_fields)
+            else:
+                # Update existing element
+                update_fields.set(f"{w_ns}val", "true")
+        except Exception:
+            # Silently fail if we can't set this property
+            pass
 
 
 def render_document(

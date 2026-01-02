@@ -173,11 +173,12 @@ def export_form_data() -> str:
     """
     Export current form data to JSON string.
 
+    Exports both scalar form_data and list_items separately to ensure
+    complete data restoration on import.
+
     Returns:
         JSON string of form data, or empty string if no data.
     """
-    all_data = state.get_all_form_data()
-
     # Convert date objects to ISO format strings
     def serialize_value(v):
         if isinstance(v, date):
@@ -188,12 +189,25 @@ def export_form_data() -> str:
             return {k: serialize_value(val) for k, val in v.items()}
         return v
 
-    serialized = {k: serialize_value(v) for k, v in all_data.items()}
+    # Export scalar fields
+    serialized = {}
+    for k, v in st.session_state.form_data.items():
+        serialized[k] = serialize_value(v)
+
+    # Export list items with full structure (including nested lists)
+    serialized["_list_items"] = {}
+    for field_name, items in st.session_state.list_items.items():
+        serialized["_list_items"][field_name] = []
+        for item in items:
+            # Remove internal _id field but keep all other data
+            cleaned = {k: serialize_value(v) for k, v in item.items() if not k.startswith("_")}
+            serialized["_list_items"][field_name].append(cleaned)
 
     # Add metadata
     serialized["_metadata"] = {
         "exported_at": date.today().isoformat(),
         "plugin_id": st.session_state.get("plugin_id", "unknown"),
+        "version": "2.0",  # Version 2.0 with improved list handling
     }
 
     return json.dumps(serialized, ensure_ascii=False, indent=2)
@@ -204,28 +218,50 @@ def load_json_data(json_data: dict) -> None:
     Load JSON data into the form state.
 
     Handles both simple fields and complex list structures.
+    Supports both v1.0 format (lists at top level) and v2.0 format (_list_items).
     """
-    # Remove metadata if present
-    if "_metadata" in json_data:
-        del json_data["_metadata"]
+    # Clear existing form data
+    state.clear_form_data()
 
-    # Process each field
-    for key, value in json_data.items():
-        if isinstance(value, list):
-            # Handle list fields
-            if key in st.session_state.list_items:
-                st.session_state.list_items[key] = []
-            else:
-                st.session_state.list_items[key] = []
+    # Extract metadata and list items
+    metadata = json_data.pop("_metadata", {})
+    list_items_data = json_data.pop("_list_items", None)
 
-            for item in value:
+    # Check export version
+    is_v2 = metadata.get("version") == "2.0" or list_items_data is not None
+
+    if is_v2 and list_items_data:
+        # V2.0 format: list items are stored separately in _list_items
+        # First, process scalar fields
+        for key, value in json_data.items():
+            if not key.startswith("_"):
+                state.set_field_value(key, value)
+
+        # Then, process list items from _list_items
+        for field_name, items in list_items_data.items():
+            st.session_state.list_items[field_name] = []
+            for item in items:
                 if isinstance(item, dict):
-                    state.add_list_item(key, item)
+                    state.add_list_item(field_name, item)
                 else:
-                    state.add_list_item(key, {"value": item})
-        else:
-            # Handle scalar fields
-            state.set_field_value(key, value)
+                    state.add_list_item(field_name, {"value": item})
+    else:
+        # V1.0 format: lists are mixed with scalar fields
+        for key, value in json_data.items():
+            if key.startswith("_"):
+                continue
+
+            if isinstance(value, list):
+                # Handle list fields
+                st.session_state.list_items[key] = []
+                for item in value:
+                    if isinstance(item, dict):
+                        state.add_list_item(key, item)
+                    else:
+                        state.add_list_item(key, {"value": item})
+            else:
+                # Handle scalar fields
+                state.set_field_value(key, value)
 
 
 def generate_document(plugin_id: str, form_data: dict) -> None:

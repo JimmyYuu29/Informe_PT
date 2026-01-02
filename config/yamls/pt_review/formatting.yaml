@@ -7,23 +7,23 @@
 # ============================================================================
 
 date_formats:
-  english_short:
-    description: "English short date format (primary for fecha_fin_fiscal)"
+  spanish_short:
+    description: "Spanish short date format (primary for fecha_fin_fiscal)"
     pattern: "{day} {month_abbr} {year}"
-    example: "31 Dec 2025"
+    example: "31 Dic 2025"
     months:
-      1: "Jan"
+      1: "Ene"
       2: "Feb"
       3: "Mar"
-      4: "Apr"
+      4: "Abr"
       5: "May"
       6: "Jun"
       7: "Jul"
-      8: "Aug"
+      8: "Ago"
       9: "Sep"
       10: "Oct"
       11: "Nov"
-      12: "Dec"
+      12: "Dic"
     applies_to:
       - fecha_fin_fiscal
 
@@ -152,8 +152,8 @@ enum_colors:
         text: "#FFFFFF"
         label: "Sí"
       no:
-        background: "#FFFF00"  # Yellow
-        text: "#000000"
+        background: "#FF0000"  # Red (changed from Yellow per user requirement)
+        text: "#FFFFFF"
         label: "No"
     source_ref: note_10
 

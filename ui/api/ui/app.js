@@ -76,6 +76,11 @@ const AppState = {
                         cleaned[k] = v;
                     }
                 }
+                // Flatten simple text lists: if item only has 'value' key, extract the value
+                const keys = Object.keys(cleaned);
+                if (keys.length === 1 && keys[0] === 'value') {
+                    return cleaned.value;
+                }
                 return cleaned;
             });
         }

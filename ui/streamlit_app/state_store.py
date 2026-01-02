@@ -106,6 +106,7 @@ def get_all_form_data() -> dict:
     Get all form data as a dictionary for generation.
 
     Combines scalar fields and list items.
+    Flattens simple text lists (items with only 'value' key) to plain strings.
     """
     data = dict(st.session_state.form_data)
 
@@ -115,7 +116,11 @@ def get_all_form_data() -> dict:
         cleaned_items = []
         for item in items:
             cleaned = {k: v for k, v in item.items() if not k.startswith("_")}
-            cleaned_items.append(cleaned)
+            # Flatten simple text lists: if item only has 'value' key, extract the value
+            if list(cleaned.keys()) == ["value"]:
+                cleaned_items.append(cleaned["value"])
+            else:
+                cleaned_items.append(cleaned)
         data[field_name] = cleaned_items
 
     return data
