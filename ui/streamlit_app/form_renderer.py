@@ -708,138 +708,188 @@ def render_operaciones_vinculadas_detail_table(context: dict, fields_def: dict) 
 def render_metodo_elegido_table(context: dict, fields_def: dict) -> None:
     """
     Render the método elegido (benchmark) table matching the template layout.
+    Now linked to servicios_vinculados - each servicio can be marked for analysis.
     """
     st.subheader("Análisis de Servicios OOVV - Método Elegido")
 
-    servicios_oovv = state.get_list_items("servicios_oovv")
+    servicios_vinculados = state.get_list_items("servicios_vinculados")
 
-    # Table header
-    cols_header = st.columns([0.25, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125])
-    headers = ["Método Elegido", "Min", "LQ", "Med", "UQ", "Max", ""]
-    for col, header in zip(cols_header, headers):
-        with col:
-            st.markdown(f"**{header}**")
+    if not servicios_vinculados:
+        st.info("Primero añada operaciones vinculadas en la sección anterior.")
+        return
 
+    st.markdown("Seleccione los servicios vinculados que desea analizar:")
     st.divider()
 
-    for idx, servicio in enumerate(servicios_oovv):
-        cols = st.columns([0.25, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125])
+    # Track which servicios have analysis enabled
+    for serv_idx, servicio in enumerate(servicios_vinculados):
+        servicio_name = servicio.get("servicio_vinculado", f"Servicio {serv_idx + 1}")
 
-        # Método
-        with cols[0]:
-            widget_key = f"servicio_oovv_{idx}_metodo"
-            current_value = servicio.get("metodo", "")
-            new_value = st.text_input(
-                "Método",
-                value=current_value,
-                key=widget_key,
-                label_visibility="collapsed",
-            )
-            servicio["metodo"] = new_value
+        if not servicio_name.strip():
+            servicio_name = f"Servicio {serv_idx + 1}"
 
-        # Min
-        with cols[1]:
-            widget_key = f"servicio_oovv_{idx}_min"
-            try:
-                current_val = float(servicio.get("min", 0))
-            except (TypeError, ValueError):
-                current_val = 0.0
-            new_val = st.number_input(
-                "Min %",
-                value=current_val,
-                key=widget_key,
-                format="%.2f",
-                label_visibility="collapsed",
-            )
-            servicio["min"] = new_val
+        # Initialize analisis data if not present
+        if "analisis" not in servicio:
+            servicio["analisis"] = {
+                "enabled": False,
+                "titulo_servicio_oovv": servicio_name,
+                "texto_intro_servicio": "",
+                "descripcion_tabla": "",
+                "metodo": "",
+                "min": 0,
+                "lq": 0,
+                "med": 0,
+                "uq": 0,
+                "max": 0,
+                "texto_conclusion_servicio": "",
+            }
 
-        # LQ
-        with cols[2]:
-            widget_key = f"servicio_oovv_{idx}_lq"
-            try:
-                current_val = float(servicio.get("lq", 0))
-            except (TypeError, ValueError):
-                current_val = 0.0
-            new_val = st.number_input(
-                "LQ %",
-                value=current_val,
-                key=widget_key,
-                format="%.2f",
-                label_visibility="collapsed",
-            )
-            servicio["lq"] = new_val
+        analisis = servicio["analisis"]
 
-        # Med
-        with cols[3]:
-            widget_key = f"servicio_oovv_{idx}_med"
-            try:
-                current_val = float(servicio.get("med", 0))
-            except (TypeError, ValueError):
-                current_val = 0.0
-            new_val = st.number_input(
-                "Med %",
-                value=current_val,
-                key=widget_key,
-                format="%.2f",
-                label_visibility="collapsed",
-            )
-            servicio["med"] = new_val
+        # Checkbox to enable analysis for this servicio
+        widget_key = f"analizar_servicio_{serv_idx}"
+        analizar = st.checkbox(
+            f"Analizar: **{servicio_name}**",
+            value=analisis.get("enabled", False),
+            key=widget_key,
+        )
+        analisis["enabled"] = analizar
 
-        # UQ
-        with cols[4]:
-            widget_key = f"servicio_oovv_{idx}_uq"
-            try:
-                current_val = float(servicio.get("uq", 0))
-            except (TypeError, ValueError):
-                current_val = 0.0
-            new_val = st.number_input(
-                "UQ %",
-                value=current_val,
-                key=widget_key,
-                format="%.2f",
-                label_visibility="collapsed",
-            )
-            servicio["uq"] = new_val
+        # If analysis is enabled, show the analysis fields
+        if analizar:
+            with st.container():
+                st.markdown(f"##### Análisis de {servicio_name}")
 
-        # Max
-        with cols[5]:
-            widget_key = f"servicio_oovv_{idx}_max"
-            try:
-                current_val = float(servicio.get("max", 0))
-            except (TypeError, ValueError):
-                current_val = 0.0
-            new_val = st.number_input(
-                "Max %",
-                value=current_val,
-                key=widget_key,
-                format="%.2f",
-                label_visibility="collapsed",
-            )
-            servicio["max"] = new_val
+                # Título del servicio
+                widget_key = f"servicio_oovv_{serv_idx}_titulo"
+                analisis["titulo_servicio_oovv"] = st.text_input(
+                    "Título del servicio",
+                    value=analisis.get("titulo_servicio_oovv", servicio_name),
+                    key=widget_key,
+                )
 
-        # Remove button
-        with cols[6]:
-            if len(servicios_oovv) > 0:
-                if st.button("X", key=f"remove_servicio_oovv_{idx}"):
-                    state.remove_list_item("servicios_oovv", idx)
-                    st.rerun()
+                # Texto introductorio
+                widget_key = f"servicio_oovv_{serv_idx}_intro"
+                analisis["texto_intro_servicio"] = st.text_area(
+                    "Texto introductorio",
+                    value=analisis.get("texto_intro_servicio", ""),
+                    key=widget_key,
+                    height=100,
+                )
 
-    # Add button
-    if st.button("+ Añadir servicio OOVV", key="add_servicio_oovv"):
-        state.add_list_item("servicios_oovv", {
-            "enabled": True,
-            "titulo_servicio_oovv": "",
-            "texto_intro_servicio": "",
-            "descripcion_tabla": "",
-            "metodo": "",
-            "min": 0,
-            "lq": 0,
-            "med": 0,
-            "uq": 0,
-            "max": 0,
-            "texto_conclusion_servicio": "",
-        })
-        st.rerun()
+                # Descripción de la tabla
+                widget_key = f"servicio_oovv_{serv_idx}_desc_tabla"
+                analisis["descripcion_tabla"] = st.text_input(
+                    "Descripción de la tabla",
+                    value=analisis.get("descripcion_tabla", ""),
+                    key=widget_key,
+                )
+
+                # Benchmark table
+                st.markdown("**Datos del Benchmark:**")
+                cols_header = st.columns([0.25, 0.15, 0.15, 0.15, 0.15, 0.15])
+                headers = ["Método Elegido", "Min %", "LQ %", "Med %", "UQ %", "Max %"]
+                for col, header in zip(cols_header, headers):
+                    with col:
+                        st.caption(header)
+
+                cols = st.columns([0.25, 0.15, 0.15, 0.15, 0.15, 0.15])
+
+                # Método
+                with cols[0]:
+                    widget_key = f"servicio_oovv_{serv_idx}_metodo"
+                    analisis["metodo"] = st.text_input(
+                        "Método",
+                        value=analisis.get("metodo", ""),
+                        key=widget_key,
+                        label_visibility="collapsed",
+                    )
+
+                # Min
+                with cols[1]:
+                    widget_key = f"servicio_oovv_{serv_idx}_min"
+                    try:
+                        current_val = float(analisis.get("min", 0))
+                    except (TypeError, ValueError):
+                        current_val = 0.0
+                    analisis["min"] = st.number_input(
+                        "Min",
+                        value=current_val,
+                        key=widget_key,
+                        format="%.2f",
+                        label_visibility="collapsed",
+                    )
+
+                # LQ
+                with cols[2]:
+                    widget_key = f"servicio_oovv_{serv_idx}_lq"
+                    try:
+                        current_val = float(analisis.get("lq", 0))
+                    except (TypeError, ValueError):
+                        current_val = 0.0
+                    analisis["lq"] = st.number_input(
+                        "LQ",
+                        value=current_val,
+                        key=widget_key,
+                        format="%.2f",
+                        label_visibility="collapsed",
+                    )
+
+                # Med
+                with cols[3]:
+                    widget_key = f"servicio_oovv_{serv_idx}_med"
+                    try:
+                        current_val = float(analisis.get("med", 0))
+                    except (TypeError, ValueError):
+                        current_val = 0.0
+                    analisis["med"] = st.number_input(
+                        "Med",
+                        value=current_val,
+                        key=widget_key,
+                        format="%.2f",
+                        label_visibility="collapsed",
+                    )
+
+                # UQ
+                with cols[4]:
+                    widget_key = f"servicio_oovv_{serv_idx}_uq"
+                    try:
+                        current_val = float(analisis.get("uq", 0))
+                    except (TypeError, ValueError):
+                        current_val = 0.0
+                    analisis["uq"] = st.number_input(
+                        "UQ",
+                        value=current_val,
+                        key=widget_key,
+                        format="%.2f",
+                        label_visibility="collapsed",
+                    )
+
+                # Max
+                with cols[5]:
+                    widget_key = f"servicio_oovv_{serv_idx}_max"
+                    try:
+                        current_val = float(analisis.get("max", 0))
+                    except (TypeError, ValueError):
+                        current_val = 0.0
+                    analisis["max"] = st.number_input(
+                        "Max",
+                        value=current_val,
+                        key=widget_key,
+                        format="%.2f",
+                        label_visibility="collapsed",
+                    )
+
+                # Texto conclusión
+                widget_key = f"servicio_oovv_{serv_idx}_conclusion"
+                analisis["texto_conclusion_servicio"] = st.text_area(
+                    "Texto de conclusión",
+                    value=analisis.get("texto_conclusion_servicio", ""),
+                    key=widget_key,
+                    height=100,
+                )
+
+        st.divider()
 
 
 def render_cumplimiento_resumen_table(context: dict, fields_def: dict) -> None:

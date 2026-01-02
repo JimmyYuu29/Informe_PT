@@ -88,6 +88,9 @@ class DocxRenderer:
         # Handle [PAGE_BREAK] markers
         self._process_page_breaks(doc.docx)
 
+        # Remove empty paragraphs left by conditional rendering
+        self._remove_empty_paragraphs(doc.docx)
+
         # Remove blank pages
         self._remove_blank_pages(doc.docx)
 
@@ -268,6 +271,95 @@ class DocxRenderer:
                 update_fields.set(f"{w_ns}val", "true")
         except Exception:
             # Silently fail if we can't set this property
+            pass
+
+    def _remove_empty_paragraphs(self, doc: Document) -> None:
+        """
+        Remove empty paragraphs left by conditional rendering.
+
+        When {% if condition %} blocks don't match, they may leave behind
+        empty paragraphs. This method removes:
+        1. Completely empty paragraphs (no text, no images)
+        2. Consecutive empty paragraphs (keeps only one if between content)
+        """
+        try:
+            body = doc.element.body
+            w_ns = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+
+            # Get all paragraph elements directly under body
+            paragraphs = list(body.findall(f"{w_ns}p"))
+
+            def is_paragraph_empty(p_elem):
+                """Check if a paragraph is completely empty."""
+                text_content = "".join(p_elem.itertext()).strip()
+                if text_content:
+                    return False
+
+                # Check for meaningful content (images, objects, etc.)
+                for child in p_elem.iter():
+                    tag = child.tag.split("}")[-1] if "}" in child.tag else child.tag
+                    if tag in ("drawing", "pict", "object", "br"):
+                        return False
+
+                return True
+
+            def has_section_break(p_elem):
+                """Check if paragraph has section properties (section break)."""
+                return p_elem.find(f".//{w_ns}sectPr") is not None
+
+            # Track elements to remove
+            elements_to_remove = []
+
+            # Find consecutive empty paragraphs
+            prev_was_empty = False
+            for i, p in enumerate(paragraphs):
+                if is_paragraph_empty(p):
+                    # Don't remove paragraphs with section breaks
+                    if has_section_break(p):
+                        prev_was_empty = False
+                        continue
+
+                    # If previous paragraph was also empty, mark this one for removal
+                    if prev_was_empty:
+                        elements_to_remove.append(p)
+                    # If this is a standalone empty paragraph not at the start/end
+                    elif i > 0 and i < len(paragraphs) - 1:
+                        # Check if next paragraph is also empty
+                        next_p = paragraphs[i + 1]
+                        if is_paragraph_empty(next_p):
+                            # This is part of a sequence - keep the first one
+                            pass
+                        else:
+                            # Standalone empty paragraph between content
+                            # Check if previous had content - if so, might be intentional spacing
+                            prev_p = paragraphs[i - 1]
+                            if is_paragraph_empty(prev_p):
+                                # Previous was also empty, this is consecutive
+                                elements_to_remove.append(p)
+
+                    prev_was_empty = True
+                else:
+                    prev_was_empty = False
+
+            # Also check for empty paragraphs at the very beginning or end
+            # that serve no purpose
+            if paragraphs:
+                # Check first paragraph
+                if is_paragraph_empty(paragraphs[0]) and not has_section_break(paragraphs[0]):
+                    if len(paragraphs) > 1 and is_paragraph_empty(paragraphs[1]):
+                        elements_to_remove.append(paragraphs[0])
+
+            # Remove identified elements
+            for elem in elements_to_remove:
+                parent = elem.getparent()
+                if parent is not None:
+                    try:
+                        parent.remove(elem)
+                    except Exception:
+                        pass
+
+        except Exception:
+            # Silently fail if empty paragraph removal encounters issues
             pass
 
     def _remove_blank_pages(self, doc: Document) -> None:
