@@ -133,11 +133,32 @@ def clear_form_data() -> None:
     st.session_state.generation_result = None
     st.session_state.validation_errors = []
 
-    # Clear all widget keys that start with "field_" to ensure
+    # Clear all widget keys related to form inputs to ensure
     # imported values take precedence over old widget state
-    keys_to_delete = [key for key in st.session_state.keys() if key.startswith("field_")]
+    # Prefixes used by various form components:
+    # - field_: standard field widgets
+    # - entidad_: entity detail table widgets
+    # - servicio_oovv_: service OOVV table widgets
+    # - rm_/add_/remove_: list action buttons
+    widget_prefixes = (
+        "field_",
+        "entidad_",
+        "servicio_oovv_",
+        "rm_",
+        "add_",
+        "remove_",
+        "_action_",
+    )
+    keys_to_delete = [
+        key for key in st.session_state.keys()
+        if any(key.startswith(prefix) for prefix in widget_prefixes)
+    ]
     for key in keys_to_delete:
         del st.session_state[key]
+
+    # Set a flag to indicate data was just cleared/imported
+    # This helps components prioritize form_data over stale widget state
+    st.session_state._data_just_imported = True
 
 
 def set_generation_result(result: Any) -> None:
@@ -176,3 +197,20 @@ def create_sync_callback(field_name: str, widget_key: str):
         if widget_key in st.session_state:
             set_field_value(field_name, st.session_state[widget_key])
     return callback
+
+
+def was_data_just_imported() -> bool:
+    """
+    Check if data was just imported/cleared.
+
+    Returns True only once per import, then clears the flag.
+    This helps components prioritize form_data over stale widget state
+    after a JSON import.
+    """
+    return st.session_state.get("_data_just_imported", False)
+
+
+def clear_import_flag() -> None:
+    """Clear the import flag after the first render cycle."""
+    if "_data_just_imported" in st.session_state:
+        del st.session_state["_data_just_imported"]
