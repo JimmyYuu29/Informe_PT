@@ -127,11 +127,17 @@ def get_all_form_data() -> dict:
 
 
 def clear_form_data() -> None:
-    """Clear all form data."""
+    """Clear all form data and widget state."""
     st.session_state.form_data = {}
     st.session_state.list_items = {}
     st.session_state.generation_result = None
     st.session_state.validation_errors = []
+
+    # Clear all widget keys that start with "field_" to ensure
+    # imported values take precedence over old widget state
+    keys_to_delete = [key for key in st.session_state.keys() if key.startswith("field_")]
+    for key in keys_to_delete:
+        del st.session_state[key]
 
 
 def set_generation_result(result: Any) -> None:

@@ -179,9 +179,11 @@ def render_section(
     section_condition = section.get("condition")
     field_names = section.get("fields", [])
 
-    # Check section condition
+    # Check section condition with fresh context to handle dynamic changes
     if section_condition:
-        if not evaluate_simple_condition(section_condition, context):
+        # Get fresh context to ensure we have latest field values
+        fresh_context = state.get_all_form_data()
+        if not evaluate_simple_condition(section_condition, fresh_context):
             return
 
     with st.expander(section_label, expanded=True):

@@ -14,6 +14,7 @@ from docx.oxml.ns import nsdecls
 from docx.oxml import parse_xml
 from docx.oxml import OxmlElement
 from docx.enum.text import WD_BREAK
+from docx.oxml.ns import qn
 
 from .plugin_loader import PluginPack
 from .context_builder import ContextBuilder
@@ -86,6 +87,9 @@ class DocxRenderer:
 
         # Handle [PAGE_BREAK] markers
         self._process_page_breaks(doc.docx)
+
+        # Remove blank pages
+        self._remove_blank_pages(doc.docx)
 
         # Mark document to update fields (including TOC) when opened
         self._set_update_fields_on_open(doc.docx)
@@ -264,6 +268,100 @@ class DocxRenderer:
                 update_fields.set(f"{w_ns}val", "true")
         except Exception:
             # Silently fail if we can't set this property
+            pass
+
+    def _remove_blank_pages(self, doc: Document) -> None:
+        """
+        Remove blank pages from the document.
+
+        A blank page is detected by:
+        1. Empty paragraphs between page breaks
+        2. Sections with only whitespace content
+        3. Consecutive page breaks
+        """
+        try:
+            body = doc.element.body
+            w_ns = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+
+            # Track elements to remove
+            elements_to_remove = []
+
+            # Get all paragraph elements
+            paragraphs = body.findall(f".//{w_ns}p")
+
+            # Helper to check if a paragraph is essentially empty
+            def is_paragraph_empty(p_elem):
+                """Check if a paragraph contains only whitespace or is empty."""
+                text_content = "".join(p_elem.itertext()).strip()
+                if text_content:
+                    return False
+
+                # Check if it has any meaningful content (images, tables, etc.)
+                # but allow page breaks
+                for child in p_elem.iter():
+                    tag = child.tag.split("}")[-1] if "}" in child.tag else child.tag
+                    if tag in ("drawing", "pict", "object"):
+                        return False
+                return True
+
+            # Helper to check if paragraph has a page break
+            def has_page_break(p_elem):
+                """Check if paragraph contains a page break."""
+                for br in p_elem.findall(f".//{w_ns}br"):
+                    br_type = br.get(f"{w_ns}type")
+                    if br_type == "page":
+                        return True
+                return False
+
+            # Find sequences of empty paragraphs followed by page breaks
+            i = 0
+            while i < len(paragraphs):
+                p = paragraphs[i]
+
+                # Check for pattern: empty paragraph with page break
+                if is_paragraph_empty(p) and has_page_break(p):
+                    # Look ahead to see if next content is also empty
+                    j = i + 1
+                    consecutive_empty = True
+
+                    # Check next few paragraphs for content
+                    while j < len(paragraphs) and j < i + 5:
+                        next_p = paragraphs[j]
+                        if not is_paragraph_empty(next_p):
+                            consecutive_empty = False
+                            break
+                        if has_page_break(next_p):
+                            # Found another page break after empty content - remove the break
+                            elements_to_remove.append(p)
+                            break
+                        j += 1
+
+                i += 1
+
+            # Also find and remove empty section breaks that would create blank pages
+            sect_prs = body.findall(f".//{w_ns}sectPr")
+            for sect_pr in sect_prs:
+                parent = sect_pr.getparent()
+                if parent is not None:
+                    # Check if the section is in an empty paragraph
+                    if parent.tag.endswith("}p"):
+                        text_content = "".join(parent.itertext()).strip()
+                        if not text_content:
+                            # Check if previous content is also empty
+                            prev = parent.getprevious()
+                            if prev is not None:
+                                prev_text = "".join(prev.itertext()).strip()
+                                if not prev_text and prev not in elements_to_remove:
+                                    elements_to_remove.append(prev)
+
+            # Remove identified elements
+            for elem in elements_to_remove:
+                parent = elem.getparent()
+                if parent is not None:
+                    parent.remove(elem)
+
+        except Exception:
+            # Silently fail if blank page removal encounters issues
             pass
 
 
