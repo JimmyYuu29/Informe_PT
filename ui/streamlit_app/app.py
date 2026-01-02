@@ -220,12 +220,12 @@ def load_json_data(json_data: dict) -> None:
     Handles both simple fields and complex list structures.
     Supports both v1.0 format (lists at top level) and v2.0 format (_list_items).
     """
-    # Clear existing form data
+    # Clear existing form data (this also clears widget state keys)
     state.clear_form_data()
 
-    # Extract metadata and list items
-    metadata = json_data.pop("_metadata", {})
-    list_items_data = json_data.pop("_list_items", None)
+    # Extract metadata and list items without mutating original dict
+    metadata = json_data.get("_metadata", {})
+    list_items_data = json_data.get("_list_items", None)
 
     # Check export version
     is_v2 = metadata.get("version") == "2.0" or list_items_data is not None
@@ -242,7 +242,7 @@ def load_json_data(json_data: dict) -> None:
             st.session_state.list_items[field_name] = []
             for item in items:
                 if isinstance(item, dict):
-                    state.add_list_item(field_name, item)
+                    state.add_list_item(field_name, item.copy())
                 else:
                     state.add_list_item(field_name, {"value": item})
     else:
@@ -256,7 +256,7 @@ def load_json_data(json_data: dict) -> None:
                 st.session_state.list_items[key] = []
                 for item in value:
                     if isinstance(item, dict):
-                        state.add_list_item(key, item)
+                        state.add_list_item(key, item.copy())
                     else:
                         state.add_list_item(key, {"value": item})
             else:
