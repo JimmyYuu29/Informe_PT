@@ -40,6 +40,22 @@ ENGLISH_MONTH_ABBR = {
     12: "Dec",
 }
 
+# Spanish month abbreviations (first letter capitalized)
+SPANISH_MONTH_ABBR = {
+    1: "Ene",
+    2: "Feb",
+    3: "Mar",
+    4: "Abr",
+    5: "May",
+    6: "Jun",
+    7: "Jul",
+    8: "Ago",
+    9: "Sep",
+    10: "Oct",
+    11: "Nov",
+    12: "Dic",
+}
+
 
 def format_spanish_date(d: date) -> str:
     """Format a date in Spanish long format: '31 de diciembre de 2025'."""
@@ -50,6 +66,12 @@ def format_spanish_date(d: date) -> str:
 def format_date_short_english(d: date) -> str:
     """Format a date in short English format: '31 Dec 2025'."""
     month_abbr = ENGLISH_MONTH_ABBR.get(d.month, str(d.month))
+    return f"{d.day} {month_abbr} {d.year}"
+
+
+def format_date_short_spanish(d: date) -> str:
+    """Format a date in short Spanish format: '31 Dic 2025'."""
+    month_abbr = SPANISH_MONTH_ABBR.get(d.month, str(d.month))
     return f"{d.day} {month_abbr} {d.year}"
 
 
@@ -81,6 +103,20 @@ def format_percentage(value: Any, precision: int = 2) -> str:
         return f"{formatted} %"
     except Exception:
         return str(value)
+
+
+def round_decimal(value: Any, precision: int = 2) -> Any:
+    """Round a decimal value to the specified precision."""
+    if value is None:
+        return None
+    try:
+        if isinstance(value, (int, float, Decimal)):
+            num = Decimal(str(value))
+            pattern = f"1.{'0' * precision}"
+            return float(num.quantize(Decimal(pattern), rounding=ROUND_HALF_UP))
+        return value
+    except Exception:
+        return value
 
 
 def sanitize_template_value(value: Any) -> Any:
@@ -183,28 +219,28 @@ def calculate_derived_fields(data: dict, derived_defs: dict) -> dict:
                     cifra_1 = get_val("cifra_1")
                     result = safe_divide(ebit_1, cifra_1)
                     if result != "N/A":
-                        derived[field_id] = result * 100
+                        derived[field_id] = round_decimal(result * 100, 2)
 
                 elif field_id == "om_0":
                     ebit_0 = get_val("ebit_0")
                     cifra_0 = get_val("cifra_0")
                     result = safe_divide(ebit_0, cifra_0)
                     if result != "N/A":
-                        derived[field_id] = result * 100
+                        derived[field_id] = round_decimal(result * 100, 2)
 
                 elif field_id == "ncp_1":
                     ebit_1 = get_val("ebit_1")
                     cost_1 = get_val("cost_1")
                     result = safe_divide(ebit_1, cost_1)
                     if result != "N/A":
-                        derived[field_id] = result * 100
+                        derived[field_id] = round_decimal(result * 100, 2)
 
                 elif field_id == "ncp_0":
                     ebit_0 = get_val("ebit_0")
                     cost_0 = get_val("cost_0")
                     result = safe_divide(ebit_0, cost_0)
                     if result != "N/A":
-                        derived[field_id] = result * 100
+                        derived[field_id] = round_decimal(result * 100, 2)
 
                 # Variation derivations
                 elif field_id.startswith("var_"):
@@ -229,13 +265,13 @@ def calculate_derived_fields(data: dict, derived_defs: dict) -> dict:
                         om_1 = get_val("om_1")
                         om_0 = get_val("om_0")
                         if om_1 is not None and om_0 is not None:
-                            derived[field_id] = om_1 - om_0
+                            derived[field_id] = round_decimal(om_1 - om_0, 2)
                         continue
                     elif field_id == "var_ncp":
                         ncp_1 = get_val("ncp_1")
                         ncp_0 = get_val("ncp_0")
                         if ncp_1 is not None and ncp_0 is not None:
-                            derived[field_id] = ncp_1 - ncp_0
+                            derived[field_id] = round_decimal(ncp_1 - ncp_0, 2)
                         continue
 
                     if field_0:
@@ -245,7 +281,7 @@ def calculate_derived_fields(data: dict, derived_defs: dict) -> dict:
                             val_0_abs = abs(Decimal(str(val_0)))
                             if val_0_abs != 0:
                                 diff = Decimal(str(val_1)) - Decimal(str(val_0))
-                                derived[field_id] = (diff / val_0_abs) * 100
+                                derived[field_id] = round_decimal((diff / val_0_abs) * 100, 2)
 
                 # Aggregate derivations
                 elif field_id == "total_ingreso_oov":
@@ -274,20 +310,41 @@ def calculate_derived_fields(data: dict, derived_defs: dict) -> dict:
                     cifra_1 = get_val("cifra_1")
                     result = safe_divide(total_ingreso, cifra_1)
                     if result != "N/A":
-                        derived[field_id] = result * 100
+                        derived[field_id] = round_decimal(result * 100, 2)
 
                 elif field_id == "peso_oov_sobre_costes":
                     total_gasto = get_val("total_gasto_oov")
                     cost_1 = get_val("cost_1")
                     result = safe_divide(total_gasto, cost_1)
                     if result != "N/A":
-                        derived[field_id] = result * 100
+                        derived[field_id] = round_decimal(result * 100, 2)
 
             except Exception:
                 # Skip field if calculation fails
                 continue
 
     return derived
+
+
+class TableCounter:
+    """Counter class for auto-numbering tables in templates."""
+
+    def __init__(self, start: int = 1):
+        self._count = start - 1
+
+    def next(self) -> int:
+        """Get the next table number."""
+        self._count += 1
+        return self._count
+
+    @property
+    def current(self) -> int:
+        """Get the current table number without incrementing."""
+        return self._count
+
+    def reset(self, value: int = 0) -> None:
+        """Reset the counter to a specific value."""
+        self._count = value
 
 
 class ContextBuilder:
@@ -323,6 +380,13 @@ class ContextBuilder:
         # Add fixed lists
         context["fixed_lists"] = self.plugin.texts.get("fixed_lists", {})
 
+        # Add table counter for auto-numbering
+        context["tabla_num"] = TableCounter()
+
+        # Ensure servicios_vinculados has a default empty list if not present
+        if "servicios_vinculados" not in context:
+            context["servicios_vinculados"] = []
+
         # Sanitize all values to ensure proper template insertion
         # This helps preserve table layouts by removing unwanted whitespace
         context = sanitize_template_value(context)
@@ -331,16 +395,18 @@ class ContextBuilder:
 
     def _format_fields(self, context: dict) -> dict:
         """Apply formatting to fields."""
-        # Format date - using short English format: "31 Dec 2025"
+        # Format date - using short Spanish format: "31 Dic 2025"
         if "fecha_fin_fiscal" in context:
             fecha = context["fecha_fin_fiscal"]
             if isinstance(fecha, date):
-                context["fecha_fin_fiscal_formatted"] = format_date_short_english(fecha)
+                context["fecha_fin_fiscal_formatted"] = format_date_short_spanish(fecha)
+                # Also store the original date for templates that need it
+                context["fecha_fin_fiscal"] = fecha
             elif isinstance(fecha, str):
                 try:
                     parts = fecha.split("-")
                     d = date(int(parts[0]), int(parts[1]), int(parts[2]))
-                    context["fecha_fin_fiscal_formatted"] = format_date_short_english(d)
+                    context["fecha_fin_fiscal_formatted"] = format_date_short_spanish(d)
                 except Exception:
                     context["fecha_fin_fiscal_formatted"] = fecha
 
