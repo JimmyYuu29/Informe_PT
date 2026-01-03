@@ -552,7 +552,13 @@ def render_operaciones_intragrupo_table(context: dict, fields_def: dict) -> None
             st.markdown(f"**{idx + 1}**")
         with cols[1]:
             widget_key = state.get_stable_key("servicios_vinculados", idx, "servicio_vinculado")
-            current_value = item.get("servicio_vinculado", "")
+            # After JSON import, prioritize list_items over stale widget state
+            if state.was_data_just_imported():
+                current_value = item.get("servicio_vinculado", "")
+            elif widget_key in st.session_state:
+                current_value = st.session_state[widget_key]
+            else:
+                current_value = item.get("servicio_vinculado", "")
             new_value = st.text_input(
                 "Tipo de operación",
                 value=current_value,
@@ -633,7 +639,13 @@ def render_operaciones_vinculadas_detail_table(context: dict, fields_def: dict) 
 
             with cols[1]:
                 widget_key = f"entidad_{serv_idx}_{ent_idx}_nombre"
-                current_value = entidad.get("entidad_vinculada", "")
+                # After JSON import, prioritize list_items over stale widget state
+                if state.was_data_just_imported():
+                    current_value = entidad.get("entidad_vinculada", "")
+                elif widget_key in st.session_state:
+                    current_value = st.session_state[widget_key]
+                else:
+                    current_value = entidad.get("entidad_vinculada", "")
                 new_value = st.text_input(
                     "Entidad",
                     value=current_value,
@@ -648,7 +660,13 @@ def render_operaciones_vinculadas_detail_table(context: dict, fields_def: dict) 
 
             with cols[2]:
                 widget_key = f"entidad_{serv_idx}_{ent_idx}_ingreso"
-                current_ingreso = entidad.get("ingreso_entidad", 0)
+                # After JSON import, prioritize list_items over stale widget state
+                if state.was_data_just_imported():
+                    current_ingreso = entidad.get("ingreso_entidad", 0)
+                elif widget_key in st.session_state:
+                    current_ingreso = st.session_state[widget_key]
+                else:
+                    current_ingreso = entidad.get("ingreso_entidad", 0)
                 try:
                     current_float = float(current_ingreso) if current_ingreso else 0.0
                 except (TypeError, ValueError):
@@ -665,7 +683,13 @@ def render_operaciones_vinculadas_detail_table(context: dict, fields_def: dict) 
 
             with cols[3]:
                 widget_key = f"entidad_{serv_idx}_{ent_idx}_gasto"
-                current_gasto = entidad.get("gasto_entidad", 0)
+                # After JSON import, prioritize list_items over stale widget state
+                if state.was_data_just_imported():
+                    current_gasto = entidad.get("gasto_entidad", 0)
+                elif widget_key in st.session_state:
+                    current_gasto = st.session_state[widget_key]
+                else:
+                    current_gasto = entidad.get("gasto_entidad", 0)
                 try:
                     current_gasto_float = float(current_gasto) if current_gasto else 0.0
                 except (TypeError, ValueError):
@@ -746,11 +770,21 @@ def render_metodo_elegido_table(context: dict, fields_def: dict) -> None:
 
         analisis = servicio["analisis"]
 
+        # Helper function to get value with import priority
+        def get_imported_value(widget_key: str, data_dict: dict, field: str, default):
+            if state.was_data_just_imported():
+                return data_dict.get(field, default)
+            elif widget_key in st.session_state:
+                return st.session_state[widget_key]
+            else:
+                return data_dict.get(field, default)
+
         # Checkbox to enable analysis for this servicio
         widget_key = f"analizar_servicio_{serv_idx}"
+        enabled_val = get_imported_value(widget_key, analisis, "enabled", False)
         analizar = st.checkbox(
             f"Analizar: **{servicio_name}**",
-            value=analisis.get("enabled", False),
+            value=bool(enabled_val),
             key=widget_key,
         )
         analisis["enabled"] = analizar
@@ -762,26 +796,29 @@ def render_metodo_elegido_table(context: dict, fields_def: dict) -> None:
 
                 # Título del servicio
                 widget_key = f"servicio_oovv_{serv_idx}_titulo"
+                val = get_imported_value(widget_key, analisis, "titulo_servicio_oovv", servicio_name)
                 analisis["titulo_servicio_oovv"] = st.text_input(
                     "Título del servicio",
-                    value=analisis.get("titulo_servicio_oovv", servicio_name),
+                    value=val,
                     key=widget_key,
                 )
 
                 # Texto introductorio
                 widget_key = f"servicio_oovv_{serv_idx}_intro"
+                val = get_imported_value(widget_key, analisis, "texto_intro_servicio", "")
                 analisis["texto_intro_servicio"] = st.text_area(
                     "Texto introductorio",
-                    value=analisis.get("texto_intro_servicio", ""),
+                    value=val,
                     key=widget_key,
                     height=100,
                 )
 
                 # Descripción de la tabla
                 widget_key = f"servicio_oovv_{serv_idx}_desc_tabla"
+                val = get_imported_value(widget_key, analisis, "descripcion_tabla", "")
                 analisis["descripcion_tabla"] = st.text_input(
                     "Descripción de la tabla",
-                    value=analisis.get("descripcion_tabla", ""),
+                    value=val,
                     key=widget_key,
                 )
 
@@ -798,9 +835,10 @@ def render_metodo_elegido_table(context: dict, fields_def: dict) -> None:
                 # Método
                 with cols[0]:
                     widget_key = f"servicio_oovv_{serv_idx}_metodo"
+                    val = get_imported_value(widget_key, analisis, "metodo", "")
                     analisis["metodo"] = st.text_input(
                         "Método",
-                        value=analisis.get("metodo", ""),
+                        value=val,
                         key=widget_key,
                         label_visibility="collapsed",
                     )
@@ -808,8 +846,9 @@ def render_metodo_elegido_table(context: dict, fields_def: dict) -> None:
                 # Min
                 with cols[1]:
                     widget_key = f"servicio_oovv_{serv_idx}_min"
+                    val = get_imported_value(widget_key, analisis, "min", 0)
                     try:
-                        current_val = float(analisis.get("min", 0))
+                        current_val = float(val) if val else 0.0
                     except (TypeError, ValueError):
                         current_val = 0.0
                     analisis["min"] = st.number_input(
@@ -823,8 +862,9 @@ def render_metodo_elegido_table(context: dict, fields_def: dict) -> None:
                 # LQ
                 with cols[2]:
                     widget_key = f"servicio_oovv_{serv_idx}_lq"
+                    val = get_imported_value(widget_key, analisis, "lq", 0)
                     try:
-                        current_val = float(analisis.get("lq", 0))
+                        current_val = float(val) if val else 0.0
                     except (TypeError, ValueError):
                         current_val = 0.0
                     analisis["lq"] = st.number_input(
@@ -838,8 +878,9 @@ def render_metodo_elegido_table(context: dict, fields_def: dict) -> None:
                 # Med
                 with cols[3]:
                     widget_key = f"servicio_oovv_{serv_idx}_med"
+                    val = get_imported_value(widget_key, analisis, "med", 0)
                     try:
-                        current_val = float(analisis.get("med", 0))
+                        current_val = float(val) if val else 0.0
                     except (TypeError, ValueError):
                         current_val = 0.0
                     analisis["med"] = st.number_input(
@@ -853,8 +894,9 @@ def render_metodo_elegido_table(context: dict, fields_def: dict) -> None:
                 # UQ
                 with cols[4]:
                     widget_key = f"servicio_oovv_{serv_idx}_uq"
+                    val = get_imported_value(widget_key, analisis, "uq", 0)
                     try:
-                        current_val = float(analisis.get("uq", 0))
+                        current_val = float(val) if val else 0.0
                     except (TypeError, ValueError):
                         current_val = 0.0
                     analisis["uq"] = st.number_input(
@@ -868,8 +910,9 @@ def render_metodo_elegido_table(context: dict, fields_def: dict) -> None:
                 # Max
                 with cols[5]:
                     widget_key = f"servicio_oovv_{serv_idx}_max"
+                    val = get_imported_value(widget_key, analisis, "max", 0)
                     try:
-                        current_val = float(analisis.get("max", 0))
+                        current_val = float(val) if val else 0.0
                     except (TypeError, ValueError):
                         current_val = 0.0
                     analisis["max"] = st.number_input(
@@ -882,9 +925,10 @@ def render_metodo_elegido_table(context: dict, fields_def: dict) -> None:
 
                 # Texto conclusión
                 widget_key = f"servicio_oovv_{serv_idx}_conclusion"
+                val = get_imported_value(widget_key, analisis, "texto_conclusion_servicio", "")
                 analisis["texto_conclusion_servicio"] = st.text_area(
                     "Texto de conclusión",
-                    value=analisis.get("texto_conclusion_servicio", ""),
+                    value=val,
                     key=widget_key,
                     height=100,
                 )

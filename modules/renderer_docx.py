@@ -163,26 +163,31 @@ class DocxRenderer:
         if column_context == "impacto":
             return
 
+        # Normalize text: treat checkmark as "si" for color matching
+        normalized_text = text
+        if text == "✓":
+            normalized_text = "si"
+
         # Check afectacion_color first (most specific - bajo/medio/alto)
         afectacion_map = enum_colors.get("afectacion_color", {}).get("values", {})
-        if text in afectacion_map:
-            color_def = afectacion_map[text]
+        if normalized_text in afectacion_map:
+            color_def = afectacion_map[normalized_text]
             if "background" in color_def:
                 self._set_cell_background(cell, color_def.get("background"))
             return
 
         # Check cumplido_color (si/no/parcial)
         cumplido_map = enum_colors.get("cumplido_color", {}).get("values", {})
-        if text in cumplido_map:
-            color_def = cumplido_map[text]
+        if normalized_text in cumplido_map:
+            color_def = cumplido_map[normalized_text]
             if "background" in color_def:
                 self._set_cell_background(cell, color_def.get("background"))
             return
 
         # Check compliance_color (si/no for summary tables)
         compliance_map = enum_colors.get("compliance_color", {}).get("values", {})
-        if text in compliance_map:
-            color_def = compliance_map[text]
+        if normalized_text in compliance_map:
+            color_def = compliance_map[normalized_text]
             if "background" in color_def:
                 self._set_cell_background(cell, color_def.get("background"))
             return
