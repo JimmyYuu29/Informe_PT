@@ -16,7 +16,7 @@ from datetime import date
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from modules.plugin_loader import load_plugin, list_plugins
+from modules.plugin_loader import PluginPack, load_plugin, list_plugins
 from modules.generate import generate, GenerationOptions
 from modules.validate_plugin import validate_plugin
 
