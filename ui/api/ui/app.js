@@ -921,35 +921,44 @@ function renderRiskTable(allFields) {
         itemHeader.innerHTML = `<strong>${i}. ${label}</strong>`;
         itemContainer.appendChild(itemHeader);
 
-        // Input row with 4 columns (like Streamlit)
+        // Input row with vertical layout (like Streamlit) - each on its own row
         const inputRow = document.createElement('div');
-        inputRow.className = 'risk-item-inputs';
+        inputRow.className = 'risk-item-inputs-vertical';
 
         // Impacto
         const impactoGroup = document.createElement('div');
-        impactoGroup.className = 'form-group';
-        impactoGroup.innerHTML = '<label class="form-label">Impacto</label>';
+        impactoGroup.className = 'form-group-row';
+        const impactoLabel = document.createElement('label');
+        impactoLabel.className = 'form-label-inline';
+        impactoLabel.textContent = 'Impacto';
+        impactoGroup.appendChild(impactoLabel);
         const impactoSelect = createSelect(`impacto_${i}`, impactoOptions, 'no');
         impactoGroup.appendChild(impactoSelect);
         inputRow.appendChild(impactoGroup);
 
         // Afectacion Preliminar
         const afectPreGroup = document.createElement('div');
-        afectPreGroup.className = 'form-group';
-        afectPreGroup.innerHTML = '<label class="form-label">Afectación Prelim.</label>';
+        afectPreGroup.className = 'form-group-row';
+        const afectPreLabel = document.createElement('label');
+        afectPreLabel.className = 'form-label-inline';
+        afectPreLabel.textContent = 'Afectación Prelim.';
+        afectPreGroup.appendChild(afectPreLabel);
         const afectPreSelect = createSelect(`afectacion_pre_${i}`, afectacionOptions, 'bajo');
         afectPreGroup.appendChild(afectPreSelect);
         inputRow.appendChild(afectPreGroup);
 
         // Mitigadores
         const mitigadoresGroup = document.createElement('div');
-        mitigadoresGroup.className = 'form-group';
-        mitigadoresGroup.innerHTML = '<label class="form-label">Mitigadores</label>';
+        mitigadoresGroup.className = 'form-group-row';
+        const mitigadoresLabel = document.createElement('label');
+        mitigadoresLabel.className = 'form-label-inline';
+        mitigadoresLabel.textContent = 'Mitigadores';
+        mitigadoresGroup.appendChild(mitigadoresLabel);
         const mitigadoresInput = document.createElement('input');
         mitigadoresInput.type = 'text';
         mitigadoresInput.className = 'form-input';
         mitigadoresInput.name = `texto_mitigacion_${i}`;
-        mitigadoresInput.placeholder = 'Mitigadores...';
+        mitigadoresInput.placeholder = 'Texto de mitigación...';
         mitigadoresInput.addEventListener('input', (e) => {
             AppState.setFormValue(`texto_mitigacion_${i}`, e.target.value);
         });
@@ -958,8 +967,11 @@ function renderRiskTable(allFields) {
 
         // Afectacion Final
         const afectFinalGroup = document.createElement('div');
-        afectFinalGroup.className = 'form-group';
-        afectFinalGroup.innerHTML = '<label class="form-label">Afectación Final</label>';
+        afectFinalGroup.className = 'form-group-row';
+        const afectFinalLabel = document.createElement('label');
+        afectFinalLabel.className = 'form-label-inline';
+        afectFinalLabel.textContent = 'Afectación Final';
+        afectFinalGroup.appendChild(afectFinalLabel);
         const afectFinalSelect = createSelect(`afectacion_final_${i}`, afectacionOptions, 'bajo');
         afectFinalGroup.appendChild(afectFinalSelect);
         inputRow.appendChild(afectFinalGroup);
@@ -1040,22 +1052,28 @@ function renderComplianceDetailTable(prefix, count, allFields) {
         itemHeader.innerHTML = `<strong>${i}. ${items[i - 1] || `Item ${i}`}</strong>`;
         itemContainer.appendChild(itemHeader);
 
-        // Input row with 2 columns (like Streamlit)
+        // Input row with vertical layout (like Streamlit)
         const inputRow = document.createElement('div');
-        inputRow.className = 'compliance-item-inputs';
+        inputRow.className = 'compliance-item-inputs-vertical';
 
         // Cumplido
         const cumplidoGroup = document.createElement('div');
-        cumplidoGroup.className = 'form-group';
-        cumplidoGroup.innerHTML = '<label class="form-label">Cumplido</label>';
+        cumplidoGroup.className = 'form-group-row';
+        const cumplidoLabel = document.createElement('label');
+        cumplidoLabel.className = 'form-label-inline';
+        cumplidoLabel.textContent = 'Cumplido';
+        cumplidoGroup.appendChild(cumplidoLabel);
         const cumplidoSelect = createSelect(`cumplido_${prefix}_${i}`, cumplidoOptions, 'si');
         cumplidoGroup.appendChild(cumplidoSelect);
         inputRow.appendChild(cumplidoGroup);
 
         // Comentario
         const comentarioGroup = document.createElement('div');
-        comentarioGroup.className = 'form-group comentario-group';
-        comentarioGroup.innerHTML = '<label class="form-label">Comentario</label>';
+        comentarioGroup.className = 'form-group-row comentario-group';
+        const comentarioLabel = document.createElement('label');
+        comentarioLabel.className = 'form-label-inline';
+        comentarioLabel.textContent = 'Comentario';
+        comentarioGroup.appendChild(comentarioLabel);
         const comentarioInput = document.createElement('input');
         comentarioInput.type = 'text';
         comentarioInput.className = 'form-input';
@@ -1127,14 +1145,17 @@ function renderComplianceSummaryTable(prefix, count, allFields) {
         itemHeader.innerHTML = `<strong>${section.num}. ${section.label}</strong>`;
         itemContainer.appendChild(itemHeader);
 
-        // Input row
+        // Input row with vertical layout
         const inputRow = document.createElement('div');
-        inputRow.className = 'compliance-summary-inputs';
+        inputRow.className = 'compliance-summary-inputs-vertical';
 
         // Cumplimiento
         const cumplimientoGroup = document.createElement('div');
-        cumplimientoGroup.className = 'form-group';
-        cumplimientoGroup.innerHTML = '<label class="form-label">Cumplimiento</label>';
+        cumplimientoGroup.className = 'form-group-row';
+        const cumplimientoLabel = document.createElement('label');
+        cumplimientoLabel.className = 'form-label-inline';
+        cumplimientoLabel.textContent = 'Cumplimiento';
+        cumplimientoGroup.appendChild(cumplimientoLabel);
         const cumplimientoSelect = createSelect(`cumplimiento_resumen_${prefix}_${section.num}`, cumplimientoOptions, 'si');
         cumplimientoGroup.appendChild(cumplimientoSelect);
         inputRow.appendChild(cumplimientoGroup);
@@ -1298,17 +1319,22 @@ function showResults(result) {
     panel.classList.remove('hidden');
 
     if (result.success) {
-        const filename = result.output_path ? result.output_path.split('/').pop() : 'document.docx';
+        // Extract filename from path - handle both forward and backslashes
+        let filename = 'document.docx';
+        if (result.output_path) {
+            const pathParts = result.output_path.replace(/\\/g, '/').split('/');
+            filename = pathParts[pathParts.length - 1];
+        }
 
         content.innerHTML = `
             <div class="result-success">
                 <div class="success-icon">✓</div>
                 <h4>Document Generated Successfully!</h4>
                 <p>Your document has been created and is ready for download.</p>
-                <a href="${API_BASE}/download/${filename}" class="btn btn-primary download-btn" download>
+                <button id="download-doc-btn" class="btn btn-primary download-btn" data-filename="${filename}">
                     <span class="btn-icon">📥</span>
                     Download Document
-                </a>
+                </button>
                 <div class="trace-info">
                     <p>Trace ID: <span class="trace-id">${result.trace_id || 'N/A'}</span></p>
                     <p>Duration: ${result.duration_ms || 0}ms</p>
@@ -1316,6 +1342,15 @@ function showResults(result) {
             </div>
             ${renderDecisionTrace(result.decision_traces)}
         `;
+
+        // Add click event listener for download button
+        const downloadBtn = document.getElementById('download-doc-btn');
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', async () => {
+                const fname = downloadBtn.dataset.filename;
+                await downloadDocument(fname);
+            });
+        }
     } else {
         content.innerHTML = `
             <div class="result-error">
@@ -1324,6 +1359,40 @@ function showResults(result) {
                 ${result.validation ? renderValidationErrors(result.validation) : ''}
             </div>
         `;
+    }
+}
+
+async function downloadDocument(filename) {
+    try {
+        showLoading('Downloading document...');
+
+        const response = await fetch(`${API_BASE}/download/${encodeURIComponent(filename)}`);
+
+        if (!response.ok) {
+            throw new Error(`Download failed: ${response.status} ${response.statusText}`);
+        }
+
+        // Get the blob from response
+        const blob = await response.blob();
+
+        // Create a download link and trigger it
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+
+        // Cleanup
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        showNotification('success', 'Download Complete', `File "${filename}" has been downloaded.`);
+    } catch (error) {
+        console.error('Download error:', error);
+        showNotification('error', 'Download Failed', error.message);
+    } finally {
+        hideLoading();
     }
 }
 
