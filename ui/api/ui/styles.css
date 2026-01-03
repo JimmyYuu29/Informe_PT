@@ -252,6 +252,69 @@ body {
     font-weight: 600;
 }
 
+/* Author Card */
+.author-info {
+    border-bottom: 1px solid var(--gray-200);
+    padding-bottom: var(--spacing-lg);
+}
+
+.author-card {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md);
+    color: white;
+}
+
+.author-name {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+}
+
+.author-role {
+    font-size: var(--font-size-sm);
+    opacity: 0.9;
+    margin-bottom: var(--spacing-xs);
+}
+
+.author-company {
+    font-size: var(--font-size-xs);
+    opacity: 0.85;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.author-address {
+    font-size: var(--font-size-xs);
+    opacity: 0.8;
+    line-height: 1.5;
+    margin-bottom: var(--spacing-sm);
+}
+
+.author-email a {
+    font-size: var(--font-size-sm);
+    color: var(--accent-gold);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.author-email a:hover {
+    text-decoration: underline;
+}
+
+/* Version Badge */
+.version-badge {
+    display: inline-block;
+    background: var(--accent-gold);
+    color: var(--primary-blue-dark);
+    padding: 2px 8px;
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    margin-left: var(--spacing-sm);
+}
+
 .plugin-info {
     background: var(--gray-50);
     border-radius: var(--border-radius-md);
@@ -1052,5 +1115,202 @@ body {
 
     .section-content {
         grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================================================
+   Table-like Form Layouts (Matching Streamlit)
+   ============================================================================ */
+
+/* Form Table Container */
+.form-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: var(--spacing-lg);
+}
+
+.form-table-header {
+    display: grid;
+    background: var(--gray-100);
+    border-bottom: 2px solid var(--gray-300);
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-sm) 0;
+}
+
+.form-table-header span {
+    padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.form-table-row {
+    display: grid;
+    border-bottom: 1px solid var(--gray-200);
+    align-items: center;
+    padding: var(--spacing-sm) 0;
+}
+
+.form-table-row:hover {
+    background: var(--gray-50);
+}
+
+.form-table-cell {
+    padding: var(--spacing-xs) var(--spacing-md);
+}
+
+.form-table-cell.label {
+    font-weight: 500;
+    color: var(--gray-700);
+}
+
+.form-table-cell.number {
+    font-family: monospace;
+}
+
+/* Financial Data Table - 4 columns */
+.financial-table .form-table-header,
+.financial-table .form-table-row {
+    grid-template-columns: 1.5fr 0.8fr 1fr 1fr;
+}
+
+/* Risk Assessment Table - 6 columns */
+.risk-table .form-table-header,
+.risk-table .form-table-row {
+    grid-template-columns: 0.4fr 2fr 0.8fr 0.8fr 1.5fr 0.8fr;
+}
+
+/* Compliance Table - 4 columns */
+.compliance-table .form-table-header,
+.compliance-table .form-table-row {
+    grid-template-columns: 0.4fr 3fr 1fr 1.5fr;
+}
+
+/* Compliance Summary Table - 3 columns */
+.compliance-summary-table .form-table-header,
+.compliance-summary-table .form-table-row {
+    grid-template-columns: 0.4fr 3.5fr 1fr;
+}
+
+/* Operations Table - 4 columns */
+.operations-table .form-table-header,
+.operations-table .form-table-row {
+    grid-template-columns: 1.5fr 1.5fr 1fr 1fr;
+}
+
+/* Contacts Table - 3 columns per row */
+.contacts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-lg);
+}
+
+.contact-card {
+    background: var(--gray-50);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-lg);
+}
+
+.contact-card h4 {
+    font-size: var(--font-size-base);
+    color: var(--primary-blue);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+/* Form Table Totals Row */
+.form-table-totals {
+    display: grid;
+    background: var(--gray-100);
+    font-weight: 600;
+    padding: var(--spacing-md) 0;
+    border-top: 2px solid var(--gray-300);
+}
+
+.form-table-totals span {
+    padding: var(--spacing-sm) var(--spacing-md);
+}
+
+/* Calculated Value Display */
+.calculated-value {
+    background: var(--gray-100);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+    font-weight: 500;
+    color: var(--gray-700);
+    font-family: monospace;
+}
+
+.calculated-value.positive {
+    color: var(--success);
+}
+
+.calculated-value.negative {
+    color: var(--danger);
+}
+
+/* Section Subheader */
+.section-subheader {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--primary-blue);
+    margin: var(--spacing-lg) 0 var(--spacing-md) 0;
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+/* Info Box */
+.info-box {
+    background: var(--info-light);
+    border: 1px solid var(--info);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    font-size: var(--font-size-sm);
+    color: var(--gray-700);
+}
+
+/* Caption Text */
+.caption-text {
+    font-size: var(--font-size-xs);
+    color: var(--gray-500);
+    font-style: italic;
+    margin-top: var(--spacing-sm);
+}
+
+/* Derived Values Section */
+.derived-values {
+    background: var(--gray-50);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-md);
+}
+
+.derived-values .form-table-header,
+.derived-values .form-table-row {
+    background: transparent;
+}
+
+.derived-values .form-table-cell {
+    font-style: italic;
+    color: var(--gray-600);
+}
+
+/* Responsive Table Adjustments */
+@media (max-width: 1200px) {
+    .financial-table .form-table-header,
+    .financial-table .form-table-row {
+        grid-template-columns: 1.5fr 0.8fr 1fr 1fr;
+    }
+
+    .contacts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 992px) {
+    .risk-table .form-table-header,
+    .risk-table .form-table-row {
+        grid-template-columns: 0.3fr 1.5fr 0.6fr 0.6fr 1.2fr 0.6fr;
+        font-size: var(--font-size-sm);
     }
 }
