@@ -1351,11 +1351,42 @@ body {
     gap: var(--spacing-md);
 }
 
+.risk-item-inputs-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
 .risk-item-divider {
     border: none;
     border-top: 1px solid var(--gray-200);
     margin-top: var(--spacing-md);
     margin-bottom: 0;
+}
+
+/* Form Group Row (inline label + input) */
+.form-group-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.form-label-inline {
+    min-width: 140px;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--gray-700);
+}
+
+.form-group-row .form-input,
+.form-group-row .select-input {
+    flex: 1;
+    max-width: 300px;
+}
+
+.form-group-row.comentario-group .form-input {
+    max-width: none;
+    flex: 1;
 }
 
 /* Compliance Detail Table Vertical Layout */
@@ -1382,6 +1413,12 @@ body {
     grid-template-columns: 200px 1fr;
     gap: var(--spacing-md);
     align-items: start;
+}
+
+.compliance-item-inputs-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
 }
 
 .compliance-item-inputs .comentario-group {
@@ -1417,6 +1454,12 @@ body {
 .compliance-summary-inputs {
     display: flex;
     gap: var(--spacing-md);
+}
+
+.compliance-summary-inputs-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
 }
 
 .compliance-summary-divider {
