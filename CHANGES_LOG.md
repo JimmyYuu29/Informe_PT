@@ -1,6 +1,118 @@
 # Informe PT - 修改日志 / Changes Log
 
 **日期 / Date:** 2026-01-03
+**分支 / Branch:** claude/fix-json-metadata-import-0PLXS
+
+---
+
+## 修改概述 / Summary of Changes
+
+本次修改解决了以下问题：
+
+1. JSON 元数据导入问题的深度修复
+2. 添加 requirements.txt 依赖文件
+
+---
+
+## 1. JSON 元数据导入深度修复 / JSON Metadata Import Deep Fix
+
+### 问题描述 / Problem
+JSON 元数据导入后，部分数据无法正确显示在表单中。这是由于 Streamlit 的 session_state 机制导致：当 widget 有 `key` 参数时，Streamlit 会优先使用 `session_state[key]` 中的值，而忽略 `value` 参数传递的新值。
+
+### 根本原因 / Root Cause
+1. Widget state keys 清理不完整，部分 widget 保留了旧值
+2. 导入数据后，widget 状态没有完全同步
+
+### 解决方案 / Solution
+
+#### 1.1 扩展 widget key 清理范围
+在 `ui/streamlit_app/state_store.py` 中的 `clear_form_data()` 函数添加更多 widget key 前缀：
+
+```python
+widget_prefixes = (
+    "field_",
+    "entidad_",
+    "servicio_oovv_",
+    "analizar_servicio_",
+    "rm_",
+    "add_",
+    "remove_",
+    "_action_",
+    # Additional prefixes
+    "servicio_",
+    "cumplimiento_",
+    "impacto_",
+    "afectacion_",
+    "texto_",
+    "cumplido_",
+)
+```
+
+#### 1.2 添加强制清理函数
+在 `ui/streamlit_app/app.py` 中添加 `_force_clear_widget_state()` 函数，在数据导入后执行二次清理：
+
+```python
+def _force_clear_widget_state() -> None:
+    """Force clear all widget state keys that might interfere with imported data."""
+    patterns_to_clear = []
+    for key in list(st.session_state.keys()):
+        if key in ("initialized", "plugin_id", "form_data", "list_items", ...):
+            continue
+        if any(pattern in key for pattern in (
+            "field_", "entidad_", "servicio_", ...
+        )):
+            patterns_to_clear.append(key)
+    for key in patterns_to_clear:
+        del st.session_state[key]
+```
+
+#### 1.3 改进 load_json_data 函数
+- 优化处理顺序：先处理 list items，再处理 scalar fields
+- 添加对 v2.0 格式中顶层列表的额外处理
+- 在数据导入结束时调用 `_force_clear_widget_state()`
+
+### 修改的文件 / Modified Files
+- `ui/streamlit_app/state_store.py` - 扩展 widget key 清理范围
+- `ui/streamlit_app/app.py` - 添加强制清理函数，改进导入逻辑
+
+---
+
+## 2. 添加 requirements.txt / Add requirements.txt
+
+### 文件内容 / File Contents
+```
+# Informe PT - Python Dependencies
+streamlit>=1.28.0
+python-docx>=0.8.11
+docxtpl>=0.16.0
+fastapi>=0.104.0
+uvicorn>=0.24.0
+pydantic>=2.0.0
+pyyaml>=6.0
+pytest>=7.4.0
+```
+
+---
+
+## 文件修改摘要 / Files Modified Summary
+
+| 文件 / File | 修改类型 / Change Type |
+|------------|----------------------|
+| `ui/streamlit_app/state_store.py` | 扩展 widget key 清理范围 |
+| `ui/streamlit_app/app.py` | 添加强制清理函数，改进导入逻辑 |
+| `requirements.txt` | 新增依赖文件 |
+| `CHANGES_LOG.md` | 更新修改日志 |
+
+---
+
+*生成时间 / Generated at: 2026-01-03*
+
+---
+---
+
+# 历史修改记录 / Historical Changes
+
+**日期 / Date:** 2026-01-03
 **分支 / Branch:** claude/fix-master-file-ui-Upmor
 
 ---
