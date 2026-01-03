@@ -161,6 +161,17 @@ def clear_form_data() -> None:
         "afectacion_",
         "texto_",
         "cumplido_",
+        # Prefixes for sec_general, sec_anexo3, sec_contacts sections
+        "contacto",
+        "cargo_",
+        "correo_",
+        "fecha_",
+        "master_",
+        "descripcion_",
+        "cifra_",
+        "ebit_",
+        "resultado_",
+        "ebt_",
     )
     keys_to_delete = [
         key for key in list(st.session_state.keys())
