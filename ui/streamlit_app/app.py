@@ -8,6 +8,7 @@ Run with: streamlit run ui/streamlit_app/app.py
 import streamlit as st
 import sys
 import json
+import copy
 from pathlib import Path
 from datetime import date
 
@@ -223,6 +224,7 @@ def load_json_data(json_data: dict) -> None:
 
     Handles both simple fields and complex list structures.
     Supports both v1.0 format (lists at top level) and v2.0 format (_list_items).
+    Uses deep copy for nested structures to prevent reference issues.
     """
     # Clear existing form data (this also clears widget state keys)
     state.clear_form_data()
@@ -236,17 +238,18 @@ def load_json_data(json_data: dict) -> None:
 
     if is_v2 and list_items_data:
         # V2.0 format: list items are stored separately in _list_items
-        # First, process scalar fields
+        # First, process scalar fields (exclude fields that are in list_items)
         for key, value in json_data.items():
-            if not key.startswith("_"):
+            if not key.startswith("_") and key not in list_items_data:
                 state.set_field_value(key, value)
 
-        # Then, process list items from _list_items
+        # Then, process list items from _list_items using deep copy
         for field_name, items in list_items_data.items():
             st.session_state.list_items[field_name] = []
             for item in items:
                 if isinstance(item, dict):
-                    state.add_list_item(field_name, item.copy())
+                    # Use deep copy to preserve nested structures
+                    state.add_list_item(field_name, copy.deepcopy(item))
                 else:
                     state.add_list_item(field_name, {"value": item})
     else:
@@ -256,11 +259,11 @@ def load_json_data(json_data: dict) -> None:
                 continue
 
             if isinstance(value, list):
-                # Handle list fields
+                # Handle list fields using deep copy
                 st.session_state.list_items[key] = []
                 for item in value:
                     if isinstance(item, dict):
-                        state.add_list_item(key, item.copy())
+                        state.add_list_item(key, copy.deepcopy(item))
                     else:
                         state.add_list_item(key, {"value": item})
             else:
