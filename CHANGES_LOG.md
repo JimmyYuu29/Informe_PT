@@ -1,6 +1,174 @@
 # Informe PT - 修改日志 / Changes Log
 
 **日期 / Date:** 2026-01-03
+**分支 / Branch:** claude/fix-json-import-errors-tIsT2
+
+---
+
+## 修改概述 / Summary of Changes
+
+本次修改解决了以下问题：
+
+1. JSON 导入时 Información General、Datos Financieros、Anexo III - Comentarios、Contactos 板块数据丢失
+2. JSON 导出顺序与 UI 完全一致化
+3. Widget 状态清理机制优化
+
+---
+
+## 1. JSON 导入数据丢失修复 / JSON Import Data Loss Fix
+
+### 问题描述 / Problem
+JSON 元数据导入后，以下板块数据无法正确显示：
+- **Información General** (fecha_fin_fiscal, entidad_cliente, master_file, descripcion_actividad)
+- **Datos Financieros** (cifra_1, cifra_0, ebit_1, ebit_0, 等) - 计算结果显示但输入数据丢失
+- **Anexo III - Comentarios** (texto_anexo3)
+- **Contactos** (contacto1-3, cargo_contacto1-3, correo_contacto1-3)
+
+### 根本原因 / Root Cause
+1. Widget 键值清理不完整，部分字段前缀（如 contacto, cargo_, correo_, fecha_, cifra_, ebit_ 等）未被包含在清理列表中
+2. 导入后 widget 状态未完全同步，导致 Streamlit 使用缓存的 widget 值而非导入的数据
+
+### 解决方案 / Solution
+
+#### 1.1 扩展 Widget 键值清理模式
+在 `ui/streamlit_app/state_store.py` 中添加更多 widget 键值前缀：
+
+```python
+widget_prefixes = (
+    # 原有前缀
+    "field_", "entidad_", "servicio_oovv_", ...
+    # 新增前缀 - 覆盖所有缺失板块
+    "contacto", "cargo_", "correo_",      # sec_contacts
+    "fecha_", "master_", "descripcion_",  # sec_general
+    "cifra_", "ebit_", "resultado_", "ebt_",  # sec_financials
+)
+```
+
+#### 1.2 优化 `_force_clear_widget_state()` 函数
+在 `ui/streamlit_app/app.py` 中同步添加相同的清理模式：
+
+```python
+if any(pattern in key for pattern in (
+    "field_", "entidad_", "servicio_", ...
+    # 新增模式
+    "contacto", "cargo_", "correo_", "fecha_", "master_",
+    "descripcion_", "cifra_", "ebit_", "resultado_", "ebt_"
+)):
+```
+
+#### 1.3 优化 `load_json_data()` 导入流程
+改进导入顺序，确保 widget 状态在数据加载前后都被正确清理：
+
+```python
+def load_json_data(json_data: dict) -> None:
+    # FIRST: 在清理 form_data 之前先清理 widget 状态
+    _force_clear_widget_state()
+
+    # 清理现有数据并设置导入标志
+    state.clear_form_data()
+
+    # ... 加载数据 ...
+
+    # FINAL: 再次清理任何可能干扰的 widget 状态
+    _force_clear_widget_state()
+
+    # 确保导入标志仍然被设置
+    st.session_state._data_just_imported = True
+```
+
+---
+
+## 2. JSON 导出顺序与 UI 完全一致化 / JSON Export Order Full Alignment
+
+### 问题描述 / Problem
+导出的 JSON 字段顺序与 UI 界面中的显示顺序不一致，特别是对于特殊板块。
+
+### 解决方案 / Solution
+
+#### 2.1 添加板块专用字段顺序函数
+在 `ui/streamlit_app/app.py` 中为每个特殊板块添加专用排序函数：
+
+```python
+def _get_financials_field_order() -> list[str]:
+    """财务数据字段顺序"""
+    return [
+        "cifra_1", "cifra_0",
+        "ebit_1", "ebit_0",
+        "resultado_fin_1", "resultado_fin_0",
+        "ebt_1", "ebt_0",
+        "resultado_net_1", "resultado_net_0",
+    ]
+
+def _get_compliance_resumen_order(prefix: str, total_rows: int) -> list[str]:
+    """合规摘要字段顺序"""
+    return [f"cumplimiento_resumen_{prefix}_{i}" for i in range(1, total_rows + 1)]
+
+def _get_contacts_field_order() -> list[str]:
+    """联系人字段顺序"""
+    fields = []
+    for i in range(1, 4):
+        fields.extend([f"contacto{i}", f"cargo_contacto{i}", f"correo_contacto{i}"])
+    return fields
+```
+
+#### 2.2 更新 `_get_export_field_order()` 函数
+为每个板块使用显式排序：
+
+```python
+def _get_export_field_order(plugin: PluginPack) -> list[str]:
+    ordered_fields: list[str] = []
+    for section in plugin.get_ui_sections():
+        section_id = section.get("id", "")
+
+        if section_id == "sec_general":
+            ordered_fields.extend(["fecha_fin_fiscal", "entidad_cliente",
+                                   "master_file", "descripcion_actividad"])
+        elif section_id == "sec_financials":
+            ordered_fields.extend(_get_financials_field_order())
+        elif section_id == "sec_anexo3":
+            ordered_fields.append("texto_anexo3")
+        elif section_id == "sec_contacts":
+            ordered_fields.extend(_get_contacts_field_order())
+        # ... 其他板块处理 ...
+
+    return ordered_fields
+```
+
+---
+
+## 修改的文件 / Modified Files
+
+| 文件 / File | 修改类型 / Change Type |
+|------------|----------------------|
+| `ui/streamlit_app/state_store.py` | 扩展 widget 键值清理前缀列表 |
+| `ui/streamlit_app/app.py` | 优化导入流程、添加导出字段顺序函数 |
+| `CHANGES_LOG.md` | 更新修改日志 |
+
+---
+
+## 测试验证 / Testing Verification
+
+### 导入导出测试 / Import/Export Test
+1. 在表单中填写所有板块数据
+2. 导出 JSON 文件
+3. 清空表单
+4. 重新导入 JSON 文件
+5. 验证以下板块数据正确显示：
+   - ✓ Información General (日期、客户名称、Master File 访问、活动描述)
+   - ✓ Datos Financieros (所有财务数据字段)
+   - ✓ Anexo III - Comentarios (评论文本)
+   - ✓ Contactos (所有联系人信息)
+
+---
+
+*生成时间 / Generated at: 2026-01-03*
+
+---
+---
+
+# 历史修改记录 / Historical Changes
+
+**日期 / Date:** 2026-01-03
 **分支 / Branch:** work
 
 ---

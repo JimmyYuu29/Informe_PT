@@ -198,6 +198,34 @@ def _get_compliance_detail_order(prefix: str, total_rows: int) -> list[str]:
     return ordered_fields
 
 
+def _get_financials_field_order() -> list[str]:
+    """Return the financial data field order as shown in the UI."""
+    return [
+        "cifra_1", "cifra_0",
+        "ebit_1", "ebit_0",
+        "resultado_fin_1", "resultado_fin_0",
+        "ebt_1", "ebt_0",
+        "resultado_net_1", "resultado_net_0",
+    ]
+
+
+def _get_compliance_resumen_order(prefix: str, total_rows: int) -> list[str]:
+    """Return the compliance resumen field order as shown in the UI."""
+    return [f"cumplimiento_resumen_{prefix}_{i}" for i in range(1, total_rows + 1)]
+
+
+def _get_contacts_field_order() -> list[str]:
+    """Return the contacts field order as shown in the UI."""
+    fields = []
+    for i in range(1, 4):
+        fields.extend([
+            f"contacto{i}",
+            f"cargo_contacto{i}",
+            f"correo_contacto{i}",
+        ])
+    return fields
+
+
 def _get_export_field_order(plugin: PluginPack) -> list[str]:
     """Return form field names in the same order as the UI sections."""
     ordered_fields: list[str] = []
@@ -205,12 +233,35 @@ def _get_export_field_order(plugin: PluginPack) -> list[str]:
         section_id = section.get("id", "")
         field_names = section.get("fields", [])
 
-        if section_id == "sec_risks" or "risk_elements" in field_names:
+        if section_id == "sec_general":
+            # Explicit order for Información General
+            ordered_fields.extend([
+                "fecha_fin_fiscal",
+                "entidad_cliente",
+                "master_file",
+                "descripcion_actividad",
+            ])
+        elif section_id == "sec_financials":
+            # Explicit order for Datos Financieros
+            ordered_fields.extend(_get_financials_field_order())
+        elif section_id == "sec_compliance_local":
+            # Explicit order for Cumplimiento Local File (Resumen)
+            ordered_fields.extend(_get_compliance_resumen_order("local", 3))
+        elif section_id == "sec_compliance_master":
+            # Explicit order for Cumplimiento Master File (Resumen)
+            ordered_fields.extend(_get_compliance_resumen_order("mast", 4))
+        elif section_id == "sec_risks" or "risk_elements" in field_names:
             ordered_fields.extend(_get_risk_field_order())
         elif section_id == "sec_local_detail" or "local_file_compliance" in field_names:
             ordered_fields.extend(_get_compliance_detail_order("local", 14))
         elif section_id == "sec_master_detail" or "master_file_compliance" in field_names:
             ordered_fields.extend(_get_compliance_detail_order("mast", 17))
+        elif section_id == "sec_anexo3":
+            # Explicit order for Anexo III - Comentarios
+            ordered_fields.append("texto_anexo3")
+        elif section_id == "sec_contacts":
+            # Explicit order for Contactos
+            ordered_fields.extend(_get_contacts_field_order())
         else:
             ordered_fields.extend(field_names)
 
@@ -312,7 +363,10 @@ def _force_clear_widget_state() -> None:
         if any(pattern in key for pattern in (
             "field_", "entidad_", "servicio_", "analizar_", "impacto_",
             "afectacion_", "texto_", "cumplido_", "cumplimiento_",
-            "rm_", "add_", "remove_", "_action_"
+            "rm_", "add_", "remove_", "_action_",
+            # Additional patterns for sec_general, sec_anexo3, sec_contacts, sec_financials
+            "contacto", "cargo_", "correo_", "fecha_", "master_",
+            "descripcion_", "cifra_", "ebit_", "resultado_", "ebt_"
         )):
             patterns_to_clear.append(key)
 
@@ -344,7 +398,11 @@ def load_json_data(json_data: dict) -> None:
             normalized["_list_items"] = json_data["list_items"]
         json_data = normalized
 
-    # Clear existing form data (this also clears widget state keys)
+    # FIRST: Force clear all widget state BEFORE clearing form data
+    # This ensures no stale widget values interfere with import
+    _force_clear_widget_state()
+
+    # Clear existing form data (this also clears widget state keys and sets import flag)
     state.clear_form_data()
 
     # Extract metadata and list items without mutating original dict
@@ -371,7 +429,7 @@ def load_json_data(json_data: dict) -> None:
                 else:
                     state.add_list_item(field_name, {"value": item})
 
-        # Process scalar fields (exclude fields that are in list_items)
+        # Process ALL scalar fields (exclude only internal keys and list fields)
         for key, value in json_data.items():
             if key.startswith("_"):
                 continue
@@ -387,6 +445,8 @@ def load_json_data(json_data: dict) -> None:
                     else:
                         state.add_list_item(key, {"value": item})
             else:
+                # Handle scalar fields - including all sections:
+                # sec_general, sec_financials, sec_anexo3, sec_contacts, etc.
                 state.set_field_value(key, value)
     else:
         # V1.0 format: lists are mixed with scalar fields
@@ -406,9 +466,12 @@ def load_json_data(json_data: dict) -> None:
                 # Handle scalar fields
                 state.set_field_value(key, value)
 
-    # Force clear any remaining widget state that might override imported data
+    # FINAL: Force clear any remaining widget state that might override imported data
     # This is a safety measure to ensure imported data takes precedence
     _force_clear_widget_state()
+
+    # Ensure the import flag is still set after all operations
+    st.session_state._data_just_imported = True
 
 
 def generate_document(plugin_id: str, form_data: dict) -> None:
