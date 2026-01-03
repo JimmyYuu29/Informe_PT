@@ -668,7 +668,7 @@ function refreshListItems(field) {
 
 function renderFinancialDataTable(allFields) {
     const container = document.createElement('div');
-    container.className = 'form-table financial-table';
+    container.className = 'form-table financial-table-3col';
 
     const financialRows = [
         { label: 'Cifra de negocios', field_1: 'cifra_1', field_0: 'cifra_0' },
@@ -678,35 +678,35 @@ function renderFinancialDataTable(allFields) {
         { label: 'Resultado Neto', field_1: 'resultado_net_1', field_0: 'resultado_net_0' },
     ];
 
-    // Header
+    // Header - 3 data columns
     const header = document.createElement('div');
     header.className = 'form-table-header';
     header.innerHTML = `
         <span>Partidas Contables</span>
-        <span>Variacion (%)</span>
+        <span>Variación (%)</span>
         <span>Ejercicio Actual (EUR)</span>
         <span>Ejercicio Anterior (EUR)</span>
     `;
     container.appendChild(header);
 
-    // Data rows
+    // Data rows with inputs
     financialRows.forEach(row => {
         const rowEl = document.createElement('div');
         rowEl.className = 'form-table-row';
         rowEl.dataset.row = row.field_1;
 
-        // Label
+        // Label column
         const labelCell = document.createElement('span');
         labelCell.className = 'form-table-cell label';
         labelCell.textContent = row.label;
 
-        // Variation (calculated)
+        // Column 1: Variation (auto-calculated)
         const variationCell = document.createElement('span');
-        variationCell.className = 'form-table-cell number';
+        variationCell.className = 'form-table-cell number calculated-value';
         variationCell.id = `variation-${row.field_1}`;
         variationCell.textContent = 'N/A';
 
-        // Current year input
+        // Column 2: Ejercicio Actual input
         const currentCell = document.createElement('span');
         currentCell.className = 'form-table-cell';
         const currentInput = document.createElement('input');
@@ -719,10 +719,11 @@ function renderFinancialDataTable(allFields) {
             const value = parseFloat(e.target.value);
             AppState.setFormValue(row.field_1, isNaN(value) ? null : value);
             updateFinancialVariation(row.field_1, row.field_0);
+            updateDerivedValues();
         });
         currentCell.appendChild(currentInput);
 
-        // Prior year input
+        // Column 3: Ejercicio Anterior input
         const priorCell = document.createElement('span');
         priorCell.className = 'form-table-cell';
         const priorInput = document.createElement('input');
@@ -735,6 +736,7 @@ function renderFinancialDataTable(allFields) {
             const value = parseFloat(e.target.value);
             AppState.setFormValue(row.field_0, isNaN(value) ? null : value);
             updateFinancialVariation(row.field_1, row.field_0);
+            updateDerivedValues();
         });
         priorCell.appendChild(priorInput);
 
@@ -745,13 +747,120 @@ function renderFinancialDataTable(allFields) {
         container.appendChild(rowEl);
     });
 
-    // Caption
+    // Divider before derived rows
+    const divider = document.createElement('div');
+    divider.className = 'form-table-divider';
+    container.appendChild(divider);
+
+    // Caption for derived rows
     const caption = document.createElement('p');
     caption.className = 'caption-text';
-    caption.textContent = 'Los valores de variacion se calculan automaticamente.';
+    caption.textContent = 'Valores calculados automáticamente:';
     container.appendChild(caption);
 
+    // Derived rows (calculated values - 2 additional rows)
+    const derivedRows = [
+        { label: 'Total costes operativos', id: 'derived-cost', unit: '€' },
+        { label: 'Operating Margin (OM)', id: 'derived-om', unit: '%' },
+        { label: 'Net Cost Plus (NCP)', id: 'derived-ncp', unit: '%' },
+    ];
+
+    derivedRows.forEach(row => {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'form-table-row derived-row';
+
+        // Label
+        const labelCell = document.createElement('span');
+        labelCell.className = 'form-table-cell label derived-label';
+        labelCell.textContent = row.label;
+
+        // Variation (calculated)
+        const variationCell = document.createElement('span');
+        variationCell.className = 'form-table-cell number derived-value';
+        variationCell.id = `${row.id}-variation`;
+        variationCell.textContent = 'N/A';
+
+        // Current year (calculated)
+        const currentCell = document.createElement('span');
+        currentCell.className = 'form-table-cell number derived-value';
+        currentCell.id = `${row.id}-1`;
+        currentCell.textContent = row.unit === '€' ? '0,00 €' : '0,00 %';
+
+        // Prior year (calculated)
+        const priorCell = document.createElement('span');
+        priorCell.className = 'form-table-cell number derived-value';
+        priorCell.id = `${row.id}-0`;
+        priorCell.textContent = row.unit === '€' ? '0,00 €' : '0,00 %';
+
+        rowEl.appendChild(labelCell);
+        rowEl.appendChild(variationCell);
+        rowEl.appendChild(currentCell);
+        rowEl.appendChild(priorCell);
+        container.appendChild(rowEl);
+    });
+
     return container;
+}
+
+function updateDerivedValues() {
+    const cifra_1 = AppState.getFormValue('cifra_1') || 0;
+    const cifra_0 = AppState.getFormValue('cifra_0') || 0;
+    const ebit_1 = AppState.getFormValue('ebit_1') || 0;
+    const ebit_0 = AppState.getFormValue('ebit_0') || 0;
+
+    // Total costes operativos = Cifra de negocios - EBIT
+    const cost_1 = cifra_1 - ebit_1;
+    const cost_0 = cifra_0 - ebit_0;
+
+    // Operating Margin (OM) = (EBIT / Cifra de negocios) * 100
+    const om_1 = cifra_1 !== 0 ? (ebit_1 / cifra_1) * 100 : 0;
+    const om_0 = cifra_0 !== 0 ? (ebit_0 / cifra_0) * 100 : 0;
+
+    // Net Cost Plus (NCP) = (EBIT / Total costes operativos) * 100
+    const ncp_1 = cost_1 !== 0 ? (ebit_1 / cost_1) * 100 : 0;
+    const ncp_0 = cost_0 !== 0 ? (ebit_0 / cost_0) * 100 : 0;
+
+    // Format currency (Spanish format)
+    const formatCurrency = (val) => {
+        return val.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+    };
+
+    // Format percentage
+    const formatPercent = (val) => {
+        return val.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' %';
+    };
+
+    // Calculate variation percentage
+    const calcVariation = (v1, v0) => {
+        if (v0 === 0) return 'N/A';
+        const variation = ((v1 - v0) / Math.abs(v0)) * 100;
+        const sign = variation >= 0 ? '+' : '';
+        return `${sign}${variation.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} %`;
+    };
+
+    // Update Total costes operativos
+    const costEl1 = document.getElementById('derived-cost-1');
+    const costEl0 = document.getElementById('derived-cost-0');
+    const costVarEl = document.getElementById('derived-cost-variation');
+    if (costEl1) costEl1.textContent = formatCurrency(cost_1);
+    if (costEl0) costEl0.textContent = formatCurrency(cost_0);
+    if (costVarEl) costVarEl.textContent = calcVariation(cost_1, cost_0);
+
+    // Update Operating Margin
+    const omEl1 = document.getElementById('derived-om-1');
+    const omEl0 = document.getElementById('derived-om-0');
+    const omVarEl = document.getElementById('derived-om-variation');
+    if (omEl1) omEl1.textContent = formatPercent(om_1);
+    if (omEl0) omEl0.textContent = formatPercent(om_0);
+    if (omVarEl) omVarEl.textContent = calcVariation(om_1, om_0);
+
+    // Update Net Cost Plus
+    const ncpEl1 = document.getElementById('derived-ncp-1');
+    const ncpEl0 = document.getElementById('derived-ncp-0');
+    const ncpVarEl = document.getElementById('derived-ncp-variation');
+    if (ncpEl1) ncpEl1.textContent = formatPercent(ncp_1);
+    if (ncpEl0) ncpEl0.textContent = formatPercent(ncp_0);
+    if (ncpVarEl) ncpVarEl.textContent = calcVariation(ncp_1, ncp_0);
 }
 
 function updateFinancialVariation(field1, field0) {
@@ -772,19 +881,19 @@ function updateFinancialVariation(field1, field0) {
 
 function renderRiskTable(allFields) {
     const container = document.createElement('div');
-    container.className = 'form-table risk-table';
+    container.className = 'risk-table-vertical';
 
     const riskLabels = [
         'Restructuraciones empresariales',
-        'Valoracion de transmisiones intragrupo de activos intangibles',
-        'Pagos por canones derivados de la cesion de intangibles',
+        'Valoración de transmisiones intragrupo de activos intangibles',
+        'Pagos por cánones derivados de la cesión de intangibles',
         'Pagos por servicios intragrupo',
-        'Existencia de perdidas reiteradas',
+        'Existencia de pérdidas reiteradas',
         'Operaciones financieras entre partes vinculadas',
         'Estructuras funcionales de bajo riesgo',
-        'Falta de declaracion de ingresos intragrupo',
-        'Erosion de bases imponibles',
-        'Revision de las formas societarias',
+        'Falta de declaración de ingresos intragrupo',
+        'Erosión de bases imponibles',
+        'Revisión de las formas societarias',
         'Operaciones con establecimientos permanentes',
         'Peso de las operaciones vinculadas relevante',
     ];
@@ -792,50 +901,50 @@ function renderRiskTable(allFields) {
     const impactoOptions = ['si', 'no', 'posible'];
     const afectacionOptions = ['bajo', 'medio', 'alto'];
 
-    // Header
-    const header = document.createElement('div');
-    header.className = 'form-table-header';
-    header.innerHTML = `
-        <span>#</span>
-        <span>Elemento de riesgo</span>
-        <span>Impacto</span>
-        <span>Afect. Prelim.</span>
-        <span>Mitigadores</span>
-        <span>Afect. Final</span>
-    `;
-    container.appendChild(header);
+    // Section title
+    const title = document.createElement('h4');
+    title.className = 'section-subheader';
+    title.textContent = 'Evaluación de Riesgos';
+    container.appendChild(title);
 
-    // Data rows
+    // Render each risk item with vertical layout (like Streamlit)
     riskLabels.forEach((label, idx) => {
         const i = idx + 1;
-        const rowEl = document.createElement('div');
-        rowEl.className = 'form-table-row';
 
-        // Number
-        const numCell = document.createElement('span');
-        numCell.className = 'form-table-cell label';
-        numCell.textContent = i;
+        // Item container
+        const itemContainer = document.createElement('div');
+        itemContainer.className = 'risk-item-vertical';
 
-        // Label
-        const labelCell = document.createElement('span');
-        labelCell.className = 'form-table-cell';
-        labelCell.textContent = label;
+        // Item header with number and label
+        const itemHeader = document.createElement('div');
+        itemHeader.className = 'risk-item-header';
+        itemHeader.innerHTML = `<strong>${i}. ${label}</strong>`;
+        itemContainer.appendChild(itemHeader);
+
+        // Input row with 4 columns (like Streamlit)
+        const inputRow = document.createElement('div');
+        inputRow.className = 'risk-item-inputs';
 
         // Impacto
-        const impactoCell = document.createElement('span');
-        impactoCell.className = 'form-table-cell';
+        const impactoGroup = document.createElement('div');
+        impactoGroup.className = 'form-group';
+        impactoGroup.innerHTML = '<label class="form-label">Impacto</label>';
         const impactoSelect = createSelect(`impacto_${i}`, impactoOptions, 'no');
-        impactoCell.appendChild(impactoSelect);
+        impactoGroup.appendChild(impactoSelect);
+        inputRow.appendChild(impactoGroup);
 
         // Afectacion Preliminar
-        const afectPreCell = document.createElement('span');
-        afectPreCell.className = 'form-table-cell';
+        const afectPreGroup = document.createElement('div');
+        afectPreGroup.className = 'form-group';
+        afectPreGroup.innerHTML = '<label class="form-label">Afectación Prelim.</label>';
         const afectPreSelect = createSelect(`afectacion_pre_${i}`, afectacionOptions, 'bajo');
-        afectPreCell.appendChild(afectPreSelect);
+        afectPreGroup.appendChild(afectPreSelect);
+        inputRow.appendChild(afectPreGroup);
 
         // Mitigadores
-        const mitigadoresCell = document.createElement('span');
-        mitigadoresCell.className = 'form-table-cell';
+        const mitigadoresGroup = document.createElement('div');
+        mitigadoresGroup.className = 'form-group';
+        mitigadoresGroup.innerHTML = '<label class="form-label">Mitigadores</label>';
         const mitigadoresInput = document.createElement('input');
         mitigadoresInput.type = 'text';
         mitigadoresInput.className = 'form-input';
@@ -844,21 +953,25 @@ function renderRiskTable(allFields) {
         mitigadoresInput.addEventListener('input', (e) => {
             AppState.setFormValue(`texto_mitigacion_${i}`, e.target.value);
         });
-        mitigadoresCell.appendChild(mitigadoresInput);
+        mitigadoresGroup.appendChild(mitigadoresInput);
+        inputRow.appendChild(mitigadoresGroup);
 
         // Afectacion Final
-        const afectFinalCell = document.createElement('span');
-        afectFinalCell.className = 'form-table-cell';
+        const afectFinalGroup = document.createElement('div');
+        afectFinalGroup.className = 'form-group';
+        afectFinalGroup.innerHTML = '<label class="form-label">Afectación Final</label>';
         const afectFinalSelect = createSelect(`afectacion_final_${i}`, afectacionOptions, 'bajo');
-        afectFinalCell.appendChild(afectFinalSelect);
+        afectFinalGroup.appendChild(afectFinalSelect);
+        inputRow.appendChild(afectFinalGroup);
 
-        rowEl.appendChild(numCell);
-        rowEl.appendChild(labelCell);
-        rowEl.appendChild(impactoCell);
-        rowEl.appendChild(afectPreCell);
-        rowEl.appendChild(mitigadoresCell);
-        rowEl.appendChild(afectFinalCell);
-        container.appendChild(rowEl);
+        itemContainer.appendChild(inputRow);
+
+        // Divider between items
+        const divider = document.createElement('hr');
+        divider.className = 'risk-item-divider';
+        itemContainer.appendChild(divider);
+
+        container.appendChild(itemContainer);
     });
 
     return container;
@@ -866,98 +979,102 @@ function renderRiskTable(allFields) {
 
 function renderComplianceDetailTable(prefix, count, allFields) {
     const container = document.createElement('div');
-    container.className = 'form-table compliance-table';
+    container.className = 'compliance-table-vertical';
 
     const localFileItems = [
         'Estructura organizativa del obligado tributario',
-        'Descripcion de las actividades de la entidad',
+        'Descripción de las actividades de la entidad',
         'Principales competidores',
         'Funciones ejercidas y riesgos asumidos',
-        'Informacion detallada de las operaciones vinculadas',
-        'Analisis de comparabilidad',
-        'Metodo de valoracion elegido',
-        'Informacion financiera del contribuyente',
+        'Información detallada de las operaciones vinculadas',
+        'Análisis de comparabilidad',
+        'Método de valoración elegido',
+        'Información financiera del contribuyente',
         'Criterios de reparto de costes',
         'Acuerdos de reparto de costes',
-        'Acuerdos previos de valoracion',
-        'Informacion sobre establecimientos permanentes',
-        'Informacion sobre operaciones con paraisos fiscales',
-        'Informacion general sobre el grupo',
+        'Acuerdos previos de valoración',
+        'Información sobre establecimientos permanentes',
+        'Información sobre operaciones con paraísos fiscales',
+        'Información general sobre el grupo',
     ];
 
     const masterFileItems = [
         'Estructura organizativa del grupo multinacional',
-        'Descripcion del negocio del grupo',
+        'Descripción del negocio del grupo',
         'Intangibles del grupo',
         'Actividades financieras intragrupo',
-        'Situacion financiera y fiscal del grupo',
-        'Descripcion de la cadena de suministro',
+        'Situación financiera y fiscal del grupo',
+        'Descripción de la cadena de suministro',
         'Lista de acuerdos importantes de servicios',
-        'Descripcion funcional y estrategia del grupo',
-        'Principales operaciones de reestructuracion',
-        'Descripcion de la estrategia del grupo respecto a intangibles',
+        'Descripción funcional y estrategia del grupo',
+        'Principales operaciones de reestructuración',
+        'Descripción de la estrategia del grupo respecto a intangibles',
         'Lista de intangibles importantes',
-        'Descripcion de acuerdos de coste',
-        'Descripcion de prestamos intragrupo',
+        'Descripción de acuerdos de coste',
+        'Descripción de préstamos intragrupo',
         'Estados financieros consolidados',
         'Lista de APAs unilaterales',
-        'Informacion sobre resoluciones fiscales',
-        'Informacion sobre operaciones con paraisos fiscales',
+        'Información sobre resoluciones fiscales',
+        'Información sobre operaciones con paraísos fiscales',
     ];
 
     const items = prefix === 'local' ? localFileItems : masterFileItems;
     const cumplidoOptions = ['si', 'parcial', 'no'];
 
-    // Header
-    const header = document.createElement('div');
-    header.className = 'form-table-header';
-    header.innerHTML = `
-        <span>#</span>
-        <span>Contenido</span>
-        <span>Cumplido</span>
-        <span>Comentario</span>
-    `;
-    container.appendChild(header);
+    // Section title
+    const titleText = prefix === 'local' ? 'Cumplimiento Local File - Detalle' : 'Cumplimiento Master File - Detalle';
+    const title = document.createElement('h4');
+    title.className = 'section-subheader';
+    title.textContent = titleText;
+    container.appendChild(title);
 
-    // Data rows
+    // Render each compliance item with vertical layout (like Streamlit)
     for (let i = 1; i <= count; i++) {
-        const rowEl = document.createElement('div');
-        rowEl.className = 'form-table-row';
+        // Item container
+        const itemContainer = document.createElement('div');
+        itemContainer.className = 'compliance-item-vertical';
 
-        // Number
-        const numCell = document.createElement('span');
-        numCell.className = 'form-table-cell label';
-        numCell.textContent = i;
+        // Item header with number and content
+        const itemHeader = document.createElement('div');
+        itemHeader.className = 'compliance-item-header';
+        itemHeader.innerHTML = `<strong>${i}. ${items[i - 1] || `Item ${i}`}</strong>`;
+        itemContainer.appendChild(itemHeader);
 
-        // Content
-        const contentCell = document.createElement('span');
-        contentCell.className = 'form-table-cell';
-        contentCell.textContent = items[i - 1] || `Item ${i}`;
+        // Input row with 2 columns (like Streamlit)
+        const inputRow = document.createElement('div');
+        inputRow.className = 'compliance-item-inputs';
 
         // Cumplido
-        const cumplidoCell = document.createElement('span');
-        cumplidoCell.className = 'form-table-cell';
+        const cumplidoGroup = document.createElement('div');
+        cumplidoGroup.className = 'form-group';
+        cumplidoGroup.innerHTML = '<label class="form-label">Cumplido</label>';
         const cumplidoSelect = createSelect(`cumplido_${prefix}_${i}`, cumplidoOptions, 'si');
-        cumplidoCell.appendChild(cumplidoSelect);
+        cumplidoGroup.appendChild(cumplidoSelect);
+        inputRow.appendChild(cumplidoGroup);
 
         // Comentario
-        const comentarioCell = document.createElement('span');
-        comentarioCell.className = 'form-table-cell';
+        const comentarioGroup = document.createElement('div');
+        comentarioGroup.className = 'form-group comentario-group';
+        comentarioGroup.innerHTML = '<label class="form-label">Comentario</label>';
         const comentarioInput = document.createElement('input');
         comentarioInput.type = 'text';
         comentarioInput.className = 'form-input';
         comentarioInput.name = `texto_cumplido_${prefix}_${i}`;
-        comentarioInput.placeholder = 'Comentario...';
+        comentarioInput.placeholder = 'Comentario (requerido si no cumple)...';
         comentarioInput.addEventListener('input', (e) => {
             AppState.setFormValue(`texto_cumplido_${prefix}_${i}`, e.target.value);
         });
-        comentarioCell.appendChild(comentarioInput);
+        comentarioGroup.appendChild(comentarioInput);
+        inputRow.appendChild(comentarioGroup);
 
-        rowEl.appendChild(numCell);
-        rowEl.appendChild(contentCell);
-        rowEl.appendChild(cumplidoCell);
-        rowEl.appendChild(comentarioCell);
-        container.appendChild(rowEl);
+        itemContainer.appendChild(inputRow);
+
+        // Divider between items
+        const divider = document.createElement('hr');
+        divider.className = 'compliance-item-divider';
+        itemContainer.appendChild(divider);
+
+        container.appendChild(itemContainer);
     }
 
     return container;
@@ -965,61 +1082,71 @@ function renderComplianceDetailTable(prefix, count, allFields) {
 
 function renderComplianceSummaryTable(prefix, count, allFields) {
     const container = document.createElement('div');
-    container.className = 'form-table compliance-summary-table';
+    container.className = 'compliance-summary-vertical';
 
     const localSections = [
-        { num: 1, label: 'Informacion del contribuyente' },
-        { num: 2, label: 'Informacion de las operaciones vinculadas' },
-        { num: 3, label: 'Informacion economico-financiera del contribuyente' },
+        { num: 1, label: 'Información del contribuyente' },
+        { num: 2, label: 'Información de las operaciones vinculadas' },
+        { num: 3, label: 'Información económico-financiera del contribuyente' },
     ];
 
     const masterSections = [
-        { num: 1, label: 'Informacion relativa a la estructura y actividades del Grupo' },
-        { num: 2, label: 'Informacion relativa a los activos intangibles del Grupo' },
-        { num: 3, label: 'Informacion relativa a la actividad financiera' },
-        { num: 4, label: 'Situacion financiera y fiscal del Grupo' },
+        { num: 1, label: 'Información relativa a la estructura y actividades del Grupo' },
+        { num: 2, label: 'Información relativa a los activos intangibles del Grupo' },
+        { num: 3, label: 'Información relativa a la actividad financiera' },
+        { num: 4, label: 'Situación financiera y fiscal del Grupo' },
     ];
 
     const sections = prefix === 'local' ? localSections : masterSections;
     const cumplimientoOptions = ['si', 'no'];
 
-    const reglamento = prefix === 'local' ? 'Articulo 16 del Reglamento' : 'Articulo 15 del Reglamento';
+    const reglamento = prefix === 'local' ? 'Artículo 16 del Reglamento' : 'Artículo 15 del Reglamento';
+    const titleText = prefix === 'local' ? 'Cumplimiento Local File (Resumen)' : 'Cumplimiento Master File (Resumen)';
 
-    // Header
-    const header = document.createElement('div');
-    header.className = 'form-table-header';
-    header.innerHTML = `
-        <span>#</span>
-        <span>Secciones (${reglamento})</span>
-        <span>Cumplimiento</span>
-    `;
-    container.appendChild(header);
+    // Section title
+    const title = document.createElement('h4');
+    title.className = 'section-subheader';
+    title.textContent = titleText;
+    container.appendChild(title);
 
-    // Data rows
+    // Info text
+    const infoText = document.createElement('p');
+    infoText.className = 'info-text';
+    infoText.innerHTML = `<em>Secciones según ${reglamento}</em>`;
+    container.appendChild(infoText);
+
+    // Render each section with vertical layout (like Streamlit)
     sections.forEach(section => {
-        const rowEl = document.createElement('div');
-        rowEl.className = 'form-table-row';
+        // Item container
+        const itemContainer = document.createElement('div');
+        itemContainer.className = 'compliance-summary-item';
 
-        // Number
-        const numCell = document.createElement('span');
-        numCell.className = 'form-table-cell label';
-        numCell.textContent = section.num;
+        // Item header with number and label
+        const itemHeader = document.createElement('div');
+        itemHeader.className = 'compliance-summary-header';
+        itemHeader.innerHTML = `<strong>${section.num}. ${section.label}</strong>`;
+        itemContainer.appendChild(itemHeader);
 
-        // Label
-        const labelCell = document.createElement('span');
-        labelCell.className = 'form-table-cell';
-        labelCell.textContent = section.label;
+        // Input row
+        const inputRow = document.createElement('div');
+        inputRow.className = 'compliance-summary-inputs';
 
         // Cumplimiento
-        const cumplimientoCell = document.createElement('span');
-        cumplimientoCell.className = 'form-table-cell';
+        const cumplimientoGroup = document.createElement('div');
+        cumplimientoGroup.className = 'form-group';
+        cumplimientoGroup.innerHTML = '<label class="form-label">Cumplimiento</label>';
         const cumplimientoSelect = createSelect(`cumplimiento_resumen_${prefix}_${section.num}`, cumplimientoOptions, 'si');
-        cumplimientoCell.appendChild(cumplimientoSelect);
+        cumplimientoGroup.appendChild(cumplimientoSelect);
+        inputRow.appendChild(cumplimientoGroup);
 
-        rowEl.appendChild(numCell);
-        rowEl.appendChild(labelCell);
-        rowEl.appendChild(cumplimientoCell);
-        container.appendChild(rowEl);
+        itemContainer.appendChild(inputRow);
+
+        // Divider between items
+        const divider = document.createElement('hr');
+        divider.className = 'compliance-summary-divider';
+        itemContainer.appendChild(divider);
+
+        container.appendChild(itemContainer);
     });
 
     return container;
