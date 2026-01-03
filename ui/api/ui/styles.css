@@ -1295,22 +1295,170 @@ body {
     color: var(--gray-600);
 }
 
+/* ============================================================================
+   Vertical Layout Tables (Matching Streamlit)
+   ============================================================================ */
+
+/* Financial Table with 3 data columns */
+.financial-table-3col .form-table-header,
+.financial-table-3col .form-table-row {
+    grid-template-columns: 1.5fr 0.8fr 1fr 1fr;
+}
+
+.financial-table-3col .form-table-divider {
+    grid-column: 1 / -1;
+    border-top: 2px solid var(--gray-300);
+    margin: var(--spacing-md) 0;
+}
+
+.financial-table-3col .derived-row {
+    background: var(--gray-50);
+}
+
+.financial-table-3col .derived-label {
+    font-style: italic;
+    color: var(--gray-600);
+}
+
+.financial-table-3col .derived-value {
+    font-style: italic;
+    color: var(--gray-600);
+    font-family: monospace;
+}
+
+/* Risk Table Vertical Layout */
+.risk-table-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.risk-item-vertical {
+    background: var(--gray-50);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md);
+}
+
+.risk-item-header {
+    margin-bottom: var(--spacing-md);
+    color: var(--gray-800);
+    font-size: var(--font-size-base);
+}
+
+.risk-item-inputs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-md);
+}
+
+.risk-item-divider {
+    border: none;
+    border-top: 1px solid var(--gray-200);
+    margin-top: var(--spacing-md);
+    margin-bottom: 0;
+}
+
+/* Compliance Detail Table Vertical Layout */
+.compliance-table-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.compliance-item-vertical {
+    background: var(--gray-50);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md);
+}
+
+.compliance-item-header {
+    margin-bottom: var(--spacing-md);
+    color: var(--gray-800);
+    font-size: var(--font-size-base);
+}
+
+.compliance-item-inputs {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: var(--spacing-md);
+    align-items: start;
+}
+
+.compliance-item-inputs .comentario-group {
+    flex: 1;
+}
+
+.compliance-item-divider {
+    border: none;
+    border-top: 1px solid var(--gray-200);
+    margin-top: var(--spacing-md);
+    margin-bottom: 0;
+}
+
+/* Compliance Summary Vertical Layout */
+.compliance-summary-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.compliance-summary-item {
+    background: var(--gray-50);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md);
+}
+
+.compliance-summary-header {
+    margin-bottom: var(--spacing-md);
+    color: var(--gray-800);
+    font-size: var(--font-size-base);
+}
+
+.compliance-summary-inputs {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.compliance-summary-divider {
+    border: none;
+    border-top: 1px solid var(--gray-200);
+    margin-top: var(--spacing-md);
+    margin-bottom: 0;
+}
+
+/* Info text styling */
+.info-text {
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+    margin-bottom: var(--spacing-md);
+}
+
 /* Responsive Table Adjustments */
 @media (max-width: 1200px) {
-    .financial-table .form-table-header,
-    .financial-table .form-table-row {
+    .financial-table-3col .form-table-header,
+    .financial-table-3col .form-table-row {
         grid-template-columns: 1.5fr 0.8fr 1fr 1fr;
     }
 
     .contacts-grid {
         grid-template-columns: 1fr;
     }
+
+    .risk-item-inputs {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .compliance-item-inputs {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 992px) {
-    .risk-table .form-table-header,
-    .risk-table .form-table-row {
-        grid-template-columns: 0.3fr 1.5fr 0.6fr 0.6fr 1.2fr 0.6fr;
-        font-size: var(--font-size-sm);
+    .risk-item-inputs {
+        grid-template-columns: 1fr;
+    }
+
+    .compliance-summary-inputs {
+        flex-direction: column;
     }
 }
