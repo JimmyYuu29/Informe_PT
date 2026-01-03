@@ -1,0 +1,23 @@
+# Informe PT - Python Dependencies
+# Install with: pip install -r requirements.txt
+
+# Web Framework
+streamlit>=1.28.0
+
+# Document Generation
+python-docx>=0.8.11
+docxtpl>=0.16.0
+
+# API Backend
+fastapi>=0.104.0
+uvicorn>=0.24.0
+pydantic>=2.0.0
+
+# YAML Processing
+pyyaml>=6.0
+
+# Testing
+pytest>=7.4.0
+
+# Development utilities (optional)
+# python-dotenv>=1.0.0

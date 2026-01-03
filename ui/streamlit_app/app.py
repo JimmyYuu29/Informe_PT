@@ -218,6 +218,44 @@ def export_form_data() -> str:
     return json.dumps(serialized, ensure_ascii=False, indent=2)
 
 
+def _force_clear_widget_state() -> None:
+    """
+    Force clear all widget state keys that might interfere with imported data.
+
+    This is a comprehensive cleanup that ensures Streamlit widgets will use
+    the imported values from form_data/list_items instead of cached widget state.
+    """
+    # List of all possible widget key patterns used in the application
+    # This must be kept in sync with the widget keys used in form_renderer.py
+    # and components.py
+    patterns_to_clear = []
+
+    # Collect all keys that match common widget patterns
+    for key in list(st.session_state.keys()):
+        # Skip internal state keys
+        if key in ("initialized", "plugin_id", "form_data", "list_items",
+                   "generation_result", "validation_errors", "_data_just_imported"):
+            continue
+
+        # Skip metadata keys
+        if key.startswith("_"):
+            continue
+
+        # Clear any key that looks like a widget key
+        # Widget keys typically have patterns like field_xxx, entidad_x_x_xxx, etc.
+        if any(pattern in key for pattern in (
+            "field_", "entidad_", "servicio_", "analizar_", "impacto_",
+            "afectacion_", "texto_", "cumplido_", "cumplimiento_",
+            "rm_", "add_", "remove_", "_action_"
+        )):
+            patterns_to_clear.append(key)
+
+    # Delete the collected keys
+    for key in patterns_to_clear:
+        if key in st.session_state:
+            del st.session_state[key]
+
+
 def load_json_data(json_data: dict) -> None:
     """
     Load JSON data into the form state.
@@ -225,6 +263,9 @@ def load_json_data(json_data: dict) -> None:
     Handles both simple fields and complex list structures.
     Supports both v1.0 format (lists at top level) and v2.0 format (_list_items).
     Uses deep copy for nested structures to prevent reference issues.
+
+    CRITICAL: This function must properly clear all widget state to ensure
+    Streamlit widgets display the imported values instead of cached values.
     """
     # Clear existing form data (this also clears widget state keys)
     state.clear_form_data()
@@ -236,14 +277,14 @@ def load_json_data(json_data: dict) -> None:
     # Check export version
     is_v2 = metadata.get("version") == "2.0" or list_items_data is not None
 
+    # Track which fields are list fields to avoid double processing
+    list_field_names = set()
+
     if is_v2 and list_items_data:
         # V2.0 format: list items are stored separately in _list_items
-        # First, process scalar fields (exclude fields that are in list_items)
-        for key, value in json_data.items():
-            if not key.startswith("_") and key not in list_items_data:
-                state.set_field_value(key, value)
+        list_field_names = set(list_items_data.keys())
 
-        # Then, process list items from _list_items using deep copy
+        # Process list items from _list_items using deep copy
         for field_name, items in list_items_data.items():
             st.session_state.list_items[field_name] = []
             for item in items:
@@ -252,6 +293,24 @@ def load_json_data(json_data: dict) -> None:
                     state.add_list_item(field_name, copy.deepcopy(item))
                 else:
                     state.add_list_item(field_name, {"value": item})
+
+        # Process scalar fields (exclude fields that are in list_items)
+        for key, value in json_data.items():
+            if key.startswith("_"):
+                continue
+            if key in list_field_names:
+                continue
+            if isinstance(value, list):
+                # This is a list at top level that wasn't in _list_items
+                # Process it as a list field
+                st.session_state.list_items[key] = []
+                for item in value:
+                    if isinstance(item, dict):
+                        state.add_list_item(key, copy.deepcopy(item))
+                    else:
+                        state.add_list_item(key, {"value": item})
+            else:
+                state.set_field_value(key, value)
     else:
         # V1.0 format: lists are mixed with scalar fields
         for key, value in json_data.items():
@@ -269,6 +328,10 @@ def load_json_data(json_data: dict) -> None:
             else:
                 # Handle scalar fields
                 state.set_field_value(key, value)
+
+    # Force clear any remaining widget state that might override imported data
+    # This is a safety measure to ensure imported data takes precedence
+    _force_clear_widget_state()
 
 
 def generate_document(plugin_id: str, form_data: dict) -> None:

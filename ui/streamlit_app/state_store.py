@@ -133,14 +133,18 @@ def clear_form_data() -> None:
     st.session_state.generation_result = None
     st.session_state.validation_errors = []
 
-    # Clear all widget keys related to form inputs to ensure
-    # imported values take precedence over old widget state
+    # Clear ALL widget keys related to form inputs to ensure
+    # imported values take precedence over old widget state.
+    # This is critical because Streamlit prioritizes session_state[key]
+    # over the value parameter when rendering widgets.
+    #
     # Prefixes used by various form components:
-    # - field_: standard field widgets
+    # - field_: standard field widgets (from get_stable_key)
     # - entidad_: entity detail table widgets
     # - servicio_oovv_: service OOVV table widgets
     # - analizar_servicio_: service analysis checkbox widgets
     # - rm_/add_/remove_: list action buttons
+    # - add_servicio/remove_servicio: service add/remove buttons
     widget_prefixes = (
         "field_",
         "entidad_",
@@ -150,9 +154,16 @@ def clear_form_data() -> None:
         "add_",
         "remove_",
         "_action_",
+        # Additional prefixes that may be used in form components
+        "servicio_",
+        "cumplimiento_",
+        "impacto_",
+        "afectacion_",
+        "texto_",
+        "cumplido_",
     )
     keys_to_delete = [
-        key for key in st.session_state.keys()
+        key for key in list(st.session_state.keys())
         if any(key.startswith(prefix) for prefix in widget_prefixes)
     ]
     for key in keys_to_delete:
