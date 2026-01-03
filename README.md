@@ -1,6 +1,23 @@
 # Enterprise Document Generation Platform
 
+**Version 2.0**
+
 A configuration-driven document generation system for creating professional reports from structured data and Word templates.
+
+---
+
+## Author
+
+**Yihao Yu**
+Consultor en Innovacion e Inteligencia Artificial
+
+Forvis Mazars - Auditoria & Assurance - Sustainability
+C/ Diputacio, 260
+08007 Barcelona
+
+Email: yihao.yu@mazars.es
+
+---
 
 ## Overview
 
@@ -56,8 +73,11 @@ project_root/
 │       │   ├── main.py
 │       │   ├── schemas.py
 │       │   └── deps.py
-│       └── ui/
-│           └── FRONTEND_PROMPT.md
+│       ├── ui/                 # Web UI (HTML/CSS/JS)
+│       │   ├── index.html
+│       │   ├── app.js
+│       │   └── styles.css
+│       └── instruction.md      # Ubuntu deployment guide
 ├── scripts/                    # CLI utilities
 │   ├── run_validate.py
 │   └── run_generate.py
@@ -66,6 +86,8 @@ project_root/
 │   ├── test_rule_engine.py
 │   ├── test_golden.py
 │   └── golden/
+├── CHANGELOG.md                # Version history
+├── requirements.txt            # Python dependencies
 └── README.md
 ```
 
@@ -75,16 +97,13 @@ project_root/
 
 ```bash
 # Python 3.10+
-pip install pyyaml pydantic docxtpl python-docx
+pip install -r requirements.txt
+```
 
-# For Streamlit UI
-pip install streamlit
+Or install packages individually:
 
-# For FastAPI backend
-pip install fastapi uvicorn
-
-# For testing
-pip install pytest
+```bash
+pip install pyyaml pydantic docxtpl python-docx streamlit fastapi uvicorn pytest
 ```
 
 ### Run Streamlit UI
@@ -229,10 +248,22 @@ rules:
 - Audit logs with trace IDs for each generation
 - Sensitive fields masked in logs
 
+## Deployment
+
+For production deployment on Ubuntu servers, see the detailed instructions in:
+
+```
+ui/api/instruction.md
+```
+
 ## License
 
 Proprietary - Forvis Mazars Tax & Legal, S.L.P.
 
 ## Support
 
-For issues and feature requests, please contact the development team.
+For issues and feature requests, please contact:
+
+**Yihao Yu** - yihao.yu@mazars.es
+Consultor en Innovacion e Inteligencia Artificial
+Forvis Mazars - Auditoria & Assurance - Sustainability

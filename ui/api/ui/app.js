@@ -325,17 +325,43 @@ function renderSection(section, allFields, expanded = true) {
     const content = document.createElement('div');
     content.className = `section-content ${expanded ? '' : 'collapsed'}`;
 
-    // Find and render fields for this section
+    // Use specialized renderers for specific sections
+    const sectionId = section.id || '';
     const sectionFieldNames = section.fields || [];
-    sectionFieldNames.forEach(fieldName => {
-        const fieldDef = allFields.find(f => f.name === fieldName);
-        if (fieldDef) {
-            const fieldEl = renderField(fieldDef);
-            if (fieldEl) {
-                content.appendChild(fieldEl);
+
+    if (sectionId === 'sec_financials') {
+        const tableEl = renderFinancialDataTable(allFields);
+        content.appendChild(tableEl);
+    } else if (sectionId === 'sec_risks' || sectionFieldNames.includes('risk_elements')) {
+        const tableEl = renderRiskTable(allFields);
+        content.appendChild(tableEl);
+    } else if (sectionId === 'sec_local_detail' || sectionFieldNames.includes('local_file_compliance')) {
+        const tableEl = renderComplianceDetailTable('local', 14, allFields);
+        content.appendChild(tableEl);
+    } else if (sectionId === 'sec_master_detail' || sectionFieldNames.includes('master_file_compliance')) {
+        const tableEl = renderComplianceDetailTable('mast', 17, allFields);
+        content.appendChild(tableEl);
+    } else if (sectionId === 'sec_compliance_local') {
+        const tableEl = renderComplianceSummaryTable('local', 3, allFields);
+        content.appendChild(tableEl);
+    } else if (sectionId === 'sec_compliance_master') {
+        const tableEl = renderComplianceSummaryTable('mast', 4, allFields);
+        content.appendChild(tableEl);
+    } else if (sectionId === 'sec_contacts') {
+        const contactsEl = renderContactsSection(allFields);
+        content.appendChild(contactsEl);
+    } else {
+        // Default rendering
+        sectionFieldNames.forEach(fieldName => {
+            const fieldDef = allFields.find(f => f.name === fieldName);
+            if (fieldDef) {
+                const fieldEl = renderField(fieldDef);
+                if (fieldEl) {
+                    content.appendChild(fieldEl);
+                }
             }
-        }
-    });
+        });
+    }
 
     sectionEl.appendChild(header);
     sectionEl.appendChild(content);
@@ -634,6 +660,456 @@ function refreshListItems(field) {
         const itemEl = renderListItem(field, index);
         itemsContainer.appendChild(itemEl);
     });
+}
+
+// ============================================================================
+// Specialized Table Renderers (Matching Streamlit Layout)
+// ============================================================================
+
+function renderFinancialDataTable(allFields) {
+    const container = document.createElement('div');
+    container.className = 'form-table financial-table';
+
+    const financialRows = [
+        { label: 'Cifra de negocios', field_1: 'cifra_1', field_0: 'cifra_0' },
+        { label: 'EBIT', field_1: 'ebit_1', field_0: 'ebit_0' },
+        { label: 'Resultado Financiero', field_1: 'resultado_fin_1', field_0: 'resultado_fin_0' },
+        { label: 'EBT', field_1: 'ebt_1', field_0: 'ebt_0' },
+        { label: 'Resultado Neto', field_1: 'resultado_net_1', field_0: 'resultado_net_0' },
+    ];
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'form-table-header';
+    header.innerHTML = `
+        <span>Partidas Contables</span>
+        <span>Variacion (%)</span>
+        <span>Ejercicio Actual (EUR)</span>
+        <span>Ejercicio Anterior (EUR)</span>
+    `;
+    container.appendChild(header);
+
+    // Data rows
+    financialRows.forEach(row => {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'form-table-row';
+        rowEl.dataset.row = row.field_1;
+
+        // Label
+        const labelCell = document.createElement('span');
+        labelCell.className = 'form-table-cell label';
+        labelCell.textContent = row.label;
+
+        // Variation (calculated)
+        const variationCell = document.createElement('span');
+        variationCell.className = 'form-table-cell number';
+        variationCell.id = `variation-${row.field_1}`;
+        variationCell.textContent = 'N/A';
+
+        // Current year input
+        const currentCell = document.createElement('span');
+        currentCell.className = 'form-table-cell';
+        const currentInput = document.createElement('input');
+        currentInput.type = 'number';
+        currentInput.className = 'form-input';
+        currentInput.name = row.field_1;
+        currentInput.step = '0.01';
+        currentInput.placeholder = '0.00';
+        currentInput.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            AppState.setFormValue(row.field_1, isNaN(value) ? null : value);
+            updateFinancialVariation(row.field_1, row.field_0);
+        });
+        currentCell.appendChild(currentInput);
+
+        // Prior year input
+        const priorCell = document.createElement('span');
+        priorCell.className = 'form-table-cell';
+        const priorInput = document.createElement('input');
+        priorInput.type = 'number';
+        priorInput.className = 'form-input';
+        priorInput.name = row.field_0;
+        priorInput.step = '0.01';
+        priorInput.placeholder = '0.00';
+        priorInput.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            AppState.setFormValue(row.field_0, isNaN(value) ? null : value);
+            updateFinancialVariation(row.field_1, row.field_0);
+        });
+        priorCell.appendChild(priorInput);
+
+        rowEl.appendChild(labelCell);
+        rowEl.appendChild(variationCell);
+        rowEl.appendChild(currentCell);
+        rowEl.appendChild(priorCell);
+        container.appendChild(rowEl);
+    });
+
+    // Caption
+    const caption = document.createElement('p');
+    caption.className = 'caption-text';
+    caption.textContent = 'Los valores de variacion se calculan automaticamente.';
+    container.appendChild(caption);
+
+    return container;
+}
+
+function updateFinancialVariation(field1, field0) {
+    const val1 = AppState.getFormValue(field1) || 0;
+    const val0 = AppState.getFormValue(field0) || 0;
+    const variationEl = document.getElementById(`variation-${field1}`);
+
+    if (variationEl) {
+        if (val0 === 0) {
+            variationEl.textContent = 'N/A';
+        } else {
+            const variation = ((val1 - val0) / Math.abs(val0)) * 100;
+            variationEl.textContent = `${variation >= 0 ? '+' : ''}${variation.toFixed(2)}%`;
+            variationEl.className = `form-table-cell number ${variation >= 0 ? 'positive' : 'negative'}`;
+        }
+    }
+}
+
+function renderRiskTable(allFields) {
+    const container = document.createElement('div');
+    container.className = 'form-table risk-table';
+
+    const riskLabels = [
+        'Restructuraciones empresariales',
+        'Valoracion de transmisiones intragrupo de activos intangibles',
+        'Pagos por canones derivados de la cesion de intangibles',
+        'Pagos por servicios intragrupo',
+        'Existencia de perdidas reiteradas',
+        'Operaciones financieras entre partes vinculadas',
+        'Estructuras funcionales de bajo riesgo',
+        'Falta de declaracion de ingresos intragrupo',
+        'Erosion de bases imponibles',
+        'Revision de las formas societarias',
+        'Operaciones con establecimientos permanentes',
+        'Peso de las operaciones vinculadas relevante',
+    ];
+
+    const impactoOptions = ['si', 'no', 'posible'];
+    const afectacionOptions = ['bajo', 'medio', 'alto'];
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'form-table-header';
+    header.innerHTML = `
+        <span>#</span>
+        <span>Elemento de riesgo</span>
+        <span>Impacto</span>
+        <span>Afect. Prelim.</span>
+        <span>Mitigadores</span>
+        <span>Afect. Final</span>
+    `;
+    container.appendChild(header);
+
+    // Data rows
+    riskLabels.forEach((label, idx) => {
+        const i = idx + 1;
+        const rowEl = document.createElement('div');
+        rowEl.className = 'form-table-row';
+
+        // Number
+        const numCell = document.createElement('span');
+        numCell.className = 'form-table-cell label';
+        numCell.textContent = i;
+
+        // Label
+        const labelCell = document.createElement('span');
+        labelCell.className = 'form-table-cell';
+        labelCell.textContent = label;
+
+        // Impacto
+        const impactoCell = document.createElement('span');
+        impactoCell.className = 'form-table-cell';
+        const impactoSelect = createSelect(`impacto_${i}`, impactoOptions, 'no');
+        impactoCell.appendChild(impactoSelect);
+
+        // Afectacion Preliminar
+        const afectPreCell = document.createElement('span');
+        afectPreCell.className = 'form-table-cell';
+        const afectPreSelect = createSelect(`afectacion_pre_${i}`, afectacionOptions, 'bajo');
+        afectPreCell.appendChild(afectPreSelect);
+
+        // Mitigadores
+        const mitigadoresCell = document.createElement('span');
+        mitigadoresCell.className = 'form-table-cell';
+        const mitigadoresInput = document.createElement('input');
+        mitigadoresInput.type = 'text';
+        mitigadoresInput.className = 'form-input';
+        mitigadoresInput.name = `texto_mitigacion_${i}`;
+        mitigadoresInput.placeholder = 'Mitigadores...';
+        mitigadoresInput.addEventListener('input', (e) => {
+            AppState.setFormValue(`texto_mitigacion_${i}`, e.target.value);
+        });
+        mitigadoresCell.appendChild(mitigadoresInput);
+
+        // Afectacion Final
+        const afectFinalCell = document.createElement('span');
+        afectFinalCell.className = 'form-table-cell';
+        const afectFinalSelect = createSelect(`afectacion_final_${i}`, afectacionOptions, 'bajo');
+        afectFinalCell.appendChild(afectFinalSelect);
+
+        rowEl.appendChild(numCell);
+        rowEl.appendChild(labelCell);
+        rowEl.appendChild(impactoCell);
+        rowEl.appendChild(afectPreCell);
+        rowEl.appendChild(mitigadoresCell);
+        rowEl.appendChild(afectFinalCell);
+        container.appendChild(rowEl);
+    });
+
+    return container;
+}
+
+function renderComplianceDetailTable(prefix, count, allFields) {
+    const container = document.createElement('div');
+    container.className = 'form-table compliance-table';
+
+    const localFileItems = [
+        'Estructura organizativa del obligado tributario',
+        'Descripcion de las actividades de la entidad',
+        'Principales competidores',
+        'Funciones ejercidas y riesgos asumidos',
+        'Informacion detallada de las operaciones vinculadas',
+        'Analisis de comparabilidad',
+        'Metodo de valoracion elegido',
+        'Informacion financiera del contribuyente',
+        'Criterios de reparto de costes',
+        'Acuerdos de reparto de costes',
+        'Acuerdos previos de valoracion',
+        'Informacion sobre establecimientos permanentes',
+        'Informacion sobre operaciones con paraisos fiscales',
+        'Informacion general sobre el grupo',
+    ];
+
+    const masterFileItems = [
+        'Estructura organizativa del grupo multinacional',
+        'Descripcion del negocio del grupo',
+        'Intangibles del grupo',
+        'Actividades financieras intragrupo',
+        'Situacion financiera y fiscal del grupo',
+        'Descripcion de la cadena de suministro',
+        'Lista de acuerdos importantes de servicios',
+        'Descripcion funcional y estrategia del grupo',
+        'Principales operaciones de reestructuracion',
+        'Descripcion de la estrategia del grupo respecto a intangibles',
+        'Lista de intangibles importantes',
+        'Descripcion de acuerdos de coste',
+        'Descripcion de prestamos intragrupo',
+        'Estados financieros consolidados',
+        'Lista de APAs unilaterales',
+        'Informacion sobre resoluciones fiscales',
+        'Informacion sobre operaciones con paraisos fiscales',
+    ];
+
+    const items = prefix === 'local' ? localFileItems : masterFileItems;
+    const cumplidoOptions = ['si', 'parcial', 'no'];
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'form-table-header';
+    header.innerHTML = `
+        <span>#</span>
+        <span>Contenido</span>
+        <span>Cumplido</span>
+        <span>Comentario</span>
+    `;
+    container.appendChild(header);
+
+    // Data rows
+    for (let i = 1; i <= count; i++) {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'form-table-row';
+
+        // Number
+        const numCell = document.createElement('span');
+        numCell.className = 'form-table-cell label';
+        numCell.textContent = i;
+
+        // Content
+        const contentCell = document.createElement('span');
+        contentCell.className = 'form-table-cell';
+        contentCell.textContent = items[i - 1] || `Item ${i}`;
+
+        // Cumplido
+        const cumplidoCell = document.createElement('span');
+        cumplidoCell.className = 'form-table-cell';
+        const cumplidoSelect = createSelect(`cumplido_${prefix}_${i}`, cumplidoOptions, 'si');
+        cumplidoCell.appendChild(cumplidoSelect);
+
+        // Comentario
+        const comentarioCell = document.createElement('span');
+        comentarioCell.className = 'form-table-cell';
+        const comentarioInput = document.createElement('input');
+        comentarioInput.type = 'text';
+        comentarioInput.className = 'form-input';
+        comentarioInput.name = `texto_cumplido_${prefix}_${i}`;
+        comentarioInput.placeholder = 'Comentario...';
+        comentarioInput.addEventListener('input', (e) => {
+            AppState.setFormValue(`texto_cumplido_${prefix}_${i}`, e.target.value);
+        });
+        comentarioCell.appendChild(comentarioInput);
+
+        rowEl.appendChild(numCell);
+        rowEl.appendChild(contentCell);
+        rowEl.appendChild(cumplidoCell);
+        rowEl.appendChild(comentarioCell);
+        container.appendChild(rowEl);
+    }
+
+    return container;
+}
+
+function renderComplianceSummaryTable(prefix, count, allFields) {
+    const container = document.createElement('div');
+    container.className = 'form-table compliance-summary-table';
+
+    const localSections = [
+        { num: 1, label: 'Informacion del contribuyente' },
+        { num: 2, label: 'Informacion de las operaciones vinculadas' },
+        { num: 3, label: 'Informacion economico-financiera del contribuyente' },
+    ];
+
+    const masterSections = [
+        { num: 1, label: 'Informacion relativa a la estructura y actividades del Grupo' },
+        { num: 2, label: 'Informacion relativa a los activos intangibles del Grupo' },
+        { num: 3, label: 'Informacion relativa a la actividad financiera' },
+        { num: 4, label: 'Situacion financiera y fiscal del Grupo' },
+    ];
+
+    const sections = prefix === 'local' ? localSections : masterSections;
+    const cumplimientoOptions = ['si', 'no'];
+
+    const reglamento = prefix === 'local' ? 'Articulo 16 del Reglamento' : 'Articulo 15 del Reglamento';
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'form-table-header';
+    header.innerHTML = `
+        <span>#</span>
+        <span>Secciones (${reglamento})</span>
+        <span>Cumplimiento</span>
+    `;
+    container.appendChild(header);
+
+    // Data rows
+    sections.forEach(section => {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'form-table-row';
+
+        // Number
+        const numCell = document.createElement('span');
+        numCell.className = 'form-table-cell label';
+        numCell.textContent = section.num;
+
+        // Label
+        const labelCell = document.createElement('span');
+        labelCell.className = 'form-table-cell';
+        labelCell.textContent = section.label;
+
+        // Cumplimiento
+        const cumplimientoCell = document.createElement('span');
+        cumplimientoCell.className = 'form-table-cell';
+        const cumplimientoSelect = createSelect(`cumplimiento_resumen_${prefix}_${section.num}`, cumplimientoOptions, 'si');
+        cumplimientoCell.appendChild(cumplimientoSelect);
+
+        rowEl.appendChild(numCell);
+        rowEl.appendChild(labelCell);
+        rowEl.appendChild(cumplimientoCell);
+        container.appendChild(rowEl);
+    });
+
+    return container;
+}
+
+function renderContactsSection(allFields) {
+    const container = document.createElement('div');
+    container.className = 'contacts-grid';
+
+    for (let i = 1; i <= 3; i++) {
+        const card = document.createElement('div');
+        card.className = 'contact-card';
+
+        card.innerHTML = `<h4>Contacto ${i}</h4>`;
+
+        // Name
+        const nameGroup = document.createElement('div');
+        nameGroup.className = 'form-group';
+        nameGroup.innerHTML = `<label class="form-label">Nombre</label>`;
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.className = 'form-input';
+        nameInput.name = `contacto${i}`;
+        nameInput.placeholder = 'Nombre completo';
+        nameInput.addEventListener('input', (e) => {
+            AppState.setFormValue(`contacto${i}`, e.target.value);
+        });
+        nameGroup.appendChild(nameInput);
+        card.appendChild(nameGroup);
+
+        // Position
+        const cargoGroup = document.createElement('div');
+        cargoGroup.className = 'form-group';
+        cargoGroup.innerHTML = `<label class="form-label">Cargo</label>`;
+        const cargoInput = document.createElement('input');
+        cargoInput.type = 'text';
+        cargoInput.className = 'form-input';
+        cargoInput.name = `cargo_contacto${i}`;
+        cargoInput.placeholder = 'Cargo';
+        cargoInput.addEventListener('input', (e) => {
+            AppState.setFormValue(`cargo_contacto${i}`, e.target.value);
+        });
+        cargoGroup.appendChild(cargoInput);
+        card.appendChild(cargoGroup);
+
+        // Email
+        const emailGroup = document.createElement('div');
+        emailGroup.className = 'form-group';
+        emailGroup.innerHTML = `<label class="form-label">Correo</label>`;
+        const emailInput = document.createElement('input');
+        emailInput.type = 'email';
+        emailInput.className = 'form-input';
+        emailInput.name = `correo_contacto${i}`;
+        emailInput.placeholder = 'email@example.com';
+        emailInput.addEventListener('input', (e) => {
+            AppState.setFormValue(`correo_contacto${i}`, e.target.value);
+        });
+        emailGroup.appendChild(emailInput);
+        card.appendChild(emailGroup);
+
+        container.appendChild(card);
+    }
+
+    return container;
+}
+
+function createSelect(name, options, defaultValue = '') {
+    const select = document.createElement('select');
+    select.className = 'select-input';
+    select.name = name;
+
+    options.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt;
+        option.textContent = opt.charAt(0).toUpperCase() + opt.slice(1);
+        if (opt === defaultValue) {
+            option.selected = true;
+        }
+        select.appendChild(option);
+    });
+
+    select.addEventListener('change', (e) => {
+        AppState.setFormValue(name, e.target.value);
+        updateConditionalVisibility();
+    });
+
+    // Set default value in state
+    AppState.setFormValue(name, defaultValue);
+
+    return select;
 }
 
 function updateConditionalVisibility() {
