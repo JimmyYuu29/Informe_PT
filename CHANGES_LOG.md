@@ -1,6 +1,128 @@
 # Informe PT - 修改日志 / Changes Log
 
 **日期 / Date:** 2026-01-03
+**分支 / Branch:** claude/fix-master-file-ui-Upmor
+
+---
+
+## 修改概述 / Summary of Changes
+
+本次修改解决了以下问题：
+
+1. Master File Resumen 表格UI修复
+2. JSON导入嵌套数据结构修复
+
+---
+
+## 1. Master File Resumen 表格UI修复 / Master File Resumen Table UI Fix
+
+### 问题描述 / Problem
+当 `master_file == 1` 时，"Cumplimiento Master File (Resumen)" 板块的UI显示不正确，需要调整为与 "Cumplimiento Local File (Resumen)" 相同的表格样式。
+
+### 解决方案 / Solution
+在 `ui/streamlit_app/form_renderer.py` 中添加了新的 `render_cumplimiento_resumen_master_table` 函数，并更新了 `render_section` 函数以正确路由该板块。
+
+#### 新增函数 / New Function
+```python
+def render_cumplimiento_resumen_master_table(context: dict, fields_def: dict) -> None:
+    """
+    Render the Master File cumplimiento resumen (compliance summary) table
+    matching the template layout.
+
+    Table structure based on Artículo 15 del Reglamento:
+    | # | Secciones (Artículo 15 del Reglamento) | Cumplimiento |
+    """
+    sections = [
+        {"num": 1, "label": "Información relativa a la estructura y actividades del Grupo"},
+        {"num": 2, "label": "Información relativa a los activos intangibles del Grupo"},
+        {"num": 3, "label": "Información relativa a la actividad financiera"},
+        {"num": 4, "label": "Situación financiera y fiscal del Grupo"},
+    ]
+```
+
+#### 表格结构 / Table Structure
+| # | Secciones (Artículo 15 del Reglamento) | Cumplimiento |
+|---|----------------------------------------|--------------|
+| 1 | Información relativa a la estructura y actividades del Grupo | si/no |
+| 2 | Información relativa a los activos intangibles del Grupo | si/no |
+| 3 | Información relativa a la actividad financiera | si/no |
+| 4 | Situación financiera y fiscal del Grupo | si/no |
+
+### 修改的文件 / Modified Files
+- `ui/streamlit_app/form_renderer.py`
+  - 添加 `render_cumplimiento_resumen_master_table()` 函数 (第984-1030行)
+  - 更新 `render_section()` 函数添加 `sec_compliance_master` 路由 (第204行)
+
+---
+
+## 2. JSON导入嵌套数据结构修复 / JSON Import Nested Data Fix
+
+### 问题描述 / Problem
+JSON元数据导入时无法正确接收和显示所有数据，特别是嵌套数据结构（如 `servicios_vinculados` 中的 `entidades_vinculadas` 和 `analisis`）。
+
+### 解决方案 / Solution
+在 `ui/streamlit_app/app.py` 中更新 `load_json_data` 函数，使用 `copy.deepcopy()` 处理嵌套数据结构。
+
+#### 修改前 / Before
+```python
+state.add_list_item(field_name, item.copy())  # 浅拷贝
+```
+
+#### 修改后 / After
+```python
+import copy
+state.add_list_item(field_name, copy.deepcopy(item))  # 深拷贝
+```
+
+### 修改的文件 / Modified Files
+- `ui/streamlit_app/app.py`
+  - 添加 `import copy` (第11行)
+  - 更新 `load_json_data()` 函数使用 `copy.deepcopy()` (第221-271行)
+  - 排除已在 `_list_items` 中的字段避免重复处理 (第243行)
+
+### 修复的问题 / Fixed Issues
+1. 嵌套列表和字典数据现在正确导入
+2. 避免浅拷贝导致的引用问题
+3. V2.0格式导入时排除重复字段
+
+---
+
+## 测试验证 / Testing Verification
+
+### Master File 表格测试 / Master File Table Test
+1. 设置 `master_file` = "Hay acceso" (值为1)
+2. 验证 "Cumplimiento Master File (Resumen)" 板块显示
+3. 确认表格包含4行，标题为 "Artículo 15 del Reglamento"
+
+### JSON导入测试 / JSON Import Test
+1. 导出包含嵌套数据的表单
+2. 清空表单
+3. 重新导入JSON文件
+4. 验证所有数据正确显示，包括：
+   - 基本字段 (entidad_cliente, fecha_fin_fiscal等)
+   - 列表数据 (documentacion_facilitada)
+   - 嵌套数据 (servicios_vinculados内的entidades_vinculadas和analisis)
+
+---
+
+## 文件修改摘要 / Files Modified Summary
+
+| 文件 / File | 修改类型 / Change Type |
+|------------|----------------------|
+| `ui/streamlit_app/form_renderer.py` | 新增Master File表格渲染函数，更新section路由 |
+| `ui/streamlit_app/app.py` | 修复JSON导入深拷贝处理 |
+| `CHANGES_LOG.md` | 更新修改日志 |
+
+---
+
+*生成时间 / Generated at: 2026-01-03*
+
+---
+---
+
+# 历史修改记录 / Historical Changes
+
+**日期 / Date:** 2026-01-03
 **分支 / Branch:** claude/fix-date-format-coloring-RiHT5
 
 ---

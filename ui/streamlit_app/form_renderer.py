@@ -201,6 +201,8 @@ def render_section(
             render_metodo_elegido_table(fresh_context, fields_def)
         elif section_id == "sec_compliance_local":
             render_cumplimiento_resumen_table(fresh_context, fields_def)
+        elif section_id == "sec_compliance_master":
+            render_cumplimiento_resumen_master_table(fresh_context, fields_def)
         elif section_id == "sec_risks" or "risk_elements" in field_names:
             render_risk_table(fresh_context, fields_def)
         elif section_id == "sec_local_detail" or "local_file_compliance" in field_names:
@@ -941,7 +943,7 @@ def render_cumplimiento_resumen_table(context: dict, fields_def: dict) -> None:
     Render the cumplimiento resumen (compliance summary) table
     matching the template layout.
     """
-    st.subheader("Resumen de Cumplimiento - Local File")
+    st.subheader("Cumplimiento Local File (Resumen)")
 
     sections = [
         {"num": 1, "label": "Información del contribuyente"},
@@ -973,6 +975,55 @@ def render_cumplimiento_resumen_table(context: dict, fields_def: dict) -> None:
 
         with cols[2]:
             field_name = f"cumplimiento_resumen_local_{section['num']}"
+            components.render_enum_input(
+                field_name=field_name,
+                label="",
+                options=cumplimiento_options,
+                required=True,
+            )
+
+
+def render_cumplimiento_resumen_master_table(context: dict, fields_def: dict) -> None:
+    """
+    Render the Master File cumplimiento resumen (compliance summary) table
+    matching the template layout.
+
+    Table structure based on Artículo 15 del Reglamento:
+    | # | Secciones (Artículo 15 del Reglamento) | Cumplimiento |
+    """
+    st.subheader("Cumplimiento Master File (Resumen)")
+
+    sections = [
+        {"num": 1, "label": "Información relativa a la estructura y actividades del Grupo"},
+        {"num": 2, "label": "Información relativa a los activos intangibles del Grupo"},
+        {"num": 3, "label": "Información relativa a la actividad financiera"},
+        {"num": 4, "label": "Situación financiera y fiscal del Grupo"},
+    ]
+
+    cumplimiento_options = ["si", "no"]
+
+    # Table header
+    cols_header = st.columns([0.1, 0.6, 0.3])
+    with cols_header[0]:
+        st.markdown("**#**")
+    with cols_header[1]:
+        st.markdown("**Secciones (Artículo 15 del Reglamento)**")
+    with cols_header[2]:
+        st.markdown("**Cumplimiento**")
+
+    st.divider()
+
+    for section in sections:
+        cols = st.columns([0.1, 0.6, 0.3])
+
+        with cols[0]:
+            st.markdown(f"**{section['num']}**")
+
+        with cols[1]:
+            st.markdown(section["label"])
+
+        with cols[2]:
+            field_name = f"cumplimiento_resumen_mast_{section['num']}"
             components.render_enum_input(
                 field_name=field_name,
                 label="",
