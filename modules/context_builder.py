@@ -64,6 +64,49 @@ def format_spanish_date(d: date) -> str:
     return f"{d.day} de {month_name} de {d.year}"
 
 
+def format_spanish_date_del(d: date) -> str:
+    """Format a date in Spanish long format with 'del': '01 de enero del 2025'."""
+    month_name = SPANISH_MONTHS.get(d.month, str(d.month))
+    return f"{d.day:02d} de {month_name} del {d.year}"
+
+
+# Fields that should have "si" replaced with checkmark
+COMPLIANCE_CHECKMARK_FIELDS = (
+    # Resumen Local File (3 fields)
+    ["cumplimiento_resumen_local_" + str(i) for i in range(1, 4)] +
+    # Resumen Master File (4 fields)
+    ["cumplimiento_resumen_mast_" + str(i) for i in range(1, 5)] +
+    # Detalle Local File (14 fields)
+    ["cumplido_local_" + str(i) for i in range(1, 15)] +
+    # Detalle Master File (17 fields)
+    ["cumplido_mast_" + str(i) for i in range(1, 18)]
+)
+# Total: 3 + 4 + 14 + 17 = 38 fields
+
+
+def replace_si_with_checkmark(context: dict) -> dict:
+    """
+    Replace 'si' values with '✓' checkmark for compliance fields.
+
+    This applies to cumplimiento_resumen_local_*, cumplimiento_resumen_mast_*,
+    cumplido_local_*, and cumplido_mast_* fields.
+
+    Total fields affected: 38 (3 + 4 + 14 + 17)
+
+    Args:
+        context: Context dictionary with field values.
+
+    Returns:
+        Modified context dictionary.
+    """
+    for field_name in COMPLIANCE_CHECKMARK_FIELDS:
+        if field_name in context:
+            value = context[field_name]
+            if isinstance(value, str) and value.lower() == "si":
+                context[field_name] = "✓"
+    return context
+
+
 def format_date_short_english(d: date) -> str:
     """Format a date in short English format: '31 Dec 2025'."""
     month_abbr = ENGLISH_MONTH_ABBR.get(d.month, str(d.month))
@@ -471,6 +514,11 @@ class ContextBuilder:
                 "texto_conclusion_servicio": "",
             }
 
+        # Replace 'si' with checkmark for compliance fields
+        # This applies to 38 fields: cumplimiento_resumen_local_*, cumplimiento_resumen_mast_*,
+        # cumplido_local_*, and cumplido_mast_*
+        context = replace_si_with_checkmark(context)
+
         # Sanitize all values to ensure proper template insertion
         # This helps preserve table layouts by removing unwanted whitespace
         context = sanitize_template_value(context)
@@ -479,20 +527,22 @@ class ContextBuilder:
 
     def _format_fields(self, context: dict) -> dict:
         """Apply formatting to fields."""
-        # Format date - using dashed Spanish format: "31-Ene-2025"
+        # Format date - using Spanish long format with 'del': "01 de enero del 2025"
         if "fecha_fin_fiscal" in context:
             fecha = context["fecha_fin_fiscal"]
             if isinstance(fecha, date):
-                # Primary format: dashed Spanish (31-Ene-2025)
-                context["fecha_fin_fiscal"] = format_date_dashed_spanish(fecha)
-                # Also provide alternative format for backward compatibility
+                # Primary format: Spanish long with 'del' (01 de enero del 2025)
+                context["fecha_fin_fiscal"] = format_spanish_date_del(fecha)
+                # Also provide alternative formats for backward compatibility
                 context["fecha_fin_fiscal_formatted"] = format_date_short_spanish(fecha)
+                context["fecha_fin_fiscal_dashed"] = format_date_dashed_spanish(fecha)
             elif isinstance(fecha, str):
                 try:
                     parts = fecha.split("-")
                     d = date(int(parts[0]), int(parts[1]), int(parts[2]))
-                    context["fecha_fin_fiscal"] = format_date_dashed_spanish(d)
+                    context["fecha_fin_fiscal"] = format_spanish_date_del(d)
                     context["fecha_fin_fiscal_formatted"] = format_date_short_spanish(d)
+                    context["fecha_fin_fiscal_dashed"] = format_date_dashed_spanish(d)
                 except Exception:
                     context["fecha_fin_fiscal_formatted"] = fecha
 

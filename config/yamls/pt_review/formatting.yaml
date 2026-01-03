@@ -147,13 +147,13 @@ enum_colors:
       - cumplimiento_resumen_mast_3
       - cumplimiento_resumen_mast_4
     values:
-      si:
+      "si":
         background: "#00B050"  # Green
         text: "#FFFFFF"
         label: "Sí"
-      no:
-        background: "#FF0000"  # Red (changed from Yellow per user requirement)
-        text: "#FFFFFF"
+      "no":
+        background: "#FFFF00"  # Yellow (for anything not "si")
+        text: "#000000"
         label: "No"
     source_ref: note_10
 
@@ -193,15 +193,15 @@ enum_colors:
       - cumplido_mast_16
       - cumplido_mast_17
     values:
-      si:
+      "si":
         background: "#00B050"  # Green
         text: "#FFFFFF"
         label: "Sí"
-      parcial:
+      "parcial":
         background: "#FFFF00"  # Yellow
         text: "#000000"
         label: "Parcial"
-      no:
+      "no":
         background: "#FF0000"  # Red
         text: "#FFFFFF"
         label: "No"
@@ -224,11 +224,11 @@ enum_colors:
       - impacto_11
       - impacto_12
     values:
-      si:
+      "si":
         label: "Sí"
-      no:
+      "no":
         label: "No"
-      posible:
+      "posible":
         label: "Posible"
     source_ref: note_11
 

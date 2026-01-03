@@ -60,7 +60,15 @@ def render_date_input(
 ) -> Optional[date]:
     """Render a date input field with stable state."""
     widget_key = state.get_stable_key(field_name)
-    default_value = state.get_field_value(field_name)
+
+    # After JSON import, prioritize form_data over stale widget state
+    # Otherwise check if widget key already exists in session_state
+    if state.was_data_just_imported():
+        default_value = state.get_field_value(field_name)
+    elif widget_key in st.session_state:
+        default_value = st.session_state[widget_key]
+    else:
+        default_value = state.get_field_value(field_name)
 
     if default_value is None:
         default_value = date.today()
@@ -95,7 +103,15 @@ def render_number_input(
 ) -> Optional[float]:
     """Render a number input field with stable state."""
     widget_key = state.get_stable_key(field_name)
-    default_value = state.get_field_value(field_name, 0.0)
+
+    # After JSON import, prioritize form_data over stale widget state
+    # Otherwise check if widget key already exists in session_state
+    if state.was_data_just_imported():
+        default_value = state.get_field_value(field_name, 0.0)
+    elif widget_key in st.session_state:
+        default_value = st.session_state[widget_key]
+    else:
+        default_value = state.get_field_value(field_name, 0.0)
 
     try:
         default_value = float(default_value) if default_value else 0.0
@@ -185,7 +201,15 @@ def render_checkbox(
 ) -> bool:
     """Render a checkbox input with stable state."""
     widget_key = state.get_stable_key(field_name)
-    default_value = state.get_field_value(field_name, False)
+
+    # After JSON import, prioritize form_data over stale widget state
+    # Otherwise check if widget key already exists in session_state
+    if state.was_data_just_imported():
+        default_value = state.get_field_value(field_name, False)
+    elif widget_key in st.session_state:
+        default_value = st.session_state[widget_key]
+    else:
+        default_value = state.get_field_value(field_name, False)
 
     value = st.checkbox(
         label,
@@ -232,7 +256,14 @@ def render_dynamic_list(
                     sub_required = field_def.get("required", False)
 
                     widget_key = state.get_stable_key(field_name, idx, sub_field)
-                    current_value = item.get(sub_field, "")
+
+                    # After JSON import, prioritize list_items over stale widget state
+                    if state.was_data_just_imported():
+                        current_value = item.get(sub_field, "")
+                    elif widget_key in st.session_state:
+                        current_value = st.session_state[widget_key]
+                    else:
+                        current_value = item.get(sub_field, "")
 
                     if sub_type == "text":
                         new_value = st.text_input(
