@@ -174,6 +174,49 @@ def main():
     show_results()
 
 
+def _get_risk_field_order() -> list[str]:
+    """Return the risk table field order as shown in the UI."""
+    ordered_fields = []
+    for idx in range(1, 13):
+        ordered_fields.extend([
+            f"impacto_{idx}",
+            f"afectacion_pre_{idx}",
+            f"texto_mitigacion_{idx}",
+            f"afectacion_final_{idx}",
+        ])
+    return ordered_fields
+
+
+def _get_compliance_detail_order(prefix: str, total_rows: int) -> list[str]:
+    """Return the compliance detail field order as shown in the UI."""
+    ordered_fields = []
+    for idx in range(1, total_rows + 1):
+        ordered_fields.extend([
+            f"cumplido_{prefix}_{idx}",
+            f"texto_cumplido_{prefix}_{idx}",
+        ])
+    return ordered_fields
+
+
+def _get_export_field_order(plugin: PluginPack) -> list[str]:
+    """Return form field names in the same order as the UI sections."""
+    ordered_fields: list[str] = []
+    for section in plugin.get_ui_sections():
+        section_id = section.get("id", "")
+        field_names = section.get("fields", [])
+
+        if section_id == "sec_risks" or "risk_elements" in field_names:
+            ordered_fields.extend(_get_risk_field_order())
+        elif section_id == "sec_local_detail" or "local_file_compliance" in field_names:
+            ordered_fields.extend(_get_compliance_detail_order("local", 14))
+        elif section_id == "sec_master_detail" or "master_file_compliance" in field_names:
+            ordered_fields.extend(_get_compliance_detail_order("mast", 17))
+        else:
+            ordered_fields.extend(field_names)
+
+    return ordered_fields
+
+
 def export_form_data() -> str:
     """
     Export current form data to JSON string.
@@ -194,24 +237,47 @@ def export_form_data() -> str:
             return {k: serialize_value(val) for k, val in v.items()}
         return v
 
-    # Export scalar fields
+    plugin_id = st.session_state.get("plugin_id", "unknown")
+    plugin = load_plugin(plugin_id)
+    ordered_fields = _get_export_field_order(plugin)
+    list_field_names = set(st.session_state.list_items.keys())
+
+    # Export scalar fields in UI order
     serialized = {}
+    for field_name in ordered_fields:
+        if field_name in list_field_names:
+            continue
+        if field_name in st.session_state.form_data:
+            serialized[field_name] = serialize_value(st.session_state.form_data[field_name])
+
+    # Append any remaining scalar fields not defined in UI order
     for k, v in st.session_state.form_data.items():
+        if k in serialized or k in list_field_names:
+            continue
         serialized[k] = serialize_value(v)
 
     # Export list items with full structure (including nested lists)
     serialized["_list_items"] = {}
-    for field_name, items in st.session_state.list_items.items():
+    ordered_list_fields = [name for name in ordered_fields if name in st.session_state.list_items]
+    for field_name in ordered_list_fields:
+        items = st.session_state.list_items[field_name]
         serialized["_list_items"][field_name] = []
         for item in items:
             # Remove internal _id field but keep all other data
+            cleaned = {k: serialize_value(v) for k, v in item.items() if not k.startswith("_")}
+            serialized["_list_items"][field_name].append(cleaned)
+    for field_name, items in st.session_state.list_items.items():
+        if field_name in serialized["_list_items"]:
+            continue
+        serialized["_list_items"][field_name] = []
+        for item in items:
             cleaned = {k: serialize_value(v) for k, v in item.items() if not k.startswith("_")}
             serialized["_list_items"][field_name].append(cleaned)
 
     # Add metadata
     serialized["_metadata"] = {
         "exported_at": date.today().isoformat(),
-        "plugin_id": st.session_state.get("plugin_id", "unknown"),
+        "plugin_id": plugin_id,
         "version": "2.0",  # Version 2.0 with improved list handling
     }
 
@@ -267,6 +333,17 @@ def load_json_data(json_data: dict) -> None:
     CRITICAL: This function must properly clear all widget state to ensure
     Streamlit widgets display the imported values instead of cached values.
     """
+    # Normalize payloads that wrap data under form_data/list_items
+    if isinstance(json_data.get("form_data"), dict):
+        normalized = dict(json_data["form_data"])
+        if "_metadata" in json_data:
+            normalized["_metadata"] = json_data["_metadata"]
+        if "_list_items" in json_data:
+            normalized["_list_items"] = json_data["_list_items"]
+        if "list_items" in json_data and "_list_items" not in normalized:
+            normalized["_list_items"] = json_data["list_items"]
+        json_data = normalized
+
     # Clear existing form data (this also clears widget state keys)
     state.clear_form_data()
 

@@ -1,6 +1,80 @@
 # Informe PT - 修改日志 / Changes Log
 
 **日期 / Date:** 2026-01-03
+**分支 / Branch:** work
+
+---
+
+## 修改概述 / Summary of Changes
+
+本次修改解决了以下问题：
+
+1. JSON 导出顺序与 UI 一致化
+2. 特殊表格字段导出顺序补齐
+3. JSON 导入增加封装结构兼容
+
+---
+
+## 1. JSON 导出顺序与 UI 一致化 / JSON Export Order Alignment
+
+### 问题描述 / Problem
+导出的 JSON 字段顺序与 UI 表单顺序不一致，且部分特殊表格字段缺少与界面一致的导出顺序。
+
+### 根本原因 / Root Cause
+导出逻辑依赖 `session_state.form_data` 的插入顺序，未基于 UI section 与表格渲染顺序进行排序。
+
+### 解决方案 / Solution
+
+#### 1.1 统一导出字段顺序
+在 `ui/streamlit_app/app.py` 中根据 UI section 顺序生成导出字段顺序，并将未在 UI 列表中的字段追加到末尾：
+
+```python
+ordered_fields = _get_export_field_order(plugin)
+for field_name in ordered_fields:
+    if field_name in list_field_names:
+        continue
+    if field_name in st.session_state.form_data:
+        serialized[field_name] = serialize_value(st.session_state.form_data[field_name])
+```
+
+#### 1.2 补齐特殊表格字段顺序
+为风险评估与合规明细表添加固定字段顺序，保证导出顺序与 UI 表格一致：
+
+```python
+def _get_risk_field_order() -> list[str]:
+    return [
+        "impacto_1", "afectacion_pre_1", "texto_mitigacion_1", "afectacion_final_1",
+        ...
+    ]
+```
+
+### 修改的文件 / Modified Files
+- `ui/streamlit_app/app.py` - 新增导出字段排序与表格顺序逻辑
+- `CHANGES_LOG.md` - 更新修改日志
+
+---
+
+## 2. JSON 导入封装结构兼容 / JSON Import Wrapper Compatibility
+
+### 问题描述 / Problem
+部分导入 JSON 将表单数据封装在 `form_data` 或 `list_items` 字段中，导致标量字段未被正确读取。
+
+### 解决方案 / Solution
+在导入逻辑中增加 payload 归一化处理，优先合并封装的表单数据与列表数据：
+
+```python
+if isinstance(json_data.get("form_data"), dict):
+    normalized = dict(json_data["form_data"])
+    if "_list_items" in json_data:
+        normalized["_list_items"] = json_data["_list_items"]
+```
+
+### 修改的文件 / Modified Files
+- `ui/streamlit_app/app.py` - 增加导入 payload 归一化逻辑
+
+---
+
+**日期 / Date:** 2026-01-03
 **分支 / Branch:** claude/fix-json-metadata-import-0PLXS
 
 ---
