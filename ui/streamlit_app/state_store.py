@@ -12,6 +12,20 @@ from datetime import date
 import uuid
 
 
+def _ensure_session_state() -> None:
+    """Ensure base session state keys exist."""
+    if "plugin_id" not in st.session_state:
+        st.session_state.plugin_id = ""
+    if "form_data" not in st.session_state:
+        st.session_state.form_data = {}
+    if "list_items" not in st.session_state:
+        st.session_state.list_items = {}
+    if "generation_result" not in st.session_state:
+        st.session_state.generation_result = None
+    if "validation_errors" not in st.session_state:
+        st.session_state.validation_errors = []
+
+
 def init_session_state(plugin_id: str) -> None:
     """
     Initialize session state for a plugin.
@@ -21,21 +35,9 @@ def init_session_state(plugin_id: str) -> None:
     """
     if "initialized" not in st.session_state:
         st.session_state.initialized = False
-
-    if "plugin_id" not in st.session_state:
+    _ensure_session_state()
+    if not st.session_state.plugin_id:
         st.session_state.plugin_id = plugin_id
-
-    if "form_data" not in st.session_state:
-        st.session_state.form_data = {}
-
-    if "list_items" not in st.session_state:
-        st.session_state.list_items = {}
-
-    if "generation_result" not in st.session_state:
-        st.session_state.generation_result = None
-
-    if "validation_errors" not in st.session_state:
-        st.session_state.validation_errors = []
 
 
 def get_stable_key(field_name: str, index: Optional[int] = None, sub_field: Optional[str] = None) -> str:
@@ -55,16 +57,19 @@ def get_stable_key(field_name: str, index: Optional[int] = None, sub_field: Opti
 
 def get_field_value(field_name: str, default: Any = None) -> Any:
     """Get a field value from session state."""
+    _ensure_session_state()
     return st.session_state.form_data.get(field_name, default)
 
 
 def set_field_value(field_name: str, value: Any) -> None:
     """Set a field value in session state."""
+    _ensure_session_state()
     st.session_state.form_data[field_name] = value
 
 
 def get_list_items(field_name: str) -> list:
     """Get list items for a repeating field."""
+    _ensure_session_state()
     if field_name not in st.session_state.list_items:
         st.session_state.list_items[field_name] = []
     return st.session_state.list_items[field_name]
@@ -76,6 +81,7 @@ def add_list_item(field_name: str, item: dict) -> int:
 
     Returns the index of the new item.
     """
+    _ensure_session_state()
     if field_name not in st.session_state.list_items:
         st.session_state.list_items[field_name] = []
 
@@ -87,6 +93,7 @@ def add_list_item(field_name: str, item: dict) -> int:
 
 def remove_list_item(field_name: str, index: int) -> None:
     """Remove an item from a list field by index."""
+    _ensure_session_state()
     if field_name in st.session_state.list_items:
         items = st.session_state.list_items[field_name]
         if 0 <= index < len(items):
@@ -95,6 +102,7 @@ def remove_list_item(field_name: str, index: int) -> None:
 
 def update_list_item(field_name: str, index: int, key: str, value: Any) -> None:
     """Update a specific field in a list item."""
+    _ensure_session_state()
     if field_name in st.session_state.list_items:
         items = st.session_state.list_items[field_name]
         if 0 <= index < len(items):
@@ -108,6 +116,7 @@ def get_all_form_data() -> dict:
     Combines scalar fields and list items.
     Flattens simple text lists (items with only 'value' key) to plain strings.
     """
+    _ensure_session_state()
     data = dict(st.session_state.form_data)
 
     # Add list items
@@ -128,6 +137,7 @@ def get_all_form_data() -> dict:
 
 def clear_form_data() -> None:
     """Clear all form data and widget state."""
+    _ensure_session_state()
     st.session_state.form_data = {}
     st.session_state.list_items = {}
     st.session_state.generation_result = None
@@ -173,9 +183,19 @@ def clear_form_data() -> None:
         "resultado_",
         "ebt_",
     )
+    reserved_keys = {
+        "initialized",
+        "plugin_id",
+        "form_data",
+        "list_items",
+        "generation_result",
+        "validation_errors",
+        "_data_just_imported",
+    }
     keys_to_delete = [
         key for key in list(st.session_state.keys())
-        if any(key.startswith(prefix) for prefix in widget_prefixes)
+        if key not in reserved_keys
+        and any(key.startswith(prefix) or prefix in key for prefix in widget_prefixes)
     ]
     for key in keys_to_delete:
         del st.session_state[key]

@@ -9,6 +9,7 @@ import streamlit as st
 import sys
 import json
 import copy
+from collections import OrderedDict
 from pathlib import Path
 from datetime import date
 
@@ -289,41 +290,49 @@ def export_form_data() -> str:
         return v
 
     plugin_id = st.session_state.get("plugin_id", "unknown")
+    if "form_data" not in st.session_state or "list_items" not in st.session_state:
+        state.init_session_state(plugin_id)
     plugin = load_plugin(plugin_id)
     ordered_fields = _get_export_field_order(plugin)
-    list_field_names = set(st.session_state.list_items.keys())
+    form_data = st.session_state.get("form_data", {})
+    list_items = st.session_state.get("list_items", {})
+    list_field_names = set(list_items.keys())
 
     # Export scalar fields in UI order
-    serialized = {}
+    serialized: OrderedDict[str, object] = OrderedDict()
+
+    # Export scalar fields in UI order
     for field_name in ordered_fields:
         if field_name in list_field_names:
             continue
-        if field_name in st.session_state.form_data:
-            serialized[field_name] = serialize_value(st.session_state.form_data[field_name])
+        if field_name in form_data:
+            serialized[field_name] = serialize_value(form_data[field_name])
 
     # Append any remaining scalar fields not defined in UI order
-    for k, v in st.session_state.form_data.items():
+    for k, v in form_data.items():
         if k in serialized or k in list_field_names:
             continue
         serialized[k] = serialize_value(v)
 
     # Export list items with full structure (including nested lists)
-    serialized["_list_items"] = {}
-    ordered_list_fields = [name for name in ordered_fields if name in st.session_state.list_items]
+    list_items_serialized: OrderedDict[str, list] = OrderedDict()
+    ordered_list_fields = [name for name in ordered_fields if name in list_items]
     for field_name in ordered_list_fields:
-        items = st.session_state.list_items[field_name]
-        serialized["_list_items"][field_name] = []
+        items = list_items[field_name]
+        list_items_serialized[field_name] = []
         for item in items:
             # Remove internal _id field but keep all other data
             cleaned = {k: serialize_value(v) for k, v in item.items() if not k.startswith("_")}
-            serialized["_list_items"][field_name].append(cleaned)
-    for field_name, items in st.session_state.list_items.items():
-        if field_name in serialized["_list_items"]:
+            list_items_serialized[field_name].append(cleaned)
+    for field_name, items in list_items.items():
+        if field_name in list_items_serialized:
             continue
-        serialized["_list_items"][field_name] = []
+        list_items_serialized[field_name] = []
         for item in items:
             cleaned = {k: serialize_value(v) for k, v in item.items() if not k.startswith("_")}
-            serialized["_list_items"][field_name].append(cleaned)
+            list_items_serialized[field_name].append(cleaned)
+
+    serialized["_list_items"] = list_items_serialized
 
     # Add metadata
     serialized["_metadata"] = {
@@ -376,6 +385,16 @@ def _force_clear_widget_state() -> None:
             del st.session_state[key]
 
 
+def _coerce_widget_value(value):
+    """Normalize imported scalar values to widget-friendly types."""
+    if isinstance(value, str):
+        try:
+            return date.fromisoformat(value)
+        except ValueError:
+            return value
+    return value
+
+
 def load_json_data(json_data: dict) -> None:
     """
     Load JSON data into the form state.
@@ -397,6 +416,16 @@ def load_json_data(json_data: dict) -> None:
         if "list_items" in json_data and "_list_items" not in normalized:
             normalized["_list_items"] = json_data["list_items"]
         json_data = normalized
+
+    def _set_scalar_field(key: str, value) -> None:
+        """Set both form_data and widget state for scalar fields."""
+        widget_key = state.get_stable_key(key)
+        coerced = _coerce_widget_value(value)
+        try:
+            st.session_state[widget_key] = coerced
+        except Exception:
+            st.session_state[widget_key] = value
+        state.set_field_value(key, coerced)
 
     # FIRST: Force clear all widget state BEFORE clearing form data
     # This ensures no stale widget values interfere with import
@@ -447,7 +476,7 @@ def load_json_data(json_data: dict) -> None:
             else:
                 # Handle scalar fields - including all sections:
                 # sec_general, sec_financials, sec_anexo3, sec_contacts, etc.
-                state.set_field_value(key, value)
+                _set_scalar_field(key, value)
     else:
         # V1.0 format: lists are mixed with scalar fields
         for key, value in json_data.items():
@@ -464,11 +493,7 @@ def load_json_data(json_data: dict) -> None:
                         state.add_list_item(key, {"value": item})
             else:
                 # Handle scalar fields
-                state.set_field_value(key, value)
-
-    # FINAL: Force clear any remaining widget state that might override imported data
-    # This is a safety measure to ensure imported data takes precedence
-    _force_clear_widget_state()
+                _set_scalar_field(key, value)
 
     # Ensure the import flag is still set after all operations
     st.session_state._data_just_imported = True
