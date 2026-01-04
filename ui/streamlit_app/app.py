@@ -351,47 +351,88 @@ def _force_clear_widget_state() -> None:
     This is a comprehensive cleanup that ensures Streamlit widgets will use
     the imported values from form_data/list_items instead of cached widget state.
     """
-    # List of all possible widget key patterns used in the application
-    # This must be kept in sync with the widget keys used in form_renderer.py
-    # and components.py
-    patterns_to_clear = []
+    # Reserved keys that should never be deleted
+    reserved_keys = {
+        "initialized", "plugin_id", "form_data", "list_items",
+        "generation_result", "validation_errors", "_data_just_imported"
+    }
 
-    # Collect all keys that match common widget patterns
+    # Widget key prefixes that should be cleared
+    widget_prefixes = (
+        "field_", "entidad_", "servicio_", "analizar_", "impacto_",
+        "afectacion_", "texto_", "cumplido_", "cumplimiento_",
+        "rm_", "add_", "remove_", "_action_",
+        "contacto", "cargo_", "correo_", "fecha_", "master_",
+        "descripcion_", "cifra_", "ebit_", "resultado_", "ebt_"
+    )
+
+    # Field name patterns that should be cleared (contains match)
+    widget_contains = (
+        "contacto", "cargo_contacto", "correo_contacto",
+        "texto_anexo", "fecha_fin", "entidad_cliente",
+        "master_file", "descripcion_actividad",
+        "cifra_", "ebit_", "resultado_", "ebt_",
+        "impacto_", "afectacion_", "texto_mitigacion",
+        "cumplido_", "texto_cumplido", "cumplimiento_resumen",
+        "servicio_vinculado", "entidad_vinculada",
+        "ingreso_entidad", "gasto_entidad"
+    )
+
+    keys_to_clear = []
     for key in list(st.session_state.keys()):
-        # Skip internal state keys
-        if key in ("initialized", "plugin_id", "form_data", "list_items",
-                   "generation_result", "validation_errors", "_data_just_imported"):
+        if key in reserved_keys:
+            continue
+        if key.startswith("_") and key != "_data_just_imported":
             continue
 
-        # Skip metadata keys
-        if key.startswith("_"):
+        # Check prefix matches
+        if any(key.startswith(prefix) for prefix in widget_prefixes):
+            keys_to_clear.append(key)
             continue
-
-        # Clear any key that looks like a widget key
-        # Widget keys typically have patterns like field_xxx, entidad_x_x_xxx, etc.
-        if any(pattern in key for pattern in (
-            "field_", "entidad_", "servicio_", "analizar_", "impacto_",
-            "afectacion_", "texto_", "cumplido_", "cumplimiento_",
-            "rm_", "add_", "remove_", "_action_",
-            # Additional patterns for sec_general, sec_anexo3, sec_contacts, sec_financials
-            "contacto", "cargo_", "correo_", "fecha_", "master_",
-            "descripcion_", "cifra_", "ebit_", "resultado_", "ebt_"
-        )):
-            patterns_to_clear.append(key)
+        # Check contains matches
+        if any(pattern in key for pattern in widget_contains):
+            keys_to_clear.append(key)
 
     # Delete the collected keys
-    for key in patterns_to_clear:
+    for key in keys_to_clear:
         if key in st.session_state:
             del st.session_state[key]
 
 
-def _coerce_widget_value(value):
-    """Normalize imported scalar values to widget-friendly types."""
+def _coerce_widget_value(value, field_name: str = ""):
+    """
+    Normalize imported scalar values to widget-friendly types.
+
+    Args:
+        value: The value to coerce
+        field_name: Optional field name to help determine the type
+
+    Returns:
+        The coerced value appropriate for the widget type
+    """
+    if value is None:
+        return value
+
+    # Handle date strings (ISO format)
     if isinstance(value, str):
-        try:
-            return date.fromisoformat(value)
-        except ValueError:
-            return value
+        # Try to parse as date if it looks like a date string
+        if len(value) == 10 and value.count("-") == 2:
+            try:
+                return date.fromisoformat(value)
+            except ValueError:
+                pass
+        return value
+
+    # Handle numeric types - ensure floats for number inputs
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        # Currency/financial fields should be floats
+        if any(pattern in field_name for pattern in (
+            "cifra_", "ebit_", "resultado_", "ebt_",
+            "ingreso_", "gasto_", "_entidad"
+        )):
+            return float(value)
+        return value
+
     return value
 
 
@@ -418,13 +459,9 @@ def load_json_data(json_data: dict) -> None:
         json_data = normalized
 
     def _set_scalar_field(key: str, value) -> None:
-        """Set both form_data and widget state for scalar fields."""
-        widget_key = state.get_stable_key(key)
-        coerced = _coerce_widget_value(value)
-        try:
-            st.session_state[widget_key] = coerced
-        except Exception:
-            st.session_state[widget_key] = value
+        """Set form_data for scalar fields. Widget state is NOT set here
+        because components will read from form_data when _data_just_imported is True."""
+        coerced = _coerce_widget_value(value, key)
         state.set_field_value(key, coerced)
 
     # FIRST: Force clear all widget state BEFORE clearing form data

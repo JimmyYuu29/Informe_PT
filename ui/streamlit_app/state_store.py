@@ -182,7 +182,38 @@ def clear_form_data() -> None:
         "ebit_",
         "resultado_",
         "ebt_",
+        # Additional patterns for complete cleanup
+        "add_entidad_",
+        "remove_servicio_",
+        "add_servicio",
     )
+
+    # Field name patterns that should be cleared (contains match)
+    widget_contains = (
+        "contacto",
+        "cargo_contacto",
+        "correo_contacto",
+        "texto_anexo",
+        "fecha_fin",
+        "entidad_cliente",
+        "master_file",
+        "descripcion_actividad",
+        "cifra_",
+        "ebit_",
+        "resultado_",
+        "ebt_",
+        "impacto_",
+        "afectacion_",
+        "texto_mitigacion",
+        "cumplido_",
+        "texto_cumplido",
+        "cumplimiento_resumen",
+        "servicio_vinculado",
+        "entidad_vinculada",
+        "ingreso_entidad",
+        "gasto_entidad",
+    )
+
     reserved_keys = {
         "initialized",
         "plugin_id",
@@ -192,11 +223,20 @@ def clear_form_data() -> None:
         "validation_errors",
         "_data_just_imported",
     }
-    keys_to_delete = [
-        key for key in list(st.session_state.keys())
-        if key not in reserved_keys
-        and any(key.startswith(prefix) or prefix in key for prefix in widget_prefixes)
-    ]
+
+    keys_to_delete = []
+    for key in list(st.session_state.keys()):
+        if key in reserved_keys:
+            continue
+        # Check prefix matches
+        if any(key.startswith(prefix) for prefix in widget_prefixes):
+            keys_to_delete.append(key)
+            continue
+        # Check contains matches
+        if any(pattern in key for pattern in widget_contains):
+            keys_to_delete.append(key)
+            continue
+
     for key in keys_to_delete:
         del st.session_state[key]
 
