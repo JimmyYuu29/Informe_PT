@@ -165,13 +165,42 @@ def render_enum_input(
         option_values = list(options)
 
     # Find index for current value, or use default
+    # Normalize current_value for comparison (handle int/str mismatch)
     default_index = 0
-    if current_value in option_values:
-        default_index = option_values.index(current_value)
-    elif current_value in option_labels:
-        default_index = option_labels.index(current_value)
-    elif default is not None and default in option_values:
-        default_index = option_values.index(default)
+    found = False
+
+    if current_value is not None:
+        # Try direct match first
+        if current_value in option_values:
+            default_index = option_values.index(current_value)
+            found = True
+        elif current_value in option_labels:
+            default_index = option_labels.index(current_value)
+            found = True
+        else:
+            # Try string conversion for integer values (e.g., master_file: 0/1)
+            str_value = str(current_value)
+            for idx, val in enumerate(option_values):
+                if str(val) == str_value:
+                    default_index = idx
+                    found = True
+                    break
+            if not found:
+                for idx, lbl in enumerate(option_labels):
+                    if str(lbl) == str_value:
+                        default_index = idx
+                        found = True
+                        break
+
+    if not found and default is not None:
+        if default in option_values:
+            default_index = option_values.index(default)
+        elif str(default) in [str(v) for v in option_values]:
+            default_index = [str(v) for v in option_values].index(str(default))
+
+    # Ensure default_index is always a valid integer
+    if not isinstance(default_index, int) or default_index < 0 or default_index >= len(option_labels):
+        default_index = 0
 
     label_display = f"{label} *" if required else label
 
