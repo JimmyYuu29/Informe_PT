@@ -884,18 +884,18 @@ function renderRiskTable(allFields) {
     container.className = 'risk-table-vertical';
 
     const riskLabels = [
-        'Restructuraciones empresariales',
-        'Valoración de transmisiones intragrupo de activos intangibles',
-        'Pagos por cánones derivados de la cesión de intangibles',
-        'Pagos por servicios intragrupo',
-        'Existencia de pérdidas reiteradas',
-        'Operaciones financieras entre partes vinculadas',
-        'Estructuras funcionales de bajo riesgo',
-        'Falta de declaración de ingresos intragrupo',
-        'Erosión de bases imponibles',
-        'Revisión de las formas societarias',
-        'Operaciones con establecimientos permanentes',
-        'Peso de las operaciones vinculadas relevante',
+        "Restructuraciones empresariales",
+        "Valoración de transmisiones intragrupo de activos intangibles",
+        "Pagos por cánones derivados de la cesión de intangibles",
+        "Pagos por servicios intragrupo",
+        "Existencia de pérdidas reiteradas",
+        "Operaciones financieras entre partes vinculadas",
+        "Estructuras funcionales de bajo riesgo, tanto en el ámbito de la fabricación como de la distribución",
+        "Falta de declaración de ingresos intragrupo por las prestaciones de servicios o de cesiones de activos intangibles no repercutidos",
+        "Erosión de bases imponibles causada por el establecimiento de estructuras en el exterior en las que se remanses beneficios que deben tributar en España",
+        "Revisión de las formas societarias utilizadas para el desempeño de la actividad económica con el objetivo de verificar si se está produciendo una minoración improcedente de la correcta tributación de la actividad desarrollada o una traslación de bases imponibles negativas hacia entidades jurídicas sometidas a menores tipos",
+        "Operaciones con establecimientos permanentes",
+        "Peso de las operaciones vinculadas relevante",
     ];
 
     const impactoOptions = ['si', 'no', 'posible'];
