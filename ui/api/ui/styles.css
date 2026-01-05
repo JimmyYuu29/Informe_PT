@@ -238,6 +238,26 @@ body {
     overflow-y: auto;
     overflow-x: hidden;
     z-index: 100;
+    scrollbar-width: thin;
+    scrollbar-color: var(--gray-300) transparent;
+}
+
+/* Custom scrollbar for webkit browsers */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: var(--gray-300);
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--gray-400);
 }
 
 /* Ensure sidebar content doesn't overflow horizontally */
@@ -248,6 +268,13 @@ body {
 
 .sidebar .select-input {
     width: 100%;
+    min-width: 0;
+}
+
+/* Prevent plugin info from overflowing */
+.sidebar .plugin-info {
+    overflow: hidden;
+    word-wrap: break-word;
 }
 
 .sidebar-section {
@@ -1347,17 +1374,30 @@ body {
 .risk-item-vertical {
     background: var(--gray-50);
     border-radius: var(--border-radius-md);
-    padding: var(--spacing-lg);
+    padding: var(--spacing-lg) var(--spacing-xl);
     border-left: 4px solid var(--accent-gold);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.2s ease;
+}
+
+.risk-item-vertical:hover {
+    box-shadow: var(--shadow-md);
 }
 
 .risk-item-header {
     margin-bottom: var(--spacing-lg);
     color: var(--primary-blue-dark);
     font-size: var(--font-size-base);
-    line-height: 1.6;
+    line-height: 1.7;
     word-wrap: break-word;
     overflow-wrap: break-word;
+    hyphens: auto;
+    padding-right: var(--spacing-md);
+}
+
+.risk-item-header strong {
+    display: block;
+    font-weight: 600;
 }
 
 .risk-item-inputs {
@@ -1370,20 +1410,28 @@ body {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-md) var(--spacing-xl);
+    align-items: start;
 }
 
 /* Make inputs in risk table more spacious */
 .risk-item-vertical .form-group-row {
-    display: grid;
-    grid-template-columns: 130px 1fr;
-    gap: var(--spacing-sm);
+    display: flex;
+    flex-direction: row;
     align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.risk-item-vertical .form-label-inline {
+    min-width: 110px;
+    flex-shrink: 0;
+    font-size: var(--font-size-sm);
 }
 
 .risk-item-vertical .form-group-row .form-input,
 .risk-item-vertical .form-group-row .select-input {
-    width: 100%;
-    max-width: none;
+    flex: 1;
+    min-width: 100px;
+    max-width: 180px;
 }
 
 /* Mitigadores field spans full width */
@@ -1391,11 +1439,13 @@ body {
     grid-column: 1 / -1;
 }
 
+.risk-item-vertical .form-group-row:nth-child(3) .form-input {
+    max-width: none;
+    flex: 1;
+}
+
 .risk-item-divider {
-    border: none;
-    border-top: 1px solid var(--gray-200);
-    margin-top: var(--spacing-lg);
-    margin-bottom: 0;
+    display: none;
 }
 
 /* Form Group Row (inline label + input) */
@@ -1434,61 +1484,77 @@ body {
 .compliance-item-vertical {
     background: var(--gray-50);
     border-radius: var(--border-radius-md);
-    padding: var(--spacing-lg);
+    padding: var(--spacing-lg) var(--spacing-xl);
     border-left: 4px solid var(--primary-blue-light);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.2s ease;
+}
+
+.compliance-item-vertical:hover {
+    box-shadow: var(--shadow-md);
 }
 
 .compliance-item-header {
     margin-bottom: var(--spacing-lg);
     color: var(--primary-blue-dark);
     font-size: var(--font-size-base);
-    line-height: 1.6;
+    line-height: 1.7;
     word-wrap: break-word;
     overflow-wrap: break-word;
+    hyphens: auto;
+    padding-right: var(--spacing-md);
+}
+
+.compliance-item-header strong {
+    display: block;
+    font-weight: 600;
 }
 
 .compliance-item-inputs {
-    display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: var(--spacing-md);
-    align-items: start;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-lg);
+    align-items: center;
 }
 
 .compliance-item-inputs-vertical {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
+    display: flex;
+    flex-wrap: wrap;
     gap: var(--spacing-md) var(--spacing-xl);
-    align-items: start;
+    align-items: center;
 }
 
 /* Make compliance detail inputs properly sized */
 .compliance-item-vertical .form-group-row {
-    display: grid;
-    grid-template-columns: 100px 1fr;
-    gap: var(--spacing-sm);
+    display: flex;
     align-items: center;
+    gap: var(--spacing-sm);
 }
 
-.compliance-item-vertical .form-group-row .form-input,
+.compliance-item-vertical .form-label-inline {
+    min-width: auto;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
 .compliance-item-vertical .form-group-row .select-input {
-    width: 100%;
-    max-width: none;
+    width: 120px;
+    min-width: 100px;
 }
 
 /* Comentario field spans more width */
 .compliance-item-vertical .comentario-group {
     flex: 1;
+    min-width: 250px;
 }
 
 .compliance-item-vertical .comentario-group .form-input {
     width: 100%;
+    min-width: 200px;
 }
 
 .compliance-item-divider {
-    border: none;
-    border-top: 1px solid var(--gray-200);
-    margin-top: var(--spacing-lg);
-    margin-bottom: 0;
+    display: none;
 }
 
 /* Compliance Summary Vertical Layout */
@@ -1503,43 +1569,54 @@ body {
     border-radius: var(--border-radius-md);
     padding: var(--spacing-lg);
     border-left: 4px solid var(--primary-blue);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-md);
 }
 
 .compliance-summary-header {
-    margin-bottom: var(--spacing-md);
+    flex: 1;
+    min-width: 300px;
     color: var(--primary-blue-dark);
     font-size: var(--font-size-base);
     line-height: 1.5;
+    margin: 0;
 }
 
 .compliance-summary-inputs {
     display: flex;
     gap: var(--spacing-md);
+    align-items: center;
+    flex-shrink: 0;
 }
 
 .compliance-summary-inputs-vertical {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: var(--spacing-sm);
-}
-
-/* Allow compliance summary selects to have more width */
-.compliance-summary-item .form-group-row {
-    display: grid;
-    grid-template-columns: 120px 150px;
-    gap: var(--spacing-md);
     align-items: center;
 }
 
+/* Allow compliance summary selects to have appropriate width */
+.compliance-summary-item .form-group-row {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: center;
+}
+
+.compliance-summary-item .form-label-inline {
+    min-width: auto;
+    white-space: nowrap;
+}
+
 .compliance-summary-item .select-input {
-    width: 100%;
+    width: 120px;
+    min-width: 100px;
 }
 
 .compliance-summary-divider {
-    border: none;
-    border-top: 1px solid var(--gray-200);
-    margin-top: var(--spacing-md);
-    margin-bottom: 0;
+    display: none;
 }
 
 /* Info text styling */
@@ -1568,16 +1645,25 @@ body {
         grid-template-columns: 1fr;
     }
 
-    .risk-item-vertical .form-group-row:nth-child(3) {
-        grid-column: 1;
+    .compliance-summary-item {
+        flex-direction: column;
+        align-items: flex-start;
     }
 
-    .compliance-item-inputs {
-        grid-template-columns: 1fr;
+    .compliance-summary-header {
+        min-width: 100%;
+        margin-bottom: var(--spacing-sm);
     }
 
     .compliance-item-inputs-vertical {
-        grid-template-columns: 1fr;
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+    }
+
+    .compliance-item-vertical .comentario-group {
+        width: 100%;
+        min-width: 100%;
     }
 }
 
@@ -1590,22 +1676,35 @@ body {
         grid-template-columns: 1fr;
     }
 
+    .risk-item-vertical .form-group-row {
+        flex-wrap: wrap;
+    }
+
+    .risk-item-vertical .form-group-row .form-input,
+    .risk-item-vertical .form-group-row .select-input {
+        max-width: none;
+        width: 100%;
+    }
+
     .compliance-summary-inputs {
         flex-direction: column;
+        width: 100%;
     }
 
     .compliance-summary-item .form-group-row {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-xs);
+        width: 100%;
+    }
+
+    .compliance-summary-item .select-input {
+        width: 100%;
     }
 
     .compliance-item-vertical .form-group-row {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-xs);
+        flex-wrap: wrap;
+        width: 100%;
     }
 
-    .risk-item-vertical .form-group-row {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-xs);
+    .compliance-item-vertical .form-group-row .select-input {
+        width: 100%;
     }
 }
