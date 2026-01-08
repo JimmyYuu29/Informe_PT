@@ -58,7 +58,7 @@ def validate_plugin_exists(plugin_id: str) -> bool:
 class Settings:
     """Application settings."""
     APP_NAME: str = "Document Generation API"
-    VERSION: str = "1.0.0"
+    VERSION: str = "1.1.0"
     DEBUG: bool = False
     CORS_ORIGINS: list[str] = ["*"]
     MAX_UPLOAD_SIZE: int = 10 * 1024 * 1024  # 10 MB
