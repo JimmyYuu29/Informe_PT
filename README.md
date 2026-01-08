@@ -1,6 +1,6 @@
 # Enterprise Document Generation Platform
 
-**Version 2.0**
+**Version 2.2**
 
 A configuration-driven document generation system for creating professional reports from structured data and Word templates.
 
@@ -35,6 +35,9 @@ The system supports multiple plugin packs, each representing a different documen
 - **Dual UI**: Streamlit web app + FastAPI backend
 - **Traceability**: Full audit trail of decisions and rule evaluations
 - **CI-ready validation**: Validate plugin integrity before deployment
+- **Conditional evaluative comments**: 17 si/no toggles for including predefined text blocks
+- **Automatic peso OOVV calculation**: Displays peso indicators in Operaciones Vinculadas section
+- **Valoración OOVV text field**: User input field for peso-based valuation commentary
 
 ## Project Structure
 
@@ -61,6 +64,7 @@ project_root/
 │   ├── renderer_docx.py
 │   ├── audit_logger.py
 │   ├── validate_plugin.py
+│   ├── comentarios_valorativos.py  # Conditional evaluative comments
 │   └── generate.py
 ├── ui/
 │   ├── streamlit_app/          # Streamlit UI

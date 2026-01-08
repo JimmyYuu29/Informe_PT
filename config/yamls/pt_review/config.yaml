@@ -44,6 +44,7 @@ ui:
       label: "Operaciones Vinculadas"
       fields:
         - servicios_vinculados
+        - valoracion_oovv
 
     - id: sec_services
       label: "Análisis de Servicios OOVV"
@@ -86,6 +87,7 @@ ui:
       label: "Anexo III - Comentarios"
       fields:
         - texto_anexo3
+        - comentarios_valorativos_section
 
     - id: sec_contacts
       label: "Contactos"

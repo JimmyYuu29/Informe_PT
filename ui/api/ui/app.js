@@ -19,12 +19,14 @@ const AppState = {
     schema: null,
     formData: {},
     listData: {},
+    comentariosData: null,  // Cached comentarios valorativos definitions
     isLoading: false,
 
     setPlugin(plugin) {
         this.currentPlugin = plugin;
         this.formData = {};
         this.listData = {};
+        this.comentariosData = null;
     },
 
     setSchema(schema) {
@@ -148,6 +150,17 @@ async function loadPluginSchema(pluginId) {
     } catch (error) {
         showNotification('error', 'Failed to load schema', error.message);
         return null;
+    }
+}
+
+async function loadComentariosValorativos(pluginId) {
+    try {
+        const data = await apiCall(`/plugins/${pluginId}/comentarios-valorativos`);
+        AppState.comentariosData = data.comentarios;
+        return data.comentarios;
+    } catch (error) {
+        console.warn('Failed to load comentarios valorativos:', error.message);
+        return [];
     }
 }
 
@@ -350,6 +363,22 @@ function renderSection(section, allFields, expanded = true) {
     } else if (sectionId === 'sec_contacts') {
         const contactsEl = renderContactsSection(allFields);
         content.appendChild(contactsEl);
+    } else if (sectionId === 'sec_operations') {
+        // Render operaciones vinculadas with peso indicators and valoracion_oovv
+        const operationsEl = renderOperacionesVinculadasSection(allFields);
+        content.appendChild(operationsEl);
+    } else if (sectionId === 'sec_anexo3') {
+        // Render texto_anexo3 field first
+        const textoAnexo3Field = allFields.find(f => f.name === 'texto_anexo3');
+        if (textoAnexo3Field) {
+            const fieldEl = renderField(textoAnexo3Field);
+            if (fieldEl) {
+                content.appendChild(fieldEl);
+            }
+        }
+        // Then render comentarios valorativos section
+        const comentariosEl = renderComentariosVlorativosSection();
+        content.appendChild(comentariosEl);
     } else {
         // Default rendering
         sectionFieldNames.forEach(fieldName => {
@@ -861,6 +890,9 @@ function updateDerivedValues() {
     if (ncpEl1) ncpEl1.textContent = formatPercent(ncp_1);
     if (ncpEl0) ncpEl0.textContent = formatPercent(ncp_0);
     if (ncpVarEl) ncpVarEl.textContent = calcVariation(ncp_1, ncp_0);
+
+    // Also update peso OOVV indicators when financial data changes
+    updatePesoOOVVIndicators();
 }
 
 function updateFinancialVariation(field1, field0) {
@@ -1173,6 +1205,141 @@ function renderComplianceSummaryTable(prefix, count, allFields) {
     return container;
 }
 
+function renderComentariosVlorativosSection() {
+    const container = document.createElement('div');
+    container.className = 'comentarios-valorativos-section';
+    container.id = 'comentarios-valorativos-container';
+
+    // Section title
+    const divider = document.createElement('hr');
+    divider.className = 'section-divider';
+    container.appendChild(divider);
+
+    const title = document.createElement('h4');
+    title.className = 'section-subheader';
+    title.textContent = 'Comentarios Valorativos';
+    container.appendChild(title);
+
+    const caption = document.createElement('p');
+    caption.className = 'info-text';
+    caption.textContent = 'Seleccione los comentarios que desea incluir en el documento.';
+    container.appendChild(caption);
+
+    // Get comentarios data from state
+    const comentarios = AppState.comentariosData || [];
+
+    if (comentarios.length === 0) {
+        const loading = document.createElement('p');
+        loading.className = 'info-text';
+        loading.textContent = 'Cargando comentarios valorativos...';
+        container.appendChild(loading);
+
+        // Try to load comentarios if not already loaded
+        if (AppState.currentPlugin) {
+            loadComentariosValorativos(AppState.currentPlugin).then(data => {
+                if (data && data.length > 0) {
+                    refreshComentariosSection();
+                }
+            });
+        }
+        return container;
+    }
+
+    const siNoOptions = ['no', 'si'];
+
+    comentarios.forEach(comentario => {
+        const itemContainer = document.createElement('div');
+        itemContainer.className = 'comentario-valorativo-item';
+        itemContainer.dataset.fieldName = comentario.id;
+
+        // Row with question, selector, and conditional preview
+        const row = document.createElement('div');
+        row.className = 'comentario-row';
+
+        // Question column
+        const questionCol = document.createElement('div');
+        questionCol.className = 'comentario-question';
+        questionCol.innerHTML = `<strong>${comentario.index}.</strong> ${comentario.question}`;
+        row.appendChild(questionCol);
+
+        // Selector column
+        const selectorCol = document.createElement('div');
+        selectorCol.className = 'comentario-selector';
+
+        const select = document.createElement('select');
+        select.className = 'select-input';
+        select.name = comentario.id;
+        select.dataset.comentarioId = comentario.id;
+
+        siNoOptions.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt;
+            option.textContent = opt.charAt(0).toUpperCase() + opt.slice(1);
+            if (opt === 'no') {
+                option.selected = true;
+            }
+            select.appendChild(option);
+        });
+
+        // Set default value
+        AppState.setFormValue(comentario.id, 'no');
+
+        select.addEventListener('change', (e) => {
+            AppState.setFormValue(comentario.id, e.target.value);
+            updateComentarioPreview(comentario.id, e.target.value, comentario.text_preview);
+        });
+
+        selectorCol.appendChild(select);
+        row.appendChild(selectorCol);
+
+        // Preview column (initially hidden)
+        const previewCol = document.createElement('div');
+        previewCol.className = 'comentario-preview hidden';
+        previewCol.id = `preview-${comentario.id}`;
+
+        if (comentario.text_preview) {
+            const previewText = document.createElement('textarea');
+            previewText.className = 'preview-textarea';
+            previewText.value = comentario.text_preview;
+            previewText.disabled = true;
+            previewText.rows = 3;
+            previewCol.appendChild(previewText);
+        }
+
+        row.appendChild(previewCol);
+
+        itemContainer.appendChild(row);
+
+        // Divider
+        const itemDivider = document.createElement('hr');
+        itemDivider.className = 'comentario-divider';
+        itemContainer.appendChild(itemDivider);
+
+        container.appendChild(itemContainer);
+    });
+
+    return container;
+}
+
+function updateComentarioPreview(fieldId, value, textPreview) {
+    const previewCol = document.getElementById(`preview-${fieldId}`);
+    if (previewCol) {
+        if (value === 'si' && textPreview) {
+            previewCol.classList.remove('hidden');
+        } else {
+            previewCol.classList.add('hidden');
+        }
+    }
+}
+
+function refreshComentariosSection() {
+    const container = document.getElementById('comentarios-valorativos-container');
+    if (container && container.parentElement) {
+        const newSection = renderComentariosVlorativosSection();
+        container.parentElement.replaceChild(newSection, container);
+    }
+}
+
 function renderContactsSection(allFields) {
     const container = document.createElement('div');
     container.className = 'contacts-grid';
@@ -1232,6 +1399,138 @@ function renderContactsSection(allFields) {
     }
 
     return container;
+}
+
+function renderOperacionesVinculadasSection(allFields) {
+    const container = document.createElement('div');
+    container.className = 'operaciones-vinculadas-section';
+
+    // Render servicios_vinculados field (existing list field renderer)
+    const serviciosField = allFields.find(f => f.name === 'servicios_vinculados');
+    if (serviciosField) {
+        const fieldEl = renderField(serviciosField);
+        if (fieldEl) {
+            container.appendChild(fieldEl);
+        }
+    }
+
+    // Divider
+    const divider1 = document.createElement('hr');
+    divider1.className = 'section-divider';
+    container.appendChild(divider1);
+
+    // Peso OOVV indicators section
+    const pesoSection = document.createElement('div');
+    pesoSection.className = 'peso-oovv-section';
+    pesoSection.id = 'peso-oovv-indicators';
+
+    const pesoTitle = document.createElement('p');
+    pesoTitle.className = 'caption-text';
+    pesoTitle.textContent = 'Indicadores calculados automáticamente:';
+    pesoSection.appendChild(pesoTitle);
+
+    // Peso OOVV sobre INCN row
+    const pesoIncnRow = document.createElement('div');
+    pesoIncnRow.className = 'peso-row';
+    pesoIncnRow.innerHTML = `
+        <span class="peso-label">Peso OOVV sobre INCN</span>
+        <span class="peso-value derived-value" id="peso-incn-value">N/A %</span>
+    `;
+    pesoSection.appendChild(pesoIncnRow);
+
+    // Peso OOVV sobre total costes row
+    const pesoCostesRow = document.createElement('div');
+    pesoCostesRow.className = 'peso-row';
+    pesoCostesRow.innerHTML = `
+        <span class="peso-label">Peso OOVV sobre total costes</span>
+        <span class="peso-value derived-value" id="peso-costes-value">N/A %</span>
+    `;
+    pesoSection.appendChild(pesoCostesRow);
+
+    container.appendChild(pesoSection);
+
+    // Divider
+    const divider2 = document.createElement('hr');
+    divider2.className = 'section-divider';
+    container.appendChild(divider2);
+
+    // Valoración OOVV text field
+    const valoracionGroup = document.createElement('div');
+    valoracionGroup.className = 'form-group full-width';
+    valoracionGroup.dataset.fieldName = 'valoracion_oovv';
+
+    const valoracionLabel = document.createElement('label');
+    valoracionLabel.className = 'form-label';
+    valoracionLabel.textContent = 'Valoración de Operaciones Vinculadas';
+    valoracionGroup.appendChild(valoracionLabel);
+
+    const valoracionInput = document.createElement('textarea');
+    valoracionInput.className = 'textarea-input';
+    valoracionInput.name = 'valoracion_oovv';
+    valoracionInput.rows = 4;
+    valoracionInput.placeholder = 'Texto de valoración basado en los indicadores de peso OOVV';
+    valoracionInput.addEventListener('input', (e) => {
+        AppState.setFormValue('valoracion_oovv', e.target.value);
+    });
+    valoracionGroup.appendChild(valoracionInput);
+
+    const valoracionHint = document.createElement('span');
+    valoracionHint.className = 'form-hint';
+    valoracionHint.textContent = 'Texto de valoración basado en los indicadores de peso OOVV';
+    valoracionGroup.appendChild(valoracionHint);
+
+    container.appendChild(valoracionGroup);
+
+    return container;
+}
+
+function updatePesoOOVVIndicators() {
+    // Get financial data for calculations
+    const cifra_1 = AppState.getFormValue('cifra_1') || 0;
+    const ebit_1 = AppState.getFormValue('ebit_1') || 0;
+    const cost_1 = cifra_1 - ebit_1;
+
+    // Calculate total ingreso and gasto from servicios_vinculados
+    const servicios = AppState.getListItems('servicios_vinculados');
+    let totalIngreso = 0;
+    let totalGasto = 0;
+
+    servicios.forEach(servicio => {
+        const entidades = servicio.entidades_vinculadas || [];
+        entidades.forEach(entidad => {
+            totalIngreso += parseFloat(entidad.ingreso_entidad) || 0;
+            totalGasto += parseFloat(entidad.gasto_entidad) || 0;
+        });
+    });
+
+    // Calculate peso indicators
+    let pesoIncn = 'N/A';
+    let pesoCostes = 'N/A';
+
+    if (cifra_1 !== 0) {
+        pesoIncn = ((totalIngreso / cifra_1) * 100).toLocaleString('es-ES', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    if (cost_1 !== 0) {
+        pesoCostes = ((totalGasto / cost_1) * 100).toLocaleString('es-ES', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    // Update display
+    const pesoIncnEl = document.getElementById('peso-incn-value');
+    const pesoCostesEl = document.getElementById('peso-costes-value');
+
+    if (pesoIncnEl) {
+        pesoIncnEl.textContent = `${pesoIncn} %`;
+    }
+    if (pesoCostesEl) {
+        pesoCostesEl.textContent = `${pesoCostes} %`;
+    }
 }
 
 function createSelect(name, options, defaultValue = '') {
@@ -1597,11 +1896,15 @@ async function handlePluginChange(pluginId) {
             updatePluginInfo(plugin);
         }
 
-        // Get schema
-        const schema = await loadPluginSchema(pluginId);
+        // Get schema and comentarios valorativos in parallel
+        const [schema, comentarios] = await Promise.all([
+            loadPluginSchema(pluginId),
+            loadComentariosValorativos(pluginId),
+        ]);
 
         if (schema) {
             AppState.setPlugin(pluginId);
+            AppState.comentariosData = comentarios;  // Store before rendering
             renderForm(schema);
             showNotification('success', 'Plugin Loaded', `${plugin?.name || pluginId} is ready.`);
         }

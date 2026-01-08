@@ -4,6 +4,35 @@ All notable changes to the Informe PT project are documented in this file.
 
 ---
 
+## [v2.2] - 2026-01-08
+
+### Added
+- Peso OOVV indicators display in Operaciones Vinculadas section:
+  - Peso OOVV sobre INCN (automatically calculated)
+  - Peso OOVV sobre total costes (automatically calculated)
+- New `valoracion_oovv` text field for peso-based valuation commentary
+- Comentarios Valorativos section with 17 conditional si/no toggles
+- Text preview feature for comentarios valorativos (shows first 3 lines when "si" selected)
+- New `comentarios_valorativos.yaml` configuration file
+- New `comentarios_valorativos.py` module for processing logic
+- API endpoint for comentarios valorativos: `/plugins/{id}/comentarios-valorativos`
+
+### Changed
+- Updated plugin version to 1.1.0
+- Updated API frontend version to v2.2
+- Enhanced Operaciones Vinculadas UI with peso calculation display
+- Updated README.md with new features documentation
+
+---
+
+## [v2.1] - 2026-01-05
+
+### Added
+- Improved sidebar layout in Streamlit app
+- Fixed table layout issues
+
+---
+
 ## [v2.0] - 2026-01-03
 
 ### Added

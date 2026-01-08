@@ -1626,6 +1626,88 @@ body {
     margin-bottom: var(--spacing-md);
 }
 
+/* ============================================================================
+   Comentarios Valorativos Section
+   ============================================================================ */
+
+.comentarios-valorativos-section {
+    margin-top: var(--spacing-lg);
+}
+
+.comentarios-valorativos-section .section-divider {
+    border: none;
+    border-top: 1px solid var(--gray-200);
+    margin: var(--spacing-lg) 0;
+}
+
+.comentario-valorativo-item {
+    margin-bottom: var(--spacing-sm);
+}
+
+.comentario-row {
+    display: grid;
+    grid-template-columns: 1fr 100px 1fr;
+    gap: var(--spacing-md);
+    align-items: start;
+    padding: var(--spacing-sm) 0;
+}
+
+.comentario-question {
+    font-size: var(--font-size-base);
+    color: var(--gray-700);
+    line-height: 1.6;
+}
+
+.comentario-selector {
+    display: flex;
+    justify-content: center;
+}
+
+.comentario-selector .select-input {
+    width: 80px;
+    min-width: 80px;
+}
+
+.comentario-preview {
+    background: var(--gray-50);
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-xs);
+}
+
+.comentario-preview .preview-textarea {
+    width: 100%;
+    font-size: var(--font-size-xs);
+    color: var(--gray-600);
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-sm);
+    resize: none;
+    line-height: 1.4;
+}
+
+.comentario-divider {
+    border: none;
+    border-top: 1px dashed var(--gray-200);
+    margin: var(--spacing-sm) 0;
+}
+
+/* Responsive adjustments for comentarios */
+@media (max-width: 992px) {
+    .comentario-row {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+
+    .comentario-selector {
+        justify-content: flex-start;
+    }
+
+    .comentario-preview {
+        margin-top: var(--spacing-sm);
+    }
+}
+
 /* Responsive Table Adjustments */
 @media (max-width: 1200px) {
     .financial-table-3col .form-table-header,
@@ -1707,4 +1789,50 @@ body {
     .compliance-item-vertical .form-group-row .select-input {
         width: 100%;
     }
+}
+
+/* ============================================================================
+   Operaciones Vinculadas - Peso OOVV Indicators
+   ============================================================================ */
+
+.operaciones-vinculadas-section {
+    padding: var(--spacing-sm) 0;
+}
+
+.peso-oovv-section {
+    background: var(--gray-50);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md);
+    margin: var(--spacing-md) 0;
+}
+
+.peso-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px dashed var(--gray-200);
+}
+
+.peso-row:last-child {
+    border-bottom: none;
+}
+
+.peso-label {
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+    font-style: italic;
+}
+
+.peso-value {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--gray-700);
+    font-style: italic;
+}
+
+.section-divider {
+    border: none;
+    border-top: 1px solid var(--gray-200);
+    margin: var(--spacing-md) 0;
 }

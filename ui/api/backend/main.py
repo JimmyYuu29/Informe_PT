@@ -327,6 +327,36 @@ async def validate_plugin_pack(plugin_id: str):
 
 
 # ============================================================================
+# Comentarios Valorativos Endpoint
+# ============================================================================
+
+@app.get("/plugins/{plugin_id}/comentarios-valorativos")
+async def get_comentarios_valorativos(plugin_id: str):
+    """
+    Get comentarios valorativos definitions for UI rendering.
+
+    Returns the list of 17 comentarios with questions and text previews.
+    """
+    from modules.comentarios_valorativos import get_comentarios_for_ui
+
+    try:
+        plugin = load_plugin(plugin_id)
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Plugin '{plugin_id}' not found",
+        )
+
+    comentarios_defs = plugin.get_comentarios_valorativos()
+    comentarios_ui = get_comentarios_for_ui(comentarios_defs)
+
+    return {
+        "plugin_id": plugin_id,
+        "comentarios": comentarios_ui,
+    }
+
+
+# ============================================================================
 # Error Handlers
 # ============================================================================
 
