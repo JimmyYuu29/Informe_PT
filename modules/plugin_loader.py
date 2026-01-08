@@ -83,6 +83,7 @@ class PluginPack:
         self._refs: Optional[dict] = None
         self._derived: Optional[dict] = None
         self._formatting: Optional[dict] = None
+        self._comentarios_valorativos: Optional[dict] = None
 
     def _load_if_exists(self, filename: str) -> dict:
         """Load a YAML file if it exists, return empty dict otherwise."""
@@ -151,6 +152,12 @@ class PluginPack:
             self._formatting = self._load_if_exists("formatting.yaml")
         return self._formatting
 
+    @property
+    def comentarios_valorativos(self) -> dict:
+        if self._comentarios_valorativos is None:
+            self._comentarios_valorativos = self._load_if_exists("comentarios_valorativos.yaml")
+        return self._comentarios_valorativos
+
     def get_field_definitions(self) -> dict:
         """Get all field definitions."""
         return self.fields.get("fields", {})
@@ -170,6 +177,10 @@ class PluginPack:
     def get_derived_fields(self) -> dict:
         """Get all derived field definitions."""
         return self.derived.get("derived_fields", {})
+
+    def get_comentarios_valorativos(self) -> dict:
+        """Get all comentarios valorativos definitions."""
+        return self.comentarios_valorativos.get("comentarios_valorativos", {})
 
     def get_template_path(self) -> Path:
         """Get the path to this plugin's template."""

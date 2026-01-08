@@ -7,6 +7,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from typing import Any, Optional
 from docxtpl import RichText
 from .plugin_loader import PluginPack
+from .comentarios_valorativos import build_comentarios_context
 
 
 # Spanish month names (full)
@@ -518,6 +519,12 @@ class ContextBuilder:
         # This applies to 38 fields: cumplimiento_resumen_local_*, cumplimiento_resumen_mast_*,
         # cumplido_local_*, and cumplido_mast_*
         context = replace_si_with_checkmark(context)
+
+        # Process comentarios valorativos
+        # This adds texto for each selected comentario and a list of selected items
+        comentarios_defs = self.plugin.get_comentarios_valorativos()
+        comentarios_context = build_comentarios_context(data, comentarios_defs)
+        context.update(comentarios_context)
 
         # Sanitize all values to ensure proper template insertion
         # This helps preserve table layouts by removing unwanted whitespace

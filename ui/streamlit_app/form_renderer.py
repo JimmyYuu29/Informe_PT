@@ -12,8 +12,13 @@ from decimal import Decimal, ROUND_HALF_UP
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from modules.plugin_loader import PluginPack
+from modules.comentarios_valorativos import get_comentarios_for_ui
 from ui.streamlit_app import state_store as state
 from ui.streamlit_app import components
+
+
+# Global variable to cache the current plugin for use in render functions
+_current_plugin: Optional[PluginPack] = None
 
 
 def render_field(field_name: str, field_def: dict, context: dict) -> Any:
@@ -209,6 +214,13 @@ def render_section(
             render_local_file_compliance_detail(fresh_context, fields_def)
         elif section_id == "sec_master_detail" or "master_file_compliance" in field_names:
             render_master_file_compliance_detail(fresh_context, fields_def)
+        elif section_id == "sec_anexo3":
+            # Render texto_anexo3 field first
+            field_def = fields_def.get("texto_anexo3")
+            if field_def:
+                render_field("texto_anexo3", field_def, fresh_context)
+            # Then render comentarios valorativos section
+            render_comentarios_valorativos_section(fresh_context, fields_def)
         else:
             # Default rendering - use fresh_context for field conditions
             for field_name in field_names:
@@ -227,6 +239,9 @@ def render_form(plugin: PluginPack) -> dict:
     Returns:
         Dictionary of form data.
     """
+    global _current_plugin
+    _current_plugin = plugin
+
     fields_def = plugin.get_field_definitions()
     sections = plugin.get_ui_sections()
 
@@ -1253,3 +1268,83 @@ def render_master_file_compliance_detail(context: dict, fields_def: dict) -> Non
                 label="",
                 required=comment_required,
             )
+
+
+def render_comentarios_valorativos_section(context: dict, fields_def: dict) -> None:
+    """
+    Render the comentarios valorativos section with 17 conditional questions.
+
+    Each question:
+    - Displays the question text from YAML
+    - Has a si/no selector (default: no)
+    - Shows a preview of the first 3 lines when "si" is selected
+    """
+    global _current_plugin
+
+    st.divider()
+    st.subheader("Comentarios Valorativos")
+    st.caption("Seleccione los comentarios que desea incluir en el documento.")
+
+    # Get comentarios definitions from plugin
+    if _current_plugin is None:
+        st.warning("No se pudo cargar la configuración de comentarios valorativos.")
+        return
+
+    comentarios_defs = _current_plugin.get_comentarios_valorativos()
+    comentarios_ui = get_comentarios_for_ui(comentarios_defs)
+
+    si_no_options = ["no", "si"]
+
+    for comentario in comentarios_ui:
+        field_name = comentario["id"]
+        index = comentario["index"]
+        question = comentario["question"]
+        text_preview = comentario["text_preview"]
+
+        # Create a container for each comentario
+        with st.container():
+            # Row with question, selector, and conditional preview
+            cols = st.columns([0.55, 0.15, 0.30])
+
+            with cols[0]:
+                st.markdown(f"**{index}.** {question}")
+
+            with cols[1]:
+                widget_key = state.get_stable_key(field_name)
+
+                # After JSON import, prioritize form_data over stale widget state
+                if state.was_data_just_imported():
+                    current_value = state.get_field_value(field_name, "no")
+                elif widget_key in st.session_state:
+                    current_value = st.session_state[widget_key]
+                else:
+                    current_value = state.get_field_value(field_name, "no")
+
+                # Find index for current value
+                try:
+                    default_index = si_no_options.index(current_value)
+                except ValueError:
+                    default_index = 0  # Default to "no"
+
+                selected = st.selectbox(
+                    f"Incluir comentario {index}",
+                    options=si_no_options,
+                    index=default_index,
+                    key=widget_key,
+                    label_visibility="collapsed",
+                )
+
+                state.set_field_value(field_name, selected)
+
+            with cols[2]:
+                # Show preview only if "si" is selected
+                if selected == "si" and text_preview:
+                    st.text_area(
+                        f"Vista previa comentario {index}",
+                        value=text_preview,
+                        height=80,
+                        disabled=True,
+                        label_visibility="collapsed",
+                    )
+
+        st.divider()

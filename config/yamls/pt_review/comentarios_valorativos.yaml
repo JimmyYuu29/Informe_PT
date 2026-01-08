@@ -1,0 +1,133 @@
+# comentarios_valorativos.yaml - Conditional Evaluative Comments
+# Plugin ID: pt_review
+# Generated: 2025-01-08
+#
+# This file contains 17 conditional evaluative comment variables.
+# Each variable (comentario_valorativo_i) has:
+#   - question: The question displayed in the UI
+#   - text: The text paragraph to include in the document when selected "si"
+#
+# Usage:
+#   - If comentario_valorativo_i == "si", the corresponding text is included
+#   - If comentario_valorativo_i == "no" (default), the text is not included
+
+comentarios_valorativos:
+
+  comentario_valorativo_1:
+    question: "[TODO: Escriba la pregunta 1 aquí]"
+    text: |
+      [TODO: Escriba el texto del comentario valorativo 1 aquí]
+      Este texto se mostrará en el documento cuando la respuesta sea "si".
+      Puede incluir múltiples líneas de texto según sea necesario.
+
+  comentario_valorativo_2:
+    question: "[TODO: Escriba la pregunta 2 aquí]"
+    text: |
+      [TODO: Escriba el texto del comentario valorativo 2 aquí]
+      Este texto se mostrará en el documento cuando la respuesta sea "si".
+      Puede incluir múltiples líneas de texto según sea necesario.
+
+  comentario_valorativo_3:
+    question: "[TODO: Escriba la pregunta 3 aquí]"
+    text: |
+      [TODO: Escriba el texto del comentario valorativo 3 aquí]
+      Este texto se mostrará en el documento cuando la respuesta sea "si".
+      Puede incluir múltiples líneas de texto según sea necesario.
+
+  comentario_valorativo_4:
+    question: "[TODO: Escriba la pregunta 4 aquí]"
+    text: |
+      [TODO: Escriba el texto del comentario valorativo 4 aquí]
+      Este texto se mostrará en el documento cuando la respuesta sea "si".
+      Puede incluir múltiples líneas de texto según sea necesario.
+
+  comentario_valorativo_5:
+    question: "[TODO: Escriba la pregunta 5 aquí]"
+    text: |
+      [TODO: Escriba el texto del comentario valorativo 5 aquí]
+      Este texto se mostrará en el documento cuando la respuesta sea "si".
+      Puede incluir múltiples líneas de texto según sea necesario.
+
+  comentario_valorativo_6:
+    question: "[TODO: Escriba la pregunta 6 aquí]"
+    text: |
+      [TODO: Escriba el texto del comentario valorativo 6 aquí]
+      Este texto se mostrará en el documento cuando la respuesta sea "si".
+      Puede incluir múltiples líneas de texto según sea necesario.
+
+  comentario_valorativo_7:
+    question: "[TODO: Escriba la pregunta 7 aquí]"
+    text: |
+      [TODO: Escriba el texto del comentario valorativo 7 aquí]
+      Este texto se mostrará en el documento cuando la respuesta sea "si".
+      Puede incluir múltiples líneas de texto según sea necesario.
+
+  comentario_valorativo_8:
+    question: "[TODO: Escriba la pregunta 8 aquí]"
+    text: |
+      [TODO: Escriba el texto del comentario valorativo 8 aquí]
+      Este texto se mostrará en el documento cuando la respuesta sea "si".
+      Puede incluir múltiples líneas de texto según sea necesario.
+
+  comentario_valorativo_9:
+    question: "[TODO: Escriba la pregunta 9 aquí]"
+    text: |
+      [TODO: Escriba el texto del comentario valorativo 9 aquí]
+      Este texto se mostrará en el documento cuando la respuesta sea "si".
+      Puede incluir múltiples líneas de texto según sea necesario.
+
+  comentario_valorativo_10:
+    question: "[TODO: Escriba la pregunta 10 aquí]"
+    text: |
+      [TODO: Escriba el texto del comentario valorativo 10 aquí]
+      Este texto se mostrará en el documento cuando la respuesta sea "si".
+      Puede incluir múltiples líneas de texto según sea necesario.
+
+  comentario_valorativo_11:
+    question: "[TODO: Escriba la pregunta 11 aquí]"
+    text: |
+      [TODO: Escriba el texto del comentario valorativo 11 aquí]
+      Este texto se mostrará en el documento cuando la respuesta sea "si".
+      Puede incluir múltiples líneas de texto según sea necesario.
+
+  comentario_valorativo_12:
+    question: "[TODO: Escriba la pregunta 12 aquí]"
+    text: |
+      [TODO: Escriba el texto del comentario valorativo 12 aquí]
+      Este texto se mostrará en el documento cuando la respuesta sea "si".
+      Puede incluir múltiples líneas de texto según sea necesario.
+
+  comentario_valorativo_13:
+    question: "[TODO: Escriba la pregunta 13 aquí]"
+    text: |
+      [TODO: Escriba el texto del comentario valorativo 13 aquí]
+      Este texto se mostrará en el documento cuando la respuesta sea "si".
+      Puede incluir múltiples líneas de texto según sea necesario.
+
+  comentario_valorativo_14:
+    question: "[TODO: Escriba la pregunta 14 aquí]"
+    text: |
+      [TODO: Escriba el texto del comentario valorativo 14 aquí]
+      Este texto se mostrará en el documento cuando la respuesta sea "si".
+      Puede incluir múltiples líneas de texto según sea necesario.
+
+  comentario_valorativo_15:
+    question: "[TODO: Escriba la pregunta 15 aquí]"
+    text: |
+      [TODO: Escriba el texto del comentario valorativo 15 aquí]
+      Este texto se mostrará en el documento cuando la respuesta sea "si".
+      Puede incluir múltiples líneas de texto según sea necesario.
+
+  comentario_valorativo_16:
+    question: "[TODO: Escriba la pregunta 16 aquí]"
+    text: |
+      [TODO: Escriba el texto del comentario valorativo 16 aquí]
+      Este texto se mostrará en el documento cuando la respuesta sea "si".
+      Puede incluir múltiples líneas de texto según sea necesario.
+
+  comentario_valorativo_17:
+    question: "[TODO: Escriba la pregunta 17 aquí]"
+    text: |
+      [TODO: Escriba el texto del comentario valorativo 17 aquí]
+      Este texto se mostrará en el documento cuando la respuesta sea "si".
+      Puede incluir múltiples líneas de texto según sea necesario.

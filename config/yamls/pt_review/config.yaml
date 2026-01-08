@@ -86,6 +86,7 @@ ui:
       label: "Anexo III - Comentarios"
       fields:
         - texto_anexo3
+        - comentarios_valorativos_section
 
     - id: sec_contacts
       label: "Contactos"

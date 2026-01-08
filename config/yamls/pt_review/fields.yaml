@@ -74,6 +74,181 @@ fields:
       - ANEXO3_LIST_03
 
   # ============================================================================
+  # COMENTARIOS VALORATIVOS - Conditional Evaluative Comments (17 variables)
+  # These are si/no toggles that conditionally include text paragraphs
+  # ============================================================================
+
+  comentario_valorativo_1:
+    type: enum
+    required: false
+    label: "Comentario Valorativo 1"
+    description: "Incluir comentario valorativo 1 en el documento"
+    values: ["si", "no"]
+    default: "no"
+    source_block_ids:
+      - ANEXO3_COMENTARIO_VAL
+
+  comentario_valorativo_2:
+    type: enum
+    required: false
+    label: "Comentario Valorativo 2"
+    description: "Incluir comentario valorativo 2 en el documento"
+    values: ["si", "no"]
+    default: "no"
+    source_block_ids:
+      - ANEXO3_COMENTARIO_VAL
+
+  comentario_valorativo_3:
+    type: enum
+    required: false
+    label: "Comentario Valorativo 3"
+    description: "Incluir comentario valorativo 3 en el documento"
+    values: ["si", "no"]
+    default: "no"
+    source_block_ids:
+      - ANEXO3_COMENTARIO_VAL
+
+  comentario_valorativo_4:
+    type: enum
+    required: false
+    label: "Comentario Valorativo 4"
+    description: "Incluir comentario valorativo 4 en el documento"
+    values: ["si", "no"]
+    default: "no"
+    source_block_ids:
+      - ANEXO3_COMENTARIO_VAL
+
+  comentario_valorativo_5:
+    type: enum
+    required: false
+    label: "Comentario Valorativo 5"
+    description: "Incluir comentario valorativo 5 en el documento"
+    values: ["si", "no"]
+    default: "no"
+    source_block_ids:
+      - ANEXO3_COMENTARIO_VAL
+
+  comentario_valorativo_6:
+    type: enum
+    required: false
+    label: "Comentario Valorativo 6"
+    description: "Incluir comentario valorativo 6 en el documento"
+    values: ["si", "no"]
+    default: "no"
+    source_block_ids:
+      - ANEXO3_COMENTARIO_VAL
+
+  comentario_valorativo_7:
+    type: enum
+    required: false
+    label: "Comentario Valorativo 7"
+    description: "Incluir comentario valorativo 7 en el documento"
+    values: ["si", "no"]
+    default: "no"
+    source_block_ids:
+      - ANEXO3_COMENTARIO_VAL
+
+  comentario_valorativo_8:
+    type: enum
+    required: false
+    label: "Comentario Valorativo 8"
+    description: "Incluir comentario valorativo 8 en el documento"
+    values: ["si", "no"]
+    default: "no"
+    source_block_ids:
+      - ANEXO3_COMENTARIO_VAL
+
+  comentario_valorativo_9:
+    type: enum
+    required: false
+    label: "Comentario Valorativo 9"
+    description: "Incluir comentario valorativo 9 en el documento"
+    values: ["si", "no"]
+    default: "no"
+    source_block_ids:
+      - ANEXO3_COMENTARIO_VAL
+
+  comentario_valorativo_10:
+    type: enum
+    required: false
+    label: "Comentario Valorativo 10"
+    description: "Incluir comentario valorativo 10 en el documento"
+    values: ["si", "no"]
+    default: "no"
+    source_block_ids:
+      - ANEXO3_COMENTARIO_VAL
+
+  comentario_valorativo_11:
+    type: enum
+    required: false
+    label: "Comentario Valorativo 11"
+    description: "Incluir comentario valorativo 11 en el documento"
+    values: ["si", "no"]
+    default: "no"
+    source_block_ids:
+      - ANEXO3_COMENTARIO_VAL
+
+  comentario_valorativo_12:
+    type: enum
+    required: false
+    label: "Comentario Valorativo 12"
+    description: "Incluir comentario valorativo 12 en el documento"
+    values: ["si", "no"]
+    default: "no"
+    source_block_ids:
+      - ANEXO3_COMENTARIO_VAL
+
+  comentario_valorativo_13:
+    type: enum
+    required: false
+    label: "Comentario Valorativo 13"
+    description: "Incluir comentario valorativo 13 en el documento"
+    values: ["si", "no"]
+    default: "no"
+    source_block_ids:
+      - ANEXO3_COMENTARIO_VAL
+
+  comentario_valorativo_14:
+    type: enum
+    required: false
+    label: "Comentario Valorativo 14"
+    description: "Incluir comentario valorativo 14 en el documento"
+    values: ["si", "no"]
+    default: "no"
+    source_block_ids:
+      - ANEXO3_COMENTARIO_VAL
+
+  comentario_valorativo_15:
+    type: enum
+    required: false
+    label: "Comentario Valorativo 15"
+    description: "Incluir comentario valorativo 15 en el documento"
+    values: ["si", "no"]
+    default: "no"
+    source_block_ids:
+      - ANEXO3_COMENTARIO_VAL
+
+  comentario_valorativo_16:
+    type: enum
+    required: false
+    label: "Comentario Valorativo 16"
+    description: "Incluir comentario valorativo 16 en el documento"
+    values: ["si", "no"]
+    default: "no"
+    source_block_ids:
+      - ANEXO3_COMENTARIO_VAL
+
+  comentario_valorativo_17:
+    type: enum
+    required: false
+    label: "Comentario Valorativo 17"
+    description: "Incluir comentario valorativo 17 en el documento"
+    values: ["si", "no"]
+    default: "no"
+    source_block_ids:
+      - ANEXO3_COMENTARIO_VAL
+
+  # ============================================================================
   # CONTACT VARIABLES
   # ============================================================================
 

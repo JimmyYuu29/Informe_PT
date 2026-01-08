@@ -19,12 +19,14 @@ const AppState = {
     schema: null,
     formData: {},
     listData: {},
+    comentariosData: null,  // Cached comentarios valorativos definitions
     isLoading: false,
 
     setPlugin(plugin) {
         this.currentPlugin = plugin;
         this.formData = {};
         this.listData = {};
+        this.comentariosData = null;
     },
 
     setSchema(schema) {
@@ -148,6 +150,17 @@ async function loadPluginSchema(pluginId) {
     } catch (error) {
         showNotification('error', 'Failed to load schema', error.message);
         return null;
+    }
+}
+
+async function loadComentariosValorativos(pluginId) {
+    try {
+        const data = await apiCall(`/plugins/${pluginId}/comentarios-valorativos`);
+        AppState.comentariosData = data.comentarios;
+        return data.comentarios;
+    } catch (error) {
+        console.warn('Failed to load comentarios valorativos:', error.message);
+        return [];
     }
 }
 
@@ -350,6 +363,18 @@ function renderSection(section, allFields, expanded = true) {
     } else if (sectionId === 'sec_contacts') {
         const contactsEl = renderContactsSection(allFields);
         content.appendChild(contactsEl);
+    } else if (sectionId === 'sec_anexo3') {
+        // Render texto_anexo3 field first
+        const textoAnexo3Field = allFields.find(f => f.name === 'texto_anexo3');
+        if (textoAnexo3Field) {
+            const fieldEl = renderField(textoAnexo3Field);
+            if (fieldEl) {
+                content.appendChild(fieldEl);
+            }
+        }
+        // Then render comentarios valorativos section
+        const comentariosEl = renderComentariosVlorativosSection();
+        content.appendChild(comentariosEl);
     } else {
         // Default rendering
         sectionFieldNames.forEach(fieldName => {
@@ -1173,6 +1198,141 @@ function renderComplianceSummaryTable(prefix, count, allFields) {
     return container;
 }
 
+function renderComentariosVlorativosSection() {
+    const container = document.createElement('div');
+    container.className = 'comentarios-valorativos-section';
+    container.id = 'comentarios-valorativos-container';
+
+    // Section title
+    const divider = document.createElement('hr');
+    divider.className = 'section-divider';
+    container.appendChild(divider);
+
+    const title = document.createElement('h4');
+    title.className = 'section-subheader';
+    title.textContent = 'Comentarios Valorativos';
+    container.appendChild(title);
+
+    const caption = document.createElement('p');
+    caption.className = 'info-text';
+    caption.textContent = 'Seleccione los comentarios que desea incluir en el documento.';
+    container.appendChild(caption);
+
+    // Get comentarios data from state
+    const comentarios = AppState.comentariosData || [];
+
+    if (comentarios.length === 0) {
+        const loading = document.createElement('p');
+        loading.className = 'info-text';
+        loading.textContent = 'Cargando comentarios valorativos...';
+        container.appendChild(loading);
+
+        // Try to load comentarios if not already loaded
+        if (AppState.currentPlugin) {
+            loadComentariosValorativos(AppState.currentPlugin).then(data => {
+                if (data && data.length > 0) {
+                    refreshComentariosSection();
+                }
+            });
+        }
+        return container;
+    }
+
+    const siNoOptions = ['no', 'si'];
+
+    comentarios.forEach(comentario => {
+        const itemContainer = document.createElement('div');
+        itemContainer.className = 'comentario-valorativo-item';
+        itemContainer.dataset.fieldName = comentario.id;
+
+        // Row with question, selector, and conditional preview
+        const row = document.createElement('div');
+        row.className = 'comentario-row';
+
+        // Question column
+        const questionCol = document.createElement('div');
+        questionCol.className = 'comentario-question';
+        questionCol.innerHTML = `<strong>${comentario.index}.</strong> ${comentario.question}`;
+        row.appendChild(questionCol);
+
+        // Selector column
+        const selectorCol = document.createElement('div');
+        selectorCol.className = 'comentario-selector';
+
+        const select = document.createElement('select');
+        select.className = 'select-input';
+        select.name = comentario.id;
+        select.dataset.comentarioId = comentario.id;
+
+        siNoOptions.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt;
+            option.textContent = opt.charAt(0).toUpperCase() + opt.slice(1);
+            if (opt === 'no') {
+                option.selected = true;
+            }
+            select.appendChild(option);
+        });
+
+        // Set default value
+        AppState.setFormValue(comentario.id, 'no');
+
+        select.addEventListener('change', (e) => {
+            AppState.setFormValue(comentario.id, e.target.value);
+            updateComentarioPreview(comentario.id, e.target.value, comentario.text_preview);
+        });
+
+        selectorCol.appendChild(select);
+        row.appendChild(selectorCol);
+
+        // Preview column (initially hidden)
+        const previewCol = document.createElement('div');
+        previewCol.className = 'comentario-preview hidden';
+        previewCol.id = `preview-${comentario.id}`;
+
+        if (comentario.text_preview) {
+            const previewText = document.createElement('textarea');
+            previewText.className = 'preview-textarea';
+            previewText.value = comentario.text_preview;
+            previewText.disabled = true;
+            previewText.rows = 3;
+            previewCol.appendChild(previewText);
+        }
+
+        row.appendChild(previewCol);
+
+        itemContainer.appendChild(row);
+
+        // Divider
+        const itemDivider = document.createElement('hr');
+        itemDivider.className = 'comentario-divider';
+        itemContainer.appendChild(itemDivider);
+
+        container.appendChild(itemContainer);
+    });
+
+    return container;
+}
+
+function updateComentarioPreview(fieldId, value, textPreview) {
+    const previewCol = document.getElementById(`preview-${fieldId}`);
+    if (previewCol) {
+        if (value === 'si' && textPreview) {
+            previewCol.classList.remove('hidden');
+        } else {
+            previewCol.classList.add('hidden');
+        }
+    }
+}
+
+function refreshComentariosSection() {
+    const container = document.getElementById('comentarios-valorativos-container');
+    if (container && container.parentElement) {
+        const newSection = renderComentariosVlorativosSection();
+        container.parentElement.replaceChild(newSection, container);
+    }
+}
+
 function renderContactsSection(allFields) {
     const container = document.createElement('div');
     container.className = 'contacts-grid';
@@ -1597,11 +1757,15 @@ async function handlePluginChange(pluginId) {
             updatePluginInfo(plugin);
         }
 
-        // Get schema
-        const schema = await loadPluginSchema(pluginId);
+        // Get schema and comentarios valorativos in parallel
+        const [schema, comentarios] = await Promise.all([
+            loadPluginSchema(pluginId),
+            loadComentariosValorativos(pluginId),
+        ]);
 
         if (schema) {
             AppState.setPlugin(pluginId);
+            AppState.comentariosData = comentarios;  // Store before rendering
             renderForm(schema);
             showNotification('success', 'Plugin Loaded', `${plugin?.name || pluginId} is ready.`);
         }
