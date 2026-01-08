@@ -1,328 +1,328 @@
-# Analisi del Progetto e Guida al Deployment
+# 项目分析与部署指南
 
-## Enterprise Document Generation Platform - Analisi Tecnica e Guida Operativa
+## 企业文档生成平台 - 技术分析与操作指南
 
-**Versione:** 2.4
-**Data:** Gennaio 2026
-**Autore:** Sistema di Documentazione Automatica
-
----
-
-## Indice
-
-1. [Analisi dell'Architettura del Progetto](#1-analisi-dellarchitettura-del-progetto)
-2. [Requisiti del Server](#2-requisiti-del-server)
-3. [Schema 1: Deployment Standard (Consigliato)](#3-schema-1-deployment-standard-consigliato)
-4. [Schema 2: Deployment con Docker](#4-schema-2-deployment-con-docker)
-5. [Configurazione Nginx](#5-configurazione-nginx)
-6. [Gestione con Systemd](#6-gestione-con-systemd)
-7. [Monitoraggio e Manutenzione](#7-monitoraggio-e-manutenzione)
-8. [Analisi delle Prestazioni e Limiti](#8-analisi-delle-prestazioni-e-limiti)
-9. [Risoluzione dei Problemi](#9-risoluzione-dei-problemi)
+**版本:** 2.4
+**日期:** 2026年1月
+**作者:** 自动文档系统
 
 ---
 
-## 1. Analisi dell'Architettura del Progetto
+## 目录
 
-### 1.1 Struttura del Progetto
+1. [项目架构分析](#1-项目架构分析)
+2. [服务器要求](#2-服务器要求)
+3. [方案一：标准部署（推荐）](#3-方案一标准部署推荐)
+4. [方案二：Docker 部署](#4-方案二docker-部署)
+5. [Nginx 配置](#5-nginx-配置)
+6. [Systemd 管理](#6-systemd-管理)
+7. [监控与维护](#7-监控与维护)
+8. [性能分析与限制](#8-性能分析与限制)
+9. [故障排除](#9-故障排除)
+
+---
+
+## 1. 项目架构分析
+
+### 1.1 项目结构
 
 ```
 Informe_PT/
 ├── config/
 │   └── yamls/
-│       └── pt_review/          # Plugin di configurazione YAML
-│           ├── manifest.yaml   # Metadati del plugin
-│           ├── config.yaml     # Configurazione runtime
-│           ├── fields.yaml     # Definizione campi input
-│           ├── derived.yaml    # Campi calcolati
+│       └── pt_review/          # YAML 配置插件
+│           ├── manifest.yaml   # 插件元数据
+│           ├── config.yaml     # 运行时配置
+│           ├── fields.yaml     # 输入字段定义
+│           ├── derived.yaml    # 计算字段
 │           └── ...
-├── modules/                    # Moduli core Python
-│   ├── plugin_loader.py        # Caricamento plugin
-│   ├── generate.py             # Generazione documenti
-│   ├── context_builder.py      # Costruzione contesto
-│   └── renderer_docx.py        # Rendering DOCX
-├── templates/                  # Template DOCX
+├── modules/                    # Python 核心模块
+│   ├── plugin_loader.py        # 插件加载器
+│   ├── generate.py             # 文档生成
+│   ├── context_builder.py      # 上下文构建
+│   └── renderer_docx.py        # DOCX 渲染
+├── templates/                  # DOCX 模板
 ├── ui/
 │   ├── api/
 │   │   ├── backend/
-│   │   │   └── main.py         # FastAPI backend
+│   │   │   └── main.py         # FastAPI 后端
 │   │   └── ui/
-│   │       ├── index.html      # Frontend HTML
-│   │       ├── app.js          # JavaScript applicazione
-│   │       └── styles.css      # Stili CSS
+│   │       ├── index.html      # 前端 HTML
+│   │       ├── app.js          # JavaScript 应用
+│   │       └── styles.css      # CSS 样式
 │   └── streamlit_app/
-│       ├── app.py              # Applicazione Streamlit
-│       ├── form_renderer.py    # Renderer form
-│       └── state_store.py      # Gestione stato
-├── requirements.txt            # Dipendenze Python
-└── output/                     # Directory output generati
+│       ├── app.py              # Streamlit 应用
+│       ├── form_renderer.py    # 表单渲染器
+│       └── state_store.py      # 状态管理
+├── requirements.txt            # Python 依赖
+└── output/                     # 生成文件输出目录
 ```
 
-### 1.2 Componenti Principali
+### 1.2 主要组件
 
-| Componente | Tecnologia | Porta Default | Descrizione |
-|------------|------------|---------------|-------------|
-| **API Backend** | FastAPI + Uvicorn | 8000 | REST API per generazione documenti |
-| **API Frontend** | HTML/JS/CSS | (servito da FastAPI) | Interfaccia web per API |
-| **Streamlit App** | Streamlit | 8501 | Interfaccia web alternativa |
+| 组件 | 技术 | 默认端口 | 说明 |
+|------|------|----------|------|
+| **API 后端** | FastAPI + Uvicorn | 8000 | 文档生成 REST API |
+| **API 前端** | HTML/JS/CSS | (由 FastAPI 提供) | API Web 界面 |
+| **Streamlit 应用** | Streamlit | 8501 | 备选 Web 界面 |
 
-### 1.3 Flusso di Dati
+### 1.3 数据流
 
 ```
-[Utente] → [Nginx] → [FastAPI :8000] → [Generatore DOCX]
+[用户] → [Nginx] → [FastAPI :8000] → [DOCX 生成器]
                   ↘
-                   [Streamlit :8501] → [Generatore DOCX]
+                   [Streamlit :8501] → [DOCX 生成器]
 ```
 
 ---
 
-## 2. Requisiti del Server
+## 2. 服务器要求
 
-### 2.1 Requisiti Hardware Minimi
+### 2.1 最低硬件要求
 
-| Risorsa | Minimo | Consigliato |
-|---------|--------|-------------|
-| **CPU** | 2 core | 4 core |
-| **RAM** | 2 GB | 4 GB |
-| **Disco** | 10 GB | 20 GB SSD |
-| **Rete** | 10 Mbps | 100 Mbps |
+| 资源 | 最低 | 推荐 |
+|------|------|------|
+| **CPU** | 2 核 | 4 核 |
+| **内存** | 2 GB | 4 GB |
+| **磁盘** | 10 GB | 20 GB SSD |
+| **网络** | 10 Mbps | 100 Mbps |
 
-### 2.2 Requisiti Software
+### 2.2 软件要求
 
-- **Sistema Operativo:** Ubuntu 20.04 LTS o superiore
-- **Python:** 3.10 o superiore
-- **Nginx:** 1.18 o superiore
-- **Git:** 2.25 o superiore
+- **操作系统:** Ubuntu 20.04 LTS 或更高版本
+- **Python:** 3.10 或更高版本
+- **Nginx:** 1.18 或更高版本
+- **Git:** 2.25 或更高版本
 
-### 2.3 Porte da Aprire
+### 2.3 需要开放的端口
 
-| Porta | Servizio | Accesso |
-|-------|----------|---------|
-| 22 | SSH | Solo amministratori |
-| 80 | HTTP | Pubblico |
-| 443 | HTTPS | Pubblico |
-| 8000 | FastAPI | Solo localhost |
-| 8501 | Streamlit | Solo localhost |
+| 端口 | 服务 | 访问权限 |
+|------|------|----------|
+| 22 | SSH | 仅管理员 |
+| 80 | HTTP | 公开 |
+| 443 | HTTPS | 公开 |
+| 8000 | FastAPI | 仅本地 |
+| 8501 | Streamlit | 仅本地 |
 
 ---
 
-## 3. Schema 1: Deployment Standard (Consigliato)
+## 3. 方案一：标准部署（推荐）
 
-Questo schema utilizza un deployment diretto senza containerizzazione, ideale per server dedicati.
+本方案采用无容器化的直接部署方式，适用于专用服务器。
 
-### Passo 1: Preparazione del Server
+### 步骤 1：准备服务器
 
-#### 1.1 Aggiornamento del Sistema
+#### 1.1 系统更新
 
-Apri un terminale SSH e connettiti al tuo server. Esegui i seguenti comandi per aggiornare il sistema:
+打开 SSH 终端连接到服务器，执行以下命令更新系统：
 
 ```bash
-# Aggiorna la lista dei pacchetti disponibili
+# 更新可用软件包列表
 sudo apt update
 
-# Aggiorna tutti i pacchetti installati
+# 更新所有已安装的软件包
 sudo apt upgrade -y
 
-# Installa i pacchetti necessari
+# 安装必要的软件包
 sudo apt install -y python3.10 python3.10-venv python3-pip nginx git curl
 ```
 
-**Spiegazione:**
-- `apt update`: Scarica la lista aggiornata dei pacchetti
-- `apt upgrade -y`: Aggiorna i pacchetti esistenti (-y conferma automaticamente)
-- I pacchetti installati includono Python 3.10, ambiente virtuale, pip, nginx e git
+**说明：**
+- `apt update`：下载更新的软件包列表
+- `apt upgrade -y`：更新现有软件包（-y 自动确认）
+- 安装的软件包包括 Python 3.10、虚拟环境、pip、nginx 和 git
 
-#### 1.2 Verifica delle Versioni
+#### 1.2 版本验证
 
 ```bash
-# Verifica la versione di Python
+# 验证 Python 版本
 python3 --version
-# Output atteso: Python 3.10.x o superiore
+# 预期输出：Python 3.10.x 或更高
 
-# Verifica la versione di Nginx
+# 验证 Nginx 版本
 nginx -v
-# Output atteso: nginx version: nginx/1.18.x o superiore
+# 预期输出：nginx version: nginx/1.18.x 或更高
 
-# Verifica la versione di Git
+# 验证 Git 版本
 git --version
-# Output atteso: git version 2.25.x o superiore
+# 预期输出：git version 2.25.x 或更高
 ```
 
-### Passo 2: Clonazione del Repository
+### 步骤 2：克隆代码库
 
-#### 2.1 Creazione della Directory di Lavoro
+#### 2.1 创建工作目录
 
 ```bash
-# Crea una directory per le applicazioni web
+# 创建 Web 应用目录
 sudo mkdir -p /var/www
 
-# Imposta i permessi per l'utente corrente
+# 设置当前用户权限
 sudo chown -R $USER:$USER /var/www
 
-# Spostati nella directory
+# 进入目录
 cd /var/www
 ```
 
-**Spiegazione:**
-- `/var/www` è la directory standard per le applicazioni web su Linux
-- `chown` cambia il proprietario della directory al tuo utente
+**说明：**
+- `/var/www` 是 Linux 上 Web 应用的标准目录
+- `chown` 将目录所有者更改为当前用户
 
-#### 2.2 Clonazione del Repository da GitHub
+#### 2.2 从 GitHub 克隆代码库
 
 ```bash
-# Clona il repository (sostituisci con il tuo URL)
+# 克隆代码库（替换为您的 URL）
 git clone https://github.com/JimmyYuu29/Informe_PT.git
 
-# Spostati nella directory del progetto
+# 进入项目目录
 cd Informe_PT
 
-# Verifica che i file siano stati scaricati
+# 验证文件已下载
 ls -la
 ```
 
-**Spiegazione:**
-- `git clone` scarica una copia completa del repository
-- Il repository verrà creato in `/var/www/Informe_PT`
+**说明：**
+- `git clone` 下载代码库的完整副本
+- 代码库将创建在 `/var/www/Informe_PT`
 
-### Passo 3: Configurazione dell'Ambiente Python
+### 步骤 3：配置 Python 环境
 
-#### 3.1 Creazione dell'Ambiente Virtuale
+#### 3.1 创建虚拟环境
 
 ```bash
-# Assicurati di essere nella directory del progetto
+# 确保在项目目录中
 cd /var/www/Informe_PT
 
-# Crea un ambiente virtuale Python
+# 创建 Python 虚拟环境
 python3 -m venv venv
 
-# Attiva l'ambiente virtuale
+# 激活虚拟环境
 source venv/bin/activate
 ```
 
-**Spiegazione:**
-- Un ambiente virtuale isola le dipendenze del progetto dal sistema
-- `source venv/bin/activate` attiva l'ambiente (vedrai `(venv)` nel prompt)
+**说明：**
+- 虚拟环境将项目依赖与系统隔离
+- `source venv/bin/activate` 激活环境（提示符中会显示 `(venv)`）
 
-#### 3.2 Installazione delle Dipendenze
+#### 3.2 安装依赖
 
 ```bash
-# Aggiorna pip all'ultima versione
+# 更新 pip 到最新版本
 pip install --upgrade pip
 
-# Installa le dipendenze del progetto
+# 安装项目依赖
 pip install -r requirements.txt
 ```
 
-**Spiegazione:**
-- `requirements.txt` contiene la lista di tutte le librerie necessarie
-- Questo comando le installa automaticamente nell'ambiente virtuale
+**说明：**
+- `requirements.txt` 包含所有必需库的列表
+- 此命令会自动在虚拟环境中安装它们
 
-#### 3.3 Verifica dell'Installazione
+#### 3.3 验证安装
 
 ```bash
-# Verifica che FastAPI sia installato
+# 验证 FastAPI 已安装
 python -c "import fastapi; print(f'FastAPI {fastapi.__version__}')"
 
-# Verifica che Streamlit sia installato
+# 验证 Streamlit 已安装
 python -c "import streamlit; print(f'Streamlit {streamlit.__version__}')"
 ```
 
-### Passo 4: Configurazione delle Directory
+### 步骤 4：配置目录
 
-#### 4.1 Creazione delle Directory Necessarie
+#### 4.1 创建必要的目录
 
 ```bash
-# Crea la directory per i file generati
+# 创建生成文件目录
 mkdir -p /var/www/Informe_PT/output
 
-# Imposta i permessi corretti
+# 设置正确的权限
 chmod 755 /var/www/Informe_PT/output
 
-# Crea la directory per i log
+# 创建日志目录
 sudo mkdir -p /var/log/informe_pt
 sudo chown $USER:$USER /var/log/informe_pt
 ```
 
-**Spiegazione:**
-- La directory `output` conterrà i documenti DOCX generati
-- I log aiuteranno a diagnosticare eventuali problemi
+**说明：**
+- `output` 目录将存放生成的 DOCX 文档
+- 日志有助于诊断潜在问题
 
-### Passo 5: Test Manuale delle Applicazioni
+### 步骤 5：手动测试应用
 
-Prima di configurare i servizi, verifica che tutto funzioni:
+在配置服务之前，验证一切正常：
 
-#### 5.1 Test dell'API FastAPI
+#### 5.1 测试 FastAPI API
 
 ```bash
-# Attiva l'ambiente virtuale (se non già attivo)
+# 激活虚拟环境（如果尚未激活）
 source /var/www/Informe_PT/venv/bin/activate
 
-# Avvia l'API in modalità test
+# 以测试模式启动 API
 cd /var/www/Informe_PT
 python -m uvicorn ui.api.backend.main:app --host 127.0.0.1 --port 8000
 ```
 
-Apri un altro terminale e testa:
+打开另一个终端进行测试：
 
 ```bash
-# Testa l'endpoint di health check
+# 测试健康检查端点
 curl http://127.0.0.1:8000/health
-# Output atteso: {"status":"healthy","version":"1.0.0",...}
+# 预期输出：{"status":"healthy","version":"1.0.0",...}
 ```
 
-Premi `Ctrl+C` per fermare l'applicazione.
+按 `Ctrl+C` 停止应用。
 
-#### 5.2 Test di Streamlit
+#### 5.2 测试 Streamlit
 
 ```bash
-# Avvia Streamlit in modalità test
+# 以测试模式启动 Streamlit
 cd /var/www/Informe_PT
 streamlit run ui/streamlit_app/app.py --server.port 8501 --server.address 127.0.0.1
 ```
 
-Apri un browser e vai a `http://[IP_SERVER]:8501` per verificare.
+打开浏览器访问 `http://[服务器IP]:8501` 进行验证。
 
-Premi `Ctrl+C` per fermare l'applicazione.
+按 `Ctrl+C` 停止应用。
 
 ---
 
-## 4. Schema 2: Deployment con Docker
+## 4. 方案二：Docker 部署
 
-Questo schema utilizza Docker per una maggiore portabilità e isolamento.
+本方案使用 Docker 实现更好的可移植性和隔离性。
 
-### Passo 1: Installazione di Docker
+### 步骤 1：安装 Docker
 
 ```bash
-# Rimuovi versioni precedenti di Docker
+# 移除旧版本 Docker
 sudo apt remove docker docker-engine docker.io containerd runc
 
-# Installa i prerequisiti
+# 安装先决条件
 sudo apt update
 sudo apt install -y ca-certificates curl gnupg lsb-release
 
-# Aggiungi la chiave GPG di Docker
+# 添加 Docker GPG 密钥
 sudo mkdir -p /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 
-# Aggiungi il repository Docker
+# 添加 Docker 仓库
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-# Installa Docker
+# 安装 Docker
 sudo apt update
 sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
-# Aggiungi l'utente corrente al gruppo docker
+# 将当前用户添加到 docker 组
 sudo usermod -aG docker $USER
 newgrp docker
 
-# Verifica l'installazione
+# 验证安装
 docker --version
 docker compose version
 ```
 
-### Passo 2: Creazione del Dockerfile
+### 步骤 2：创建 Dockerfile
 
-Crea un file `Dockerfile` nella root del progetto:
+在项目根目录创建 `Dockerfile` 文件：
 
 ```bash
 cat > /var/www/Informe_PT/Dockerfile << 'EOF'
@@ -330,30 +330,30 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# Installa dipendenze di sistema
+# 安装系统依赖
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copia requirements e installa dipendenze Python
+# 复制 requirements 并安装 Python 依赖
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copia il codice dell'applicazione
+# 复制应用代码
 COPY . .
 
-# Crea directory output
+# 创建 output 目录
 RUN mkdir -p output && chmod 755 output
 
-# Esponi le porte
+# 暴露端口
 EXPOSE 8000 8501
 
-# Il comando sarà specificato nel docker-compose.yml
+# 命令将在 docker-compose.yml 中指定
 CMD ["python", "-m", "uvicorn", "ui.api.backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
 EOF
 ```
 
-### Passo 3: Creazione del docker-compose.yml
+### 步骤 3：创建 docker-compose.yml
 
 ```bash
 cat > /var/www/Informe_PT/docker-compose.yml << 'EOF'
@@ -392,115 +392,115 @@ services:
 EOF
 ```
 
-### Passo 4: Avvio dei Container
+### 步骤 4：启动容器
 
 ```bash
-# Costruisci le immagini Docker
+# 构建 Docker 镜像
 cd /var/www/Informe_PT
 docker compose build
 
-# Avvia i servizi in background
+# 后台启动服务
 docker compose up -d
 
-# Verifica che i container siano in esecuzione
+# 验证容器正在运行
 docker compose ps
 
-# Visualizza i log
+# 查看日志
 docker compose logs -f
 ```
 
-### Passo 5: Comandi Utili per Docker
+### 步骤 5：Docker 常用命令
 
 ```bash
-# Ferma i servizi
+# 停止服务
 docker compose down
 
-# Riavvia i servizi
+# 重启服务
 docker compose restart
 
-# Ricostruisci dopo modifiche
+# 修改后重新构建
 docker compose build --no-cache
 docker compose up -d
 
-# Visualizza log di un servizio specifico
+# 查看特定服务的日志
 docker compose logs api
 docker compose logs streamlit
 ```
 
 ---
 
-## 5. Configurazione Nginx
+## 5. Nginx 配置
 
-Nginx fungerà da reverse proxy per entrambi i servizi, gestendo SSL e bilanciamento del carico.
+Nginx 将作为两个服务的反向代理，处理 SSL 和负载均衡。
 
-### 5.1 Creazione della Configurazione Nginx
+### 5.1 创建 Nginx 配置
 
 ```bash
-# Crea il file di configurazione per il sito
+# 创建站点配置文件
 sudo nano /etc/nginx/sites-available/informe_pt
 ```
 
-Inserisci il seguente contenuto:
+输入以下内容：
 
 ```nginx
-# Configurazione per Document Generation Platform
-# Supporta sia API (FastAPI) che Streamlit
+# 文档生成平台配置
+# 支持 API (FastAPI) 和 Streamlit
 
-# Upstream per FastAPI
+# FastAPI 上游
 upstream fastapi_backend {
     server 127.0.0.1:8000;
     keepalive 32;
 }
 
-# Upstream per Streamlit
+# Streamlit 上游
 upstream streamlit_backend {
     server 127.0.0.1:8501;
     keepalive 32;
 }
 
-# Server HTTP (reindirizza a HTTPS)
+# HTTP 服务器（重定向到 HTTPS）
 server {
     listen 80;
-    server_name tu-dominio.com www.tu-dominio.com;
+    server_name your-domain.com www.your-domain.com;
 
-    # Per certificato Let's Encrypt
+    # Let's Encrypt 证书验证
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
     }
 
-    # Reindirizza tutto il traffico HTTP a HTTPS
+    # 将所有 HTTP 流量重定向到 HTTPS
     location / {
         return 301 https://$host$request_uri;
     }
 }
 
-# Server HTTPS principale
+# 主 HTTPS 服务器
 server {
     listen 443 ssl http2;
-    server_name tu-dominio.com www.tu-dominio.com;
+    server_name your-domain.com www.your-domain.com;
 
-    # Certificati SSL (da configurare con Let's Encrypt)
-    ssl_certificate /etc/letsencrypt/live/tu-dominio.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/tu-dominio.com/privkey.pem;
+    # SSL 证书（使用 Let's Encrypt 配置）
+    ssl_certificate /etc/letsencrypt/live/your-domain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
 
-    # Configurazioni SSL moderne
+    # 现代 SSL 配置
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_prefer_server_ciphers off;
     ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
 
-    # Headers di sicurezza
+    # 安全头
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-XSS-Protection "1; mode=block" always;
 
-    # Logging
+    # 日志
     access_log /var/log/nginx/informe_pt_access.log;
     error_log /var/log/nginx/informe_pt_error.log;
 
-    # Dimensione massima upload
+    # 最大上传大小
     client_max_body_size 50M;
 
-    # Root per API (interfaccia principale)
+    # API 根路径（主界面）
     location / {
         proxy_pass http://fastapi_backend;
         proxy_http_version 1.1;
@@ -510,12 +510,12 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header Connection "";
 
-        # Timeout per generazione documenti
+        # 文档生成超时
         proxy_read_timeout 300s;
         proxy_connect_timeout 75s;
     }
 
-    # Streamlit disponibile su /streamlit/
+    # Streamlit 可通过 /streamlit/ 访问
     location /streamlit/ {
         rewrite ^/streamlit/(.*)$ /$1 break;
         proxy_pass http://streamlit_backend;
@@ -530,7 +530,7 @@ server {
         proxy_read_timeout 86400s;
     }
 
-    # WebSocket per Streamlit
+    # Streamlit WebSocket
     location /streamlit/_stcore/stream {
         rewrite ^/streamlit/(.*)$ /$1 break;
         proxy_pass http://streamlit_backend;
@@ -543,46 +543,46 @@ server {
 }
 ```
 
-### 5.2 Attivazione della Configurazione
+### 5.2 激活配置
 
 ```bash
-# Crea un link simbolico per abilitare il sito
+# 创建符号链接启用站点
 sudo ln -s /etc/nginx/sites-available/informe_pt /etc/nginx/sites-enabled/
 
-# Rimuovi la configurazione di default (opzionale)
+# 移除默认配置（可选）
 sudo rm /etc/nginx/sites-enabled/default
 
-# Testa la configurazione
+# 测试配置
 sudo nginx -t
-# Output atteso: nginx: configuration file /etc/nginx/nginx.conf test is successful
+# 预期输出：nginx: configuration file /etc/nginx/nginx.conf test is successful
 
-# Ricarica Nginx
+# 重新加载 Nginx
 sudo systemctl reload nginx
 ```
 
-### 5.3 Configurazione SSL con Let's Encrypt
+### 5.3 使用 Let's Encrypt 配置 SSL
 
 ```bash
-# Installa Certbot
+# 安装 Certbot
 sudo apt install -y certbot python3-certbot-nginx
 
-# Crea la directory per la verifica
+# 创建验证目录
 sudo mkdir -p /var/www/certbot
 
-# Ottieni il certificato SSL
-sudo certbot --nginx -d tu-dominio.com -d www.tu-dominio.com
+# 获取 SSL 证书
+sudo certbot --nginx -d your-domain.com -d www.your-domain.com
 
-# Il certificato si rinnoverà automaticamente
-# Verifica il timer di rinnovo
+# 证书会自动续期
+# 验证续期定时器
 sudo systemctl status certbot.timer
 ```
 
-### 5.4 Configurazione Senza SSL (Solo per Test Locali)
+### 5.4 无 SSL 配置（仅用于本地测试）
 
-Se stai testando in locale senza SSL, usa questa configurazione semplificata:
+如果在本地测试不需要 SSL，使用此简化配置：
 
 ```bash
-# Crea configurazione semplificata
+# 创建简化配置
 sudo nano /etc/nginx/sites-available/informe_pt_local
 ```
 
@@ -615,18 +615,18 @@ server {
 
 ---
 
-## 6. Gestione con Systemd
+## 6. Systemd 管理
 
-Systemd gestirà l'avvio automatico e il monitoraggio dei servizi.
+Systemd 将管理服务的自动启动和监控。
 
-### 6.1 Servizio per FastAPI
+### 6.1 FastAPI 服务
 
 ```bash
-# Crea il file di servizio
+# 创建服务文件
 sudo nano /etc/systemd/system/informe-pt-api.service
 ```
 
-Inserisci:
+输入：
 
 ```ini
 [Unit]
@@ -646,7 +646,7 @@ RestartSec=5
 StandardOutput=append:/var/log/informe_pt/api.log
 StandardError=append:/var/log/informe_pt/api_error.log
 
-# Sicurezza
+# 安全性
 NoNewPrivileges=yes
 PrivateTmp=yes
 
@@ -654,14 +654,14 @@ PrivateTmp=yes
 WantedBy=multi-user.target
 ```
 
-### 6.2 Servizio per Streamlit
+### 6.2 Streamlit 服务
 
 ```bash
-# Crea il file di servizio
+# 创建服务文件
 sudo nano /etc/systemd/system/informe-pt-streamlit.service
 ```
 
-Inserisci:
+输入：
 
 ```ini
 [Unit]
@@ -681,7 +681,7 @@ RestartSec=5
 StandardOutput=append:/var/log/informe_pt/streamlit.log
 StandardError=append:/var/log/informe_pt/streamlit_error.log
 
-# Sicurezza
+# 安全性
 NoNewPrivileges=yes
 PrivateTmp=yes
 
@@ -689,112 +689,112 @@ PrivateTmp=yes
 WantedBy=multi-user.target
 ```
 
-### 6.3 Configurazione dei Permessi
+### 6.3 配置权限
 
 ```bash
-# Imposta il proprietario dei file
+# 设置文件所有者
 sudo chown -R www-data:www-data /var/www/Informe_PT
 
-# Assicurati che l'ambiente virtuale sia accessibile
+# 确保虚拟环境可访问
 sudo chmod -R 755 /var/www/Informe_PT/venv
 
-# Crea la directory dei log se non esiste
+# 创建日志目录（如果不存在）
 sudo mkdir -p /var/log/informe_pt
 sudo chown www-data:www-data /var/log/informe_pt
 ```
 
-### 6.4 Attivazione dei Servizi
+### 6.4 激活服务
 
 ```bash
-# Ricarica la configurazione di systemd
+# 重新加载 systemd 配置
 sudo systemctl daemon-reload
 
-# Abilita i servizi all'avvio
+# 启用开机自启
 sudo systemctl enable informe-pt-api.service
 sudo systemctl enable informe-pt-streamlit.service
 
-# Avvia i servizi
+# 启动服务
 sudo systemctl start informe-pt-api.service
 sudo systemctl start informe-pt-streamlit.service
 
-# Verifica lo stato
+# 验证状态
 sudo systemctl status informe-pt-api.service
 sudo systemctl status informe-pt-streamlit.service
 ```
 
-### 6.5 Comandi Utili per la Gestione
+### 6.5 管理常用命令
 
 ```bash
-# Ferma un servizio
+# 停止服务
 sudo systemctl stop informe-pt-api.service
 
-# Riavvia un servizio
+# 重启服务
 sudo systemctl restart informe-pt-api.service
 
-# Visualizza i log in tempo reale
+# 实时查看日志
 sudo journalctl -u informe-pt-api.service -f
 
-# Visualizza gli ultimi 100 log
+# 查看最近 100 条日志
 sudo journalctl -u informe-pt-api.service -n 100
 
-# Ricarica dopo modifiche ai file di servizio
+# 修改服务文件后重新加载
 sudo systemctl daemon-reload
 sudo systemctl restart informe-pt-api.service
 ```
 
 ---
 
-## 7. Monitoraggio e Manutenzione
+## 7. 监控与维护
 
-### 7.1 Script di Health Check
+### 7.1 健康检查脚本
 
 ```bash
-# Crea lo script di monitoraggio
+# 创建监控脚本
 sudo nano /usr/local/bin/informe_pt_health_check.sh
 ```
 
 ```bash
 #!/bin/bash
 
-# Health check script per Informe PT
+# Informe PT 健康检查脚本
 LOG_FILE="/var/log/informe_pt/health_check.log"
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 
-# Controlla API
+# 检查 API
 API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/health)
 if [ "$API_STATUS" != "200" ]; then
-    echo "[$DATE] API DOWN - Status: $API_STATUS" >> $LOG_FILE
+    echo "[$DATE] API 异常 - 状态: $API_STATUS" >> $LOG_FILE
     sudo systemctl restart informe-pt-api.service
-    echo "[$DATE] API restarted" >> $LOG_FILE
+    echo "[$DATE] API 已重启" >> $LOG_FILE
 else
-    echo "[$DATE] API OK" >> $LOG_FILE
+    echo "[$DATE] API 正常" >> $LOG_FILE
 fi
 
-# Controlla Streamlit
+# 检查 Streamlit
 STREAMLIT_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8501)
 if [ "$STREAMLIT_STATUS" != "200" ]; then
-    echo "[$DATE] Streamlit DOWN - Status: $STREAMLIT_STATUS" >> $LOG_FILE
+    echo "[$DATE] Streamlit 异常 - 状态: $STREAMLIT_STATUS" >> $LOG_FILE
     sudo systemctl restart informe-pt-streamlit.service
-    echo "[$DATE] Streamlit restarted" >> $LOG_FILE
+    echo "[$DATE] Streamlit 已重启" >> $LOG_FILE
 else
-    echo "[$DATE] Streamlit OK" >> $LOG_FILE
+    echo "[$DATE] Streamlit 正常" >> $LOG_FILE
 fi
 ```
 
 ```bash
-# Rendi eseguibile lo script
+# 使脚本可执行
 sudo chmod +x /usr/local/bin/informe_pt_health_check.sh
 
-# Aggiungi al crontab (ogni 5 minuti)
+# 添加到 crontab（每 5 分钟）
 sudo crontab -e
-# Aggiungi la riga:
+# 添加以下行：
 # */5 * * * * /usr/local/bin/informe_pt_health_check.sh
 ```
 
-### 7.2 Rotazione dei Log
+### 7.2 日志轮转
 
 ```bash
-# Crea configurazione logrotate
+# 创建 logrotate 配置
 sudo nano /etc/logrotate.d/informe_pt
 ```
 
@@ -814,58 +814,58 @@ sudo nano /etc/logrotate.d/informe_pt
 }
 ```
 
-### 7.3 Aggiornamento del Progetto
+### 7.3 项目更新
 
 ```bash
-# Script per aggiornamento sicuro
-# Crea: /usr/local/bin/update_informe_pt.sh
+# 安全更新脚本
+# 创建: /usr/local/bin/update_informe_pt.sh
 
 #!/bin/bash
 cd /var/www/Informe_PT
 
-# Ferma i servizi
+# 停止服务
 sudo systemctl stop informe-pt-api.service
 sudo systemctl stop informe-pt-streamlit.service
 
-# Backup
+# 备份
 sudo tar -czf /var/backups/informe_pt_$(date +%Y%m%d).tar.gz /var/www/Informe_PT
 
-# Pull dal repository
+# 从仓库拉取
 git pull origin main
 
-# Attiva ambiente virtuale e aggiorna dipendenze
+# 激活虚拟环境并更新依赖
 source venv/bin/activate
 pip install -r requirements.txt
 
-# Riavvia i servizi
+# 重启服务
 sudo systemctl start informe-pt-api.service
 sudo systemctl start informe-pt-streamlit.service
 
-echo "Aggiornamento completato!"
+echo "更新完成！"
 ```
 
 ---
 
-## 8. Analisi delle Prestazioni e Limiti
+## 8. 性能分析与限制
 
-### 8.1 Limiti di Concorrenza
+### 8.1 并发限制
 
-| Configurazione | Utenti Simultanei | RAM Stimata | CPU Stimata |
-|----------------|-------------------|-------------|-------------|
-| **Minima** (2 worker) | 10-20 | 1 GB | 50% |
-| **Standard** (4 worker) | 30-50 | 2 GB | 70% |
-| **Ottimale** (8 worker) | 80-100 | 4 GB | 85% |
+| 配置 | 并发用户 | 预估内存 | 预估 CPU |
+|------|----------|----------|----------|
+| **最小** (2 worker) | 10-20 | 1 GB | 50% |
+| **标准** (4 worker) | 30-50 | 2 GB | 70% |
+| **最优** (8 worker) | 80-100 | 4 GB | 85% |
 
-### 8.2 Fattori che Influenzano le Prestazioni
+### 8.2 影响性能的因素
 
-1. **Generazione Documenti**: Ogni generazione richiede ~500MB di RAM e ~2-5 secondi
-2. **Template Complessi**: Template con molte tabelle aumentano il tempo di 50-100%
-3. **File Upload**: L'upload di JSON grandi può impattare la memoria
-4. **WebSocket Streamlit**: Ogni sessione mantiene una connessione attiva
+1. **文档生成**：每次生成需要约 500MB 内存和 2-5 秒
+2. **复杂模板**：包含多表格的模板会增加 50-100% 的时间
+3. **文件上传**：大型 JSON 上传可能影响内存
+4. **WebSocket Streamlit**：每个会话保持一个活动连接
 
-### 8.3 Configurazione Ottimale per Carico
+### 8.3 负载优化配置
 
-#### Server con 4GB RAM (30-50 utenti):
+#### 4GB 内存服务器（30-50 用户）：
 
 ```ini
 # /etc/systemd/system/informe-pt-api.service
@@ -876,7 +876,7 @@ worker_processes 4;
 worker_connections 1024;
 ```
 
-#### Server con 8GB RAM (80-100 utenti):
+#### 8GB 内存服务器（80-100 用户）：
 
 ```ini
 # /etc/systemd/system/informe-pt-api.service
@@ -887,109 +887,109 @@ worker_processes 8;
 worker_connections 2048;
 ```
 
-### 8.4 Raccomandazioni per l'Alta Disponibilità
+### 8.4 高可用性建议
 
-Per carichi superiori a 100 utenti simultanei:
+对于超过 100 并发用户的负载：
 
-1. **Load Balancer**: Distribuisci il carico su più server
-2. **CDN**: Usa Cloudflare o simili per contenuti statici
-3. **Cache**: Implementa Redis per il caching delle sessioni
-4. **Database**: Considera PostgreSQL per persistenza dati
+1. **负载均衡器**：将负载分配到多台服务器
+2. **CDN**：使用 Cloudflare 或类似服务处理静态内容
+3. **缓存**：实现 Redis 进行会话缓存
+4. **数据库**：考虑使用 PostgreSQL 进行数据持久化
 
 ---
 
-## 9. Risoluzione dei Problemi
+## 9. 故障排除
 
-### 9.1 L'API non risponde
+### 9.1 API 无响应
 
 ```bash
-# Verifica lo stato del servizio
+# 验证服务状态
 sudo systemctl status informe-pt-api.service
 
-# Controlla i log
+# 检查日志
 sudo journalctl -u informe-pt-api.service -n 50
 
-# Verifica la porta
+# 验证端口
 sudo netstat -tulpn | grep 8000
 
-# Testa manualmente
+# 手动测试
 curl -v http://127.0.0.1:8000/health
 ```
 
-### 9.2 Streamlit non carica
+### 9.2 Streamlit 无法加载
 
 ```bash
-# Verifica WebSocket
+# 验证 WebSocket
 curl -I http://127.0.0.1:8501
 
-# Controlla la configurazione Nginx
+# 检查 Nginx 配置
 sudo nginx -t
 
-# Ricarica Nginx
+# 重新加载 Nginx
 sudo systemctl reload nginx
 ```
 
-### 9.3 Errori di Permessi
+### 9.3 权限错误
 
 ```bash
-# Correggi i permessi
+# 修复权限
 sudo chown -R www-data:www-data /var/www/Informe_PT
 sudo chmod -R 755 /var/www/Informe_PT
 sudo chmod -R 775 /var/www/Informe_PT/output
 ```
 
-### 9.4 Problemi di Memoria
+### 9.4 内存问题
 
 ```bash
-# Controlla l'uso della memoria
+# 检查内存使用
 free -h
 htop
 
-# Riduci i worker se necessario
-# Modifica il file di servizio e riavvia
+# 如有必要减少 worker 数量
+# 修改服务文件并重启
 ```
 
-### 9.5 Certificato SSL Scaduto
+### 9.5 SSL 证书过期
 
 ```bash
-# Rinnova manualmente
+# 手动续期
 sudo certbot renew
 
-# Verifica lo stato
+# 验证状态
 sudo certbot certificates
 ```
 
 ---
 
-## Appendice A: Checklist di Deployment
+## 附录 A：部署清单
 
-- [ ] Sistema aggiornato (`apt update && apt upgrade`)
-- [ ] Python 3.10+ installato
-- [ ] Nginx installato
-- [ ] Git installato
-- [ ] Repository clonato in `/var/www/Informe_PT`
-- [ ] Ambiente virtuale creato e dipendenze installate
-- [ ] Directory output creata con permessi corretti
-- [ ] Servizi systemd configurati e abilitati
-- [ ] Nginx configurato come reverse proxy
-- [ ] SSL configurato (se necessario)
-- [ ] Health check configurato
-- [ ] Log rotation configurata
-- [ ] Firewall configurato
-
----
-
-## Appendice B: Variabili d'Ambiente
-
-| Variabile | Default | Descrizione |
-|-----------|---------|-------------|
-| `INFORME_PT_DEBUG` | `false` | Modalità debug |
-| `INFORME_PT_WORKERS` | `4` | Numero di worker Uvicorn |
-| `INFORME_PT_HOST` | `127.0.0.1` | Host di binding |
-| `INFORME_PT_PORT` | `8000` | Porta di ascolto |
+- [ ] 系统已更新（`apt update && apt upgrade`）
+- [ ] Python 3.10+ 已安装
+- [ ] Nginx 已安装
+- [ ] Git 已安装
+- [ ] 代码库已克隆到 `/var/www/Informe_PT`
+- [ ] 虚拟环境已创建并安装依赖
+- [ ] output 目录已创建且权限正确
+- [ ] systemd 服务已配置并启用
+- [ ] Nginx 已配置为反向代理
+- [ ] SSL 已配置（如需要）
+- [ ] 健康检查已配置
+- [ ] 日志轮转已配置
+- [ ] 防火墙已配置
 
 ---
 
-**Fine del documento**
+## 附录 B：环境变量
 
-Per domande o supporto, contattare il team di sviluppo.
+| 变量 | 默认值 | 说明 |
+|------|--------|------|
+| `INFORME_PT_DEBUG` | `false` | 调试模式 |
+| `INFORME_PT_WORKERS` | `4` | Uvicorn worker 数量 |
+| `INFORME_PT_HOST` | `127.0.0.1` | 绑定主机 |
+| `INFORME_PT_PORT` | `8000` | 监听端口 |
+
+---
+
+**文档结束**
+
+如有问题或需要支持，请联系开发团队。
