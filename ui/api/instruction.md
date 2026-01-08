@@ -1,8 +1,8 @@
 # API Deployment Instructions for Ubuntu Server
 
-**Version:** 2.0
+**Version:** 2.4
 **Author:** Yihao Yu
-**Last Updated:** 2026-01-03
+**Last Updated:** 2026-01-08
 
 ---
 

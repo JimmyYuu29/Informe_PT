@@ -763,14 +763,14 @@ def render_operaciones_vinculadas_detail_table(context: dict, fields_def: dict) 
 
     # Peso oovv sobre INCN = (total_ingreso / cifra_1) * 100
     if cifra_1_float != 0:
-        peso_incn = (total_ingreso / Decimal(str(cifra_1_float))) * 100
+        peso_incn = (Decimal(str(total_ingreso)) / Decimal(str(cifra_1_float))) * 100
         peso_incn_formatted = f"{float(peso_incn):.2f}".replace(".", ",")
     else:
         peso_incn_formatted = "N/A"
 
     # Peso oovv sobre total costes = (total_gasto / cost_1) * 100
     if cost_1 != 0:
-        peso_costes = (total_gasto / Decimal(str(cost_1))) * 100
+        peso_costes = (Decimal(str(total_gasto)) / Decimal(str(cost_1))) * 100
         peso_costes_formatted = f"{float(peso_costes):.2f}".replace(".", ",")
     else:
         peso_costes_formatted = "N/A"

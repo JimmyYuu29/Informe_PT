@@ -1,6 +1,6 @@
 # Enterprise Document Generation Platform
 
-**Version 2.3**
+**Version 2.4**
 
 A configuration-driven document generation system for creating professional reports from structured data and Word templates.
 

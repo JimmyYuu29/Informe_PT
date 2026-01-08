@@ -1862,3 +1862,99 @@ body {
     border-top: 1px solid var(--gray-200);
     margin: var(--spacing-md) 0;
 }
+
+/* Operaciones Vinculadas - Hierarchical Structure */
+.operaciones-intragrupo-section,
+.operaciones-detalle-section {
+    margin-bottom: var(--spacing-md);
+}
+
+.subsection-title {
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: var(--spacing-sm);
+}
+
+.operations-intragrupo-header,
+.operations-detail-header {
+    display: flex;
+    gap: var(--spacing-sm);
+    background: var(--gray-100);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+    font-weight: 500;
+    font-size: var(--font-size-sm);
+}
+
+.operations-intragrupo-row,
+.operations-detail-row {
+    display: flex;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom: 1px solid var(--gray-100);
+    align-items: center;
+}
+
+.operations-intragrupo-row:hover,
+.operations-detail-row:hover {
+    background: var(--gray-50);
+}
+
+.operacion-block {
+    margin-bottom: var(--spacing-sm);
+}
+
+.operation-divider {
+    border: none;
+    border-top: 1px dashed var(--gray-200);
+    margin: var(--spacing-sm) 0;
+}
+
+.btn-add-entity {
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    margin-top: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
+}
+
+.btn-remove-small {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: var(--gray-200);
+    color: var(--gray-600);
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.btn-remove-small:hover {
+    background: var(--danger);
+    color: var(--white);
+}
+
+.operations-totals {
+    display: flex;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    background: var(--gray-100);
+    border-radius: var(--border-radius-sm);
+    margin-top: var(--spacing-md);
+}
+
+.empty-message {
+    color: var(--gray-500);
+    font-style: italic;
+    padding: var(--spacing-md);
+    text-align: center;
+}
+
+.currency-input {
+    text-align: right;
+}

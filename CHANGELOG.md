@@ -4,6 +4,24 @@ All notable changes to the Informe PT project are documented in this file.
 
 ---
 
+## [v2.4] - 2026-01-08
+
+### Fixed
+- **Streamlit TypeError**: Fixed `TypeError: unsupported operand type(s) for /: 'float' and 'decimal.Decimal'` in peso OOVV calculations by converting float totals to Decimal before division
+- **API Operaciones Vinculadas Logic**: Refactored to proper hierarchical structure matching Streamlit version:
+  - First add operaciones vinculadas (operation types)
+  - Then add entidades vinculadas (linked entities) per operation
+  - Each entity has ingreso and gasto fields
+  - Totals and peso indicators update automatically
+
+### Changed
+- Improved API UI for Operaciones Vinculadas section with clear two-table layout
+- Added "Operaciones Intragrupo" table for operation type management
+- Added "Detalle de Operaciones Vinculadas" table for entity/amount breakdown
+- Enhanced CSS styling for new hierarchical structure
+
+---
+
 ## [v2.3] - 2026-01-08
 
 ### Added
