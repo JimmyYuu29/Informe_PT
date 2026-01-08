@@ -363,6 +363,10 @@ function renderSection(section, allFields, expanded = true) {
     } else if (sectionId === 'sec_contacts') {
         const contactsEl = renderContactsSection(allFields);
         content.appendChild(contactsEl);
+    } else if (sectionId === 'sec_operations') {
+        // Render operaciones vinculadas with peso indicators and valoracion_oovv
+        const operationsEl = renderOperacionesVinculadasSection(allFields);
+        content.appendChild(operationsEl);
     } else if (sectionId === 'sec_anexo3') {
         // Render texto_anexo3 field first
         const textoAnexo3Field = allFields.find(f => f.name === 'texto_anexo3');
@@ -886,6 +890,9 @@ function updateDerivedValues() {
     if (ncpEl1) ncpEl1.textContent = formatPercent(ncp_1);
     if (ncpEl0) ncpEl0.textContent = formatPercent(ncp_0);
     if (ncpVarEl) ncpVarEl.textContent = calcVariation(ncp_1, ncp_0);
+
+    // Also update peso OOVV indicators when financial data changes
+    updatePesoOOVVIndicators();
 }
 
 function updateFinancialVariation(field1, field0) {
@@ -1392,6 +1399,138 @@ function renderContactsSection(allFields) {
     }
 
     return container;
+}
+
+function renderOperacionesVinculadasSection(allFields) {
+    const container = document.createElement('div');
+    container.className = 'operaciones-vinculadas-section';
+
+    // Render servicios_vinculados field (existing list field renderer)
+    const serviciosField = allFields.find(f => f.name === 'servicios_vinculados');
+    if (serviciosField) {
+        const fieldEl = renderField(serviciosField);
+        if (fieldEl) {
+            container.appendChild(fieldEl);
+        }
+    }
+
+    // Divider
+    const divider1 = document.createElement('hr');
+    divider1.className = 'section-divider';
+    container.appendChild(divider1);
+
+    // Peso OOVV indicators section
+    const pesoSection = document.createElement('div');
+    pesoSection.className = 'peso-oovv-section';
+    pesoSection.id = 'peso-oovv-indicators';
+
+    const pesoTitle = document.createElement('p');
+    pesoTitle.className = 'caption-text';
+    pesoTitle.textContent = 'Indicadores calculados automáticamente:';
+    pesoSection.appendChild(pesoTitle);
+
+    // Peso OOVV sobre INCN row
+    const pesoIncnRow = document.createElement('div');
+    pesoIncnRow.className = 'peso-row';
+    pesoIncnRow.innerHTML = `
+        <span class="peso-label">Peso OOVV sobre INCN</span>
+        <span class="peso-value derived-value" id="peso-incn-value">N/A %</span>
+    `;
+    pesoSection.appendChild(pesoIncnRow);
+
+    // Peso OOVV sobre total costes row
+    const pesoCostesRow = document.createElement('div');
+    pesoCostesRow.className = 'peso-row';
+    pesoCostesRow.innerHTML = `
+        <span class="peso-label">Peso OOVV sobre total costes</span>
+        <span class="peso-value derived-value" id="peso-costes-value">N/A %</span>
+    `;
+    pesoSection.appendChild(pesoCostesRow);
+
+    container.appendChild(pesoSection);
+
+    // Divider
+    const divider2 = document.createElement('hr');
+    divider2.className = 'section-divider';
+    container.appendChild(divider2);
+
+    // Valoración OOVV text field
+    const valoracionGroup = document.createElement('div');
+    valoracionGroup.className = 'form-group full-width';
+    valoracionGroup.dataset.fieldName = 'valoracion_oovv';
+
+    const valoracionLabel = document.createElement('label');
+    valoracionLabel.className = 'form-label';
+    valoracionLabel.textContent = 'Valoración de Operaciones Vinculadas';
+    valoracionGroup.appendChild(valoracionLabel);
+
+    const valoracionInput = document.createElement('textarea');
+    valoracionInput.className = 'textarea-input';
+    valoracionInput.name = 'valoracion_oovv';
+    valoracionInput.rows = 4;
+    valoracionInput.placeholder = 'Texto de valoración basado en los indicadores de peso OOVV';
+    valoracionInput.addEventListener('input', (e) => {
+        AppState.setFormValue('valoracion_oovv', e.target.value);
+    });
+    valoracionGroup.appendChild(valoracionInput);
+
+    const valoracionHint = document.createElement('span');
+    valoracionHint.className = 'form-hint';
+    valoracionHint.textContent = 'Texto de valoración basado en los indicadores de peso OOVV';
+    valoracionGroup.appendChild(valoracionHint);
+
+    container.appendChild(valoracionGroup);
+
+    return container;
+}
+
+function updatePesoOOVVIndicators() {
+    // Get financial data for calculations
+    const cifra_1 = AppState.getFormValue('cifra_1') || 0;
+    const ebit_1 = AppState.getFormValue('ebit_1') || 0;
+    const cost_1 = cifra_1 - ebit_1;
+
+    // Calculate total ingreso and gasto from servicios_vinculados
+    const servicios = AppState.getListItems('servicios_vinculados');
+    let totalIngreso = 0;
+    let totalGasto = 0;
+
+    servicios.forEach(servicio => {
+        const entidades = servicio.entidades_vinculadas || [];
+        entidades.forEach(entidad => {
+            totalIngreso += parseFloat(entidad.ingreso_entidad) || 0;
+            totalGasto += parseFloat(entidad.gasto_entidad) || 0;
+        });
+    });
+
+    // Calculate peso indicators
+    let pesoIncn = 'N/A';
+    let pesoCostes = 'N/A';
+
+    if (cifra_1 !== 0) {
+        pesoIncn = ((totalIngreso / cifra_1) * 100).toLocaleString('es-ES', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    if (cost_1 !== 0) {
+        pesoCostes = ((totalGasto / cost_1) * 100).toLocaleString('es-ES', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    // Update display
+    const pesoIncnEl = document.getElementById('peso-incn-value');
+    const pesoCostesEl = document.getElementById('peso-costes-value');
+
+    if (pesoIncnEl) {
+        pesoIncnEl.textContent = `${pesoIncn} %`;
+    }
+    if (pesoCostesEl) {
+        pesoCostesEl.textContent = `${pesoCostes} %`;
+    }
 }
 
 function createSelect(name, options, defaultValue = '') {

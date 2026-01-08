@@ -73,6 +73,16 @@ fields:
     source_block_ids:
       - ANEXO3_LIST_03
 
+  valoracion_oovv:
+    type: text
+    required: false
+    label: "Valoración de Operaciones Vinculadas"
+    description: "Texto de valoración basado en los indicadores de peso OOVV"
+    multiline: true
+    default: ""
+    source_block_ids:
+      - SEC2_TABLE_03
+
   # ============================================================================
   # COMENTARIOS VALORATIVOS - Conditional Evaluative Comments (17 variables)
   # These are si/no toggles that conditionally include text paragraphs

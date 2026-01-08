@@ -745,6 +745,59 @@ def render_operaciones_vinculadas_detail_table(context: dict, fields_def: dict) 
         formatted_gasto = f"{total_gasto:,.2f} €".replace(",", "X").replace(".", ",").replace("X", ".")
         st.markdown(f"**{formatted_gasto}**")
 
+    # Calculate and display peso OOVV metrics
+    st.divider()
+    st.caption("Indicadores calculados automáticamente:")
+
+    # Get cifra_1 and cost_1 for peso calculations
+    cifra_1 = state.get_field_value("cifra_1", 0)
+    ebit_1 = state.get_field_value("ebit_1", 0)
+
+    try:
+        cifra_1_float = float(cifra_1) if cifra_1 else 0.0
+        ebit_1_float = float(ebit_1) if ebit_1 else 0.0
+        cost_1 = cifra_1_float - ebit_1_float
+    except (TypeError, ValueError):
+        cifra_1_float = 0.0
+        cost_1 = 0.0
+
+    # Peso oovv sobre INCN = (total_ingreso / cifra_1) * 100
+    if cifra_1_float != 0:
+        peso_incn = (total_ingreso / Decimal(str(cifra_1_float))) * 100
+        peso_incn_formatted = f"{float(peso_incn):.2f}".replace(".", ",")
+    else:
+        peso_incn_formatted = "N/A"
+
+    # Peso oovv sobre total costes = (total_gasto / cost_1) * 100
+    if cost_1 != 0:
+        peso_costes = (total_gasto / Decimal(str(cost_1))) * 100
+        peso_costes_formatted = f"{float(peso_costes):.2f}".replace(".", ",")
+    else:
+        peso_costes_formatted = "N/A"
+
+    # Display peso rows
+    cols_peso1 = st.columns([0.50, 0.50])
+    with cols_peso1[0]:
+        st.markdown("*Peso OOVV sobre INCN*")
+    with cols_peso1[1]:
+        st.markdown(f"*{peso_incn_formatted} %*")
+
+    cols_peso2 = st.columns([0.50, 0.50])
+    with cols_peso2[0]:
+        st.markdown("*Peso OOVV sobre total costes*")
+    with cols_peso2[1]:
+        st.markdown(f"*{peso_costes_formatted} %*")
+
+    # Valoración OOVV text field
+    st.divider()
+    components.render_text_input(
+        field_name="valoracion_oovv",
+        label="Valoración de Operaciones Vinculadas",
+        required=False,
+        multiline=True,
+        help_text="Texto de valoración basado en los indicadores de peso OOVV",
+    )
+
 
 def render_metodo_elegido_table(context: dict, fields_def: dict) -> None:
     """

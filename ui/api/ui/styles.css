@@ -1790,3 +1790,49 @@ body {
         width: 100%;
     }
 }
+
+/* ============================================================================
+   Operaciones Vinculadas - Peso OOVV Indicators
+   ============================================================================ */
+
+.operaciones-vinculadas-section {
+    padding: var(--spacing-sm) 0;
+}
+
+.peso-oovv-section {
+    background: var(--gray-50);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md);
+    margin: var(--spacing-md) 0;
+}
+
+.peso-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px dashed var(--gray-200);
+}
+
+.peso-row:last-child {
+    border-bottom: none;
+}
+
+.peso-label {
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+    font-style: italic;
+}
+
+.peso-value {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--gray-700);
+    font-style: italic;
+}
+
+.section-divider {
+    border: none;
+    border-top: 1px solid var(--gray-200);
+    margin: var(--spacing-md) 0;
+}

@@ -44,6 +44,7 @@ ui:
       label: "Operaciones Vinculadas"
       fields:
         - servicios_vinculados
+        - valoracion_oovv
 
     - id: sec_services
       label: "Análisis de Servicios OOVV"
