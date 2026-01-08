@@ -1866,6 +1866,100 @@ function exportAsJson() {
     showNotification('success', 'Export Complete', 'Form data has been exported as JSON.');
 }
 
+function importJson(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const json = JSON.parse(e.target.result);
+            loadJsonData(json);
+            showNotification('success', 'Import Complete', 'Form data has been imported from JSON.');
+        } catch (error) {
+            showNotification('error', 'Import Failed', `Invalid JSON file: ${error.message}`);
+        }
+    };
+    reader.onerror = function() {
+        showNotification('error', 'Import Failed', 'Failed to read the file.');
+    };
+    reader.readAsText(file);
+}
+
+function loadJsonData(json) {
+    if (!AppState.schema) {
+        showNotification('warning', 'No Plugin Selected', 'Please select a plugin first before importing data.');
+        return;
+    }
+
+    // Clear existing data
+    AppState.clearAll();
+
+    // Process all fields from JSON
+    for (const [key, value] of Object.entries(json)) {
+        // Skip internal keys (legacy support)
+        if (key.startsWith('_')) {
+            // Handle legacy _list_items format
+            if (key === '_list_items' && typeof value === 'object') {
+                for (const [listKey, listValue] of Object.entries(value)) {
+                    if (Array.isArray(listValue)) {
+                        AppState.listData[listKey] = listValue.map((item, idx) => {
+                            if (typeof item === 'object') {
+                                return { ...item, _id: Date.now() + idx };
+                            }
+                            return { value: item, _id: Date.now() + idx };
+                        });
+                    }
+                }
+            }
+            continue;
+        }
+
+        if (Array.isArray(value)) {
+            // Handle list fields
+            AppState.listData[key] = value.map((item, idx) => {
+                if (typeof item === 'object') {
+                    return { ...item, _id: Date.now() + idx };
+                }
+                return { value: item, _id: Date.now() + idx };
+            });
+        } else {
+            // Handle scalar fields
+            AppState.setFormValue(key, value);
+        }
+    }
+
+    // Update form inputs with imported data
+    updateFormWithImportedData();
+
+    // Update UI
+    updateConditionalVisibility();
+    updateDerivedValues();
+}
+
+function updateFormWithImportedData() {
+    // Update all form inputs with data from AppState
+    for (const [key, value] of Object.entries(AppState.formData)) {
+        const input = document.querySelector(`[name="${key}"]`);
+        if (input) {
+            if (input.type === 'checkbox') {
+                input.checked = Boolean(value);
+            } else if (input.type === 'date' && value) {
+                // Handle date fields
+                input.value = value;
+            } else {
+                input.value = value !== null && value !== undefined ? value : '';
+            }
+        }
+    }
+
+    // Refresh list displays
+    if (AppState.schema && AppState.schema.fields) {
+        AppState.schema.fields.forEach(field => {
+            if (field.type === 'list') {
+                refreshListItems(field);
+            }
+        });
+    }
+}
+
 // ============================================================================
 // Event Handlers
 // ============================================================================
@@ -2023,6 +2117,19 @@ async function init() {
     document.getElementById('btn-load-sample').addEventListener('click', loadSampleData);
     document.getElementById('btn-export-json').addEventListener('click', exportAsJson);
     document.getElementById('btn-close-results').addEventListener('click', hideResults);
+
+    // Import JSON functionality
+    const importInput = document.getElementById('json-import-input');
+    document.getElementById('btn-import-json').addEventListener('click', () => {
+        importInput.click();
+    });
+    importInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+            importJson(e.target.files[0]);
+            // Reset the input so the same file can be imported again
+            e.target.value = '';
+        }
+    });
 
     // Modal close handlers
     document.querySelectorAll('.modal-close, .modal-cancel').forEach(btn => {

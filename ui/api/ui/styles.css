@@ -395,16 +395,21 @@ body {
 .content-area {
     flex: 1;
     margin-left: var(--sidebar-width);
-    padding: var(--spacing-xl);
+    padding: var(--spacing-xl) var(--spacing-2xl);
     padding-bottom: calc(var(--footer-height) + var(--spacing-xl));
+    max-width: calc(100vw - var(--sidebar-width));
+    box-sizing: border-box;
 }
 
 .form-container {
     background: white;
     border-radius: var(--border-radius-lg);
     box-shadow: var(--shadow-sm);
-    padding: var(--spacing-xl);
+    padding: var(--spacing-xl) var(--spacing-2xl);
     min-height: 400px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .form-placeholder {
@@ -441,6 +446,7 @@ body {
     margin-bottom: var(--spacing-xl);
     padding-bottom: var(--spacing-xl);
     border-bottom: 1px solid var(--gray-200);
+    width: 100%;
 }
 
 .form-section:last-child {
@@ -473,8 +479,9 @@ body {
 
 .section-content {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: var(--spacing-lg);
+    width: 100%;
 }
 
 .section-content.collapsed {
@@ -1163,8 +1170,10 @@ body {
 /* Form Table Container */
 .form-table {
     width: 100%;
+    max-width: 100%;
     border-collapse: collapse;
     margin-bottom: var(--spacing-lg);
+    box-sizing: border-box;
 }
 
 .form-table-header {
@@ -1207,7 +1216,7 @@ body {
 /* Financial Data Table - 4 columns */
 .financial-table .form-table-header,
 .financial-table .form-table-row {
-    grid-template-columns: 1.5fr 0.8fr 1fr 1fr;
+    grid-template-columns: minmax(180px, 1.5fr) minmax(100px, 0.8fr) minmax(150px, 1fr) minmax(150px, 1fr);
 }
 
 /* Risk Assessment Table - 6 columns */
@@ -1237,8 +1246,9 @@ body {
 /* Contacts Table - 3 columns per row */
 .contacts-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: var(--spacing-lg);
+    width: 100%;
 }
 
 .contact-card {
@@ -1294,6 +1304,7 @@ body {
     margin: var(--spacing-lg) 0 var(--spacing-md) 0;
     padding-bottom: var(--spacing-sm);
     border-bottom: 1px solid var(--gray-200);
+    width: 100%;
 }
 
 /* Info Box */
@@ -1340,7 +1351,12 @@ body {
 /* Financial Table with 3 data columns */
 .financial-table-3col .form-table-header,
 .financial-table-3col .form-table-row {
-    grid-template-columns: 1.5fr 0.8fr 1fr 1fr;
+    grid-template-columns: minmax(180px, 2fr) minmax(100px, 1fr) minmax(180px, 1.5fr) minmax(180px, 1.5fr);
+}
+
+.financial-table-3col .form-input {
+    width: 100%;
+    min-width: 120px;
 }
 
 .financial-table-3col .form-table-divider {
@@ -1369,6 +1385,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-lg);
+    width: 100%;
 }
 
 .risk-item-vertical {
@@ -1378,6 +1395,8 @@ body {
     border-left: 4px solid var(--accent-gold);
     box-shadow: var(--shadow-sm);
     transition: box-shadow 0.2s ease;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .risk-item-vertical:hover {
@@ -1479,6 +1498,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-lg);
+    width: 100%;
 }
 
 .compliance-item-vertical {
@@ -1488,6 +1508,8 @@ body {
     border-left: 4px solid var(--primary-blue-light);
     box-shadow: var(--shadow-sm);
     transition: box-shadow 0.2s ease;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .compliance-item-vertical:hover {
@@ -1503,6 +1525,7 @@ body {
     overflow-wrap: break-word;
     hyphens: auto;
     padding-right: var(--spacing-md);
+    max-width: 100%;
 }
 
 .compliance-item-header strong {
@@ -1522,6 +1545,7 @@ body {
     flex-wrap: wrap;
     gap: var(--spacing-md) var(--spacing-xl);
     align-items: center;
+    width: 100%;
 }
 
 /* Make compliance detail inputs properly sized */
@@ -1544,13 +1568,13 @@ body {
 
 /* Comentario field spans more width */
 .compliance-item-vertical .comentario-group {
-    flex: 1;
-    min-width: 250px;
+    flex: 2;
+    min-width: 300px;
 }
 
 .compliance-item-vertical .comentario-group .form-input {
     width: 100%;
-    min-width: 200px;
+    min-width: 250px;
 }
 
 .compliance-item-divider {
@@ -1562,6 +1586,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
+    width: 100%;
 }
 
 .compliance-summary-item {
@@ -1646,10 +1671,11 @@ body {
 
 .comentario-row {
     display: grid;
-    grid-template-columns: 1fr 100px 1fr;
+    grid-template-columns: minmax(200px, 2fr) 100px minmax(200px, 2fr);
     gap: var(--spacing-md);
     align-items: start;
     padding: var(--spacing-sm) 0;
+    width: 100%;
 }
 
 .comentario-question {

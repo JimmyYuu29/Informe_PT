@@ -100,44 +100,39 @@ def main():
 
         st.divider()
 
-        # JSON Import Section
-        st.header("Import Data")
+        # Data Management Section
+        st.header("Data Management")
+
+        # JSON Import
         uploaded_file = st.file_uploader(
-            "Import JSON Metadata",
+            "Import JSON",
             type=["json"],
-            help="Upload a JSON file with form data to pre-fill the form",
+            help="Upload a JSON file with form data",
         )
 
         if uploaded_file is not None:
             try:
                 json_data = json.load(uploaded_file)
-                if st.button("Load JSON Data", use_container_width=True):
+                if st.button("Import Data", type="primary", use_container_width=True):
                     load_json_data(json_data)
-                    st.success("JSON data loaded successfully!")
+                    st.success("Data imported successfully!")
                     st.rerun()
             except json.JSONDecodeError as e:
                 st.error(f"Invalid JSON file: {e}")
             except Exception as e:
                 st.error(f"Error loading JSON: {e}")
 
-        st.divider()
-
-        # JSON Export Section
-        st.header("Export Data")
+        # JSON Export
         export_data = export_form_data()
         st.download_button(
-            label="Export to JSON",
+            label="Export Data",
             data=export_data,
             file_name="form_data.json",
             mime="application/json",
             use_container_width=True,
         )
 
-        st.divider()
-
-        # Actions
-        st.header("Actions")
-
+        # Clear Form
         if st.button("Clear Form", use_container_width=True):
             state.clear_form_data()
             st.rerun()
@@ -273,11 +268,11 @@ def export_form_data() -> str:
     """
     Export current form data to JSON string.
 
-    Exports both scalar form_data and list_items separately to ensure
-    complete data restoration on import.
+    Exports a clean, flat JSON structure with all form fields and list items.
+    Lists are included directly in the main JSON object for simplicity.
 
     Returns:
-        JSON string of form data, or empty string if no data.
+        JSON string of form data.
     """
     # Convert date objects to ISO format strings
     def serialize_value(v):
@@ -298,7 +293,7 @@ def export_form_data() -> str:
     list_items = st.session_state.get("list_items", {})
     list_field_names = set(list_items.keys())
 
-    # Export scalar fields in UI order
+    # Export all fields in a flat structure
     serialized: OrderedDict[str, object] = OrderedDict()
 
     # Export scalar fields in UI order
@@ -314,32 +309,26 @@ def export_form_data() -> str:
             continue
         serialized[k] = serialize_value(v)
 
-    # Export list items with full structure (including nested lists)
-    list_items_serialized: OrderedDict[str, list] = OrderedDict()
+    # Export list items directly in the main structure
     ordered_list_fields = [name for name in ordered_fields if name in list_items]
     for field_name in ordered_list_fields:
         items = list_items[field_name]
-        list_items_serialized[field_name] = []
+        cleaned_items = []
         for item in items:
             # Remove internal _id field but keep all other data
             cleaned = {k: serialize_value(v) for k, v in item.items() if not k.startswith("_")}
-            list_items_serialized[field_name].append(cleaned)
+            cleaned_items.append(cleaned)
+        serialized[field_name] = cleaned_items
+
+    # Add remaining list fields
     for field_name, items in list_items.items():
-        if field_name in list_items_serialized:
+        if field_name in serialized:
             continue
-        list_items_serialized[field_name] = []
+        cleaned_items = []
         for item in items:
             cleaned = {k: serialize_value(v) for k, v in item.items() if not k.startswith("_")}
-            list_items_serialized[field_name].append(cleaned)
-
-    serialized["_list_items"] = list_items_serialized
-
-    # Add metadata
-    serialized["_metadata"] = {
-        "exported_at": date.today().isoformat(),
-        "plugin_id": plugin_id,
-        "version": "2.0",  # Version 2.0 with improved list handling
-    }
+            cleaned_items.append(cleaned)
+        serialized[field_name] = cleaned_items
 
     return json.dumps(serialized, ensure_ascii=False, indent=2)
 
@@ -440,18 +429,13 @@ def load_json_data(json_data: dict) -> None:
     """
     Load JSON data into the form state.
 
-    Handles both simple fields and complex list structures.
-    Supports both v1.0 format (lists at top level) and v2.0 format (_list_items).
+    Handles a flat JSON structure where lists and scalar fields are mixed.
+    Also supports legacy formats with _metadata and _list_items for backwards compatibility.
     Uses deep copy for nested structures to prevent reference issues.
-
-    CRITICAL: This function must properly clear all widget state to ensure
-    Streamlit widgets display the imported values instead of cached values.
     """
-    # Normalize payloads that wrap data under form_data/list_items
+    # Normalize payloads that wrap data under form_data/list_items (legacy support)
     if isinstance(json_data.get("form_data"), dict):
         normalized = dict(json_data["form_data"])
-        if "_metadata" in json_data:
-            normalized["_metadata"] = json_data["_metadata"]
         if "_list_items" in json_data:
             normalized["_list_items"] = json_data["_list_items"]
         if "list_items" in json_data and "_list_items" not in normalized:
@@ -459,80 +443,49 @@ def load_json_data(json_data: dict) -> None:
         json_data = normalized
 
     def _set_scalar_field(key: str, value) -> None:
-        """Set form_data for scalar fields. Widget state is NOT set here
-        because components will read from form_data when _data_just_imported is True."""
+        """Set form_data for scalar fields."""
         coerced = _coerce_widget_value(value, key)
         state.set_field_value(key, coerced)
 
-    # FIRST: Force clear all widget state BEFORE clearing form data
-    # This ensures no stale widget values interfere with import
+    # Force clear all widget state BEFORE clearing form data
     _force_clear_widget_state()
 
-    # Clear existing form data (this also clears widget state keys and sets import flag)
+    # Clear existing form data
     state.clear_form_data()
 
-    # Extract metadata and list items without mutating original dict
-    metadata = json_data.get("_metadata", {})
+    # Check for legacy _list_items format (backwards compatibility)
     list_items_data = json_data.get("_list_items", None)
 
-    # Check export version
-    is_v2 = metadata.get("version") == "2.0" or list_items_data is not None
-
-    # Track which fields are list fields to avoid double processing
-    list_field_names = set()
-
-    if is_v2 and list_items_data:
-        # V2.0 format: list items are stored separately in _list_items
-        list_field_names = set(list_items_data.keys())
-
-        # Process list items from _list_items using deep copy
+    if list_items_data:
+        # Legacy format: list items are stored separately in _list_items
         for field_name, items in list_items_data.items():
             st.session_state.list_items[field_name] = []
             for item in items:
                 if isinstance(item, dict):
-                    # Use deep copy to preserve nested structures
                     state.add_list_item(field_name, copy.deepcopy(item))
                 else:
                     state.add_list_item(field_name, {"value": item})
 
-        # Process ALL scalar fields (exclude only internal keys and list fields)
-        for key, value in json_data.items():
-            if key.startswith("_"):
-                continue
-            if key in list_field_names:
-                continue
-            if isinstance(value, list):
-                # This is a list at top level that wasn't in _list_items
-                # Process it as a list field
-                st.session_state.list_items[key] = []
-                for item in value:
-                    if isinstance(item, dict):
-                        state.add_list_item(key, copy.deepcopy(item))
-                    else:
-                        state.add_list_item(key, {"value": item})
-            else:
-                # Handle scalar fields - including all sections:
-                # sec_general, sec_financials, sec_anexo3, sec_contacts, etc.
-                _set_scalar_field(key, value)
-    else:
-        # V1.0 format: lists are mixed with scalar fields
-        for key, value in json_data.items():
-            if key.startswith("_"):
-                continue
+    # Process all fields
+    for key, value in json_data.items():
+        # Skip internal keys
+        if key.startswith("_"):
+            continue
 
-            if isinstance(value, list):
-                # Handle list fields using deep copy
+        if isinstance(value, list):
+            # Handle list fields
+            if key not in st.session_state.list_items:
                 st.session_state.list_items[key] = []
-                for item in value:
-                    if isinstance(item, dict):
-                        state.add_list_item(key, copy.deepcopy(item))
-                    else:
-                        state.add_list_item(key, {"value": item})
-            else:
-                # Handle scalar fields
-                _set_scalar_field(key, value)
+            for item in value:
+                if isinstance(item, dict):
+                    state.add_list_item(key, copy.deepcopy(item))
+                else:
+                    state.add_list_item(key, {"value": item})
+        else:
+            # Handle scalar fields
+            _set_scalar_field(key, value)
 
-    # Ensure the import flag is still set after all operations
+    # Ensure the import flag is set
     st.session_state._data_just_imported = True
 
 

@@ -43,7 +43,7 @@ from .deps import get_plugin, get_settings, Settings
 app = FastAPI(
     title="Document Generation API",
     description="API for generating documents from YAML-configured plugins",
-    version="1.0.0",
+    version="1.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
 )

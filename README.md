@@ -1,6 +1,6 @@
 # Enterprise Document Generation Platform
 
-**Version 2.2**
+**Version 2.3**
 
 A configuration-driven document generation system for creating professional reports from structured data and Word templates.
 
@@ -254,11 +254,20 @@ rules:
 
 ## Deployment
 
-For production deployment on Ubuntu servers, see the detailed instructions in:
+For production deployment on Ubuntu servers with nginx and systemd, see the comprehensive guide:
 
 ```
-ui/api/instruction.md
+analisi.md        # Detailed deployment guide with two deployment schemes
+ui/api/instruction.md  # Quick reference instructions
 ```
+
+The `analisi.md` file includes:
+- Step-by-step deployment instructions for beginners
+- Two deployment schemes (standard and Docker)
+- Nginx reverse proxy configuration
+- Systemd service configuration
+- Performance analysis and capacity planning
+- Troubleshooting guide
 
 ## License
 

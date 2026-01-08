@@ -4,6 +4,28 @@ All notable changes to the Informe PT project are documented in this file.
 
 ---
 
+## [v2.3] - 2026-01-08
+
+### Added
+- Comprehensive deployment guide (`analisi.md`) with Ubuntu/nginx/systemd instructions
+- JSON import functionality in API web UI
+- Improved layout for tables and forms in API web UI
+
+### Changed
+- Simplified JSON export format (removed `_metadata` and `_list_items` wrapper)
+- Simplified JSON import to handle flat structure with backwards compatibility
+- Reorganized sidebar sections in both Streamlit and API versions
+- Updated Data Management UI section (Import/Export/Clear)
+- Optimized CSS for full-width table layouts
+- Updated API version to 1.1.0
+
+### Fixed
+- Left-aligned table layout issues in API web UI
+- Text truncation in compliance and risk tables
+- Responsive layout for financial data tables
+
+---
+
 ## [v2.2] - 2026-01-08
 
 ### Added
