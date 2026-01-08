@@ -1405,21 +1405,107 @@ function renderOperacionesVinculadasSection(allFields) {
     const container = document.createElement('div');
     container.className = 'operaciones-vinculadas-section';
 
-    // Render servicios_vinculados field (existing list field renderer)
-    const serviciosField = allFields.find(f => f.name === 'servicios_vinculados');
-    if (serviciosField) {
-        const fieldEl = renderField(serviciosField);
-        if (fieldEl) {
-            container.appendChild(fieldEl);
-        }
-    }
+    // ========================================================================
+    // Section 1: Operaciones Intragrupo - List of operation types
+    // ========================================================================
+    const intragrupoSection = document.createElement('div');
+    intragrupoSection.className = 'operaciones-intragrupo-section';
+
+    const intragrupoTitle = document.createElement('h4');
+    intragrupoTitle.className = 'subsection-title';
+    intragrupoTitle.textContent = 'Operaciones Intragrupo';
+    intragrupoSection.appendChild(intragrupoTitle);
+
+    // Table header
+    const intragrupoHeader = document.createElement('div');
+    intragrupoHeader.className = 'form-table-header operations-intragrupo-header';
+    intragrupoHeader.innerHTML = `
+        <span style="flex: 0.1;">#</span>
+        <span style="flex: 0.9;">Operaciones intragrupo</span>
+    `;
+    intragrupoSection.appendChild(intragrupoHeader);
+
+    // Container for operation items
+    const operacionesContainer = document.createElement('div');
+    operacionesContainer.id = 'operaciones-intragrupo-items';
+    operacionesContainer.className = 'operaciones-intragrupo-items';
+    intragrupoSection.appendChild(operacionesContainer);
+
+    // Add operation button
+    const addOperacionBtn = document.createElement('button');
+    addOperacionBtn.type = 'button';
+    addOperacionBtn.className = 'btn btn-outline btn-add-item';
+    addOperacionBtn.innerHTML = 'Añadir operación';
+    addOperacionBtn.addEventListener('click', () => {
+        addOperacionVinculada();
+    });
+    intragrupoSection.appendChild(addOperacionBtn);
+
+    container.appendChild(intragrupoSection);
 
     // Divider
     const divider1 = document.createElement('hr');
     divider1.className = 'section-divider';
     container.appendChild(divider1);
 
-    // Peso OOVV indicators section
+    // ========================================================================
+    // Section 2: Detalle de Operaciones Vinculadas - Entity breakdown
+    // ========================================================================
+    const detalleSection = document.createElement('div');
+    detalleSection.className = 'operaciones-detalle-section';
+
+    const detalleTitle = document.createElement('h4');
+    detalleTitle.className = 'subsection-title';
+    detalleTitle.textContent = 'Detalle de Operaciones Vinculadas';
+    detalleSection.appendChild(detalleTitle);
+
+    // Get fiscal year for column header
+    const fechaFin = AppState.getFormValue('fecha_fin_fiscal');
+    let anyoActual = 'FY 2026';
+    if (fechaFin) {
+        try {
+            const year = new Date(fechaFin).getFullYear();
+            if (!isNaN(year)) anyoActual = `FY ${year}`;
+        } catch (e) {}
+    }
+
+    // Table header
+    const detalleHeader = document.createElement('div');
+    detalleHeader.className = 'form-table-header operations-detail-header';
+    detalleHeader.innerHTML = `
+        <span style="flex: 0.25;">Tipo de operación vinculada</span>
+        <span style="flex: 0.25;">Entidad vinculada</span>
+        <span style="flex: 0.25;">Ingreso ${anyoActual} (EUR)</span>
+        <span style="flex: 0.25;">Gasto ${anyoActual} (EUR)</span>
+    `;
+    detalleSection.appendChild(detalleHeader);
+
+    // Container for detail items (entities grouped by operation)
+    const detalleContainer = document.createElement('div');
+    detalleContainer.id = 'operaciones-detalle-items';
+    detalleContainer.className = 'operaciones-detalle-items';
+    detalleSection.appendChild(detalleContainer);
+
+    // Totals row
+    const totalsRow = document.createElement('div');
+    totalsRow.className = 'form-table-totals operations-totals';
+    totalsRow.innerHTML = `
+        <span style="flex: 0.50;"><strong>Totales OOVV</strong></span>
+        <span style="flex: 0.25;" id="total-ingreso-oovv"><strong>0,00 €</strong></span>
+        <span style="flex: 0.25;" id="total-gasto-oovv"><strong>0,00 €</strong></span>
+    `;
+    detalleSection.appendChild(totalsRow);
+
+    container.appendChild(detalleSection);
+
+    // Divider
+    const divider2 = document.createElement('hr');
+    divider2.className = 'section-divider';
+    container.appendChild(divider2);
+
+    // ========================================================================
+    // Section 3: Peso OOVV indicators
+    // ========================================================================
     const pesoSection = document.createElement('div');
     pesoSection.className = 'peso-oovv-section';
     pesoSection.id = 'peso-oovv-indicators';
@@ -1450,11 +1536,13 @@ function renderOperacionesVinculadasSection(allFields) {
     container.appendChild(pesoSection);
 
     // Divider
-    const divider2 = document.createElement('hr');
-    divider2.className = 'section-divider';
-    container.appendChild(divider2);
+    const divider3 = document.createElement('hr');
+    divider3.className = 'section-divider';
+    container.appendChild(divider3);
 
-    // Valoración OOVV text field
+    // ========================================================================
+    // Section 4: Valoración OOVV text field
+    // ========================================================================
     const valoracionGroup = document.createElement('div');
     valoracionGroup.className = 'form-group full-width';
     valoracionGroup.dataset.fieldName = 'valoracion_oovv';
@@ -1481,7 +1569,266 @@ function renderOperacionesVinculadasSection(allFields) {
 
     container.appendChild(valoracionGroup);
 
+    // Initialize data and render items
+    setTimeout(() => {
+        renderOperacionesIntragrupoItems();
+        renderOperacionesDetalleItems();
+        updatePesoOOVVIndicators();
+    }, 0);
+
     return container;
+}
+
+// Add a new operacion vinculada
+function addOperacionVinculada() {
+    const servicios = AppState.getListItems('servicios_vinculados');
+    const newItem = {
+        servicio_vinculado: '',
+        entidades_vinculadas: []
+    };
+    AppState.addListItem('servicios_vinculados', newItem);
+    renderOperacionesIntragrupoItems();
+    renderOperacionesDetalleItems();
+}
+
+// Remove an operacion vinculada
+function removeOperacionVinculada(index) {
+    AppState.removeListItem('servicios_vinculados', index);
+    renderOperacionesIntragrupoItems();
+    renderOperacionesDetalleItems();
+    updatePesoOOVVIndicators();
+}
+
+// Add an entity to a specific operation
+function addEntidadToOperacion(servicioIndex) {
+    const servicios = AppState.getListItems('servicios_vinculados');
+    if (servicios[servicioIndex]) {
+        if (!servicios[servicioIndex].entidades_vinculadas) {
+            servicios[servicioIndex].entidades_vinculadas = [];
+        }
+        servicios[servicioIndex].entidades_vinculadas.push({
+            entidad_vinculada: '',
+            ingreso_entidad: 0,
+            gasto_entidad: 0
+        });
+        renderOperacionesDetalleItems();
+    }
+}
+
+// Remove an entity from a specific operation
+function removeEntidadFromOperacion(servicioIndex, entidadIndex) {
+    const servicios = AppState.getListItems('servicios_vinculados');
+    if (servicios[servicioIndex] && servicios[servicioIndex].entidades_vinculadas) {
+        servicios[servicioIndex].entidades_vinculadas.splice(entidadIndex, 1);
+        renderOperacionesDetalleItems();
+        updatePesoOOVVIndicators();
+    }
+}
+
+// Render the Operaciones Intragrupo items list
+function renderOperacionesIntragrupoItems() {
+    const container = document.getElementById('operaciones-intragrupo-items');
+    if (!container) return;
+
+    container.innerHTML = '';
+    const servicios = AppState.getListItems('servicios_vinculados');
+
+    servicios.forEach((servicio, idx) => {
+        const row = document.createElement('div');
+        row.className = 'form-table-row operations-intragrupo-row';
+        row.dataset.index = idx;
+
+        // Number column
+        const numCell = document.createElement('span');
+        numCell.className = 'form-table-cell';
+        numCell.style.flex = '0.1';
+        numCell.innerHTML = `<strong>${idx + 1}</strong>`;
+
+        // Operation name input
+        const nameCell = document.createElement('span');
+        nameCell.className = 'form-table-cell';
+        nameCell.style.flex = '0.8';
+
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.className = 'form-input';
+        nameInput.placeholder = 'Tipo de operación vinculada';
+        nameInput.value = servicio.servicio_vinculado || '';
+        nameInput.addEventListener('input', (e) => {
+            AppState.updateListItem('servicios_vinculados', idx, 'servicio_vinculado', e.target.value);
+            // Update the detail section header for this operation
+            renderOperacionesDetalleItems();
+        });
+        nameCell.appendChild(nameInput);
+
+        // Remove button
+        const removeCell = document.createElement('span');
+        removeCell.className = 'form-table-cell';
+        removeCell.style.flex = '0.1';
+        removeCell.style.textAlign = 'right';
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-remove';
+        removeBtn.innerHTML = '✕';
+        removeBtn.title = 'Eliminar operación';
+        removeBtn.addEventListener('click', () => {
+            removeOperacionVinculada(idx);
+        });
+        removeCell.appendChild(removeBtn);
+
+        row.appendChild(numCell);
+        row.appendChild(nameCell);
+        row.appendChild(removeCell);
+        container.appendChild(row);
+    });
+}
+
+// Render the Detalle de Operaciones Vinculadas items (entities grouped by operation)
+function renderOperacionesDetalleItems() {
+    const container = document.getElementById('operaciones-detalle-items');
+    if (!container) return;
+
+    container.innerHTML = '';
+    const servicios = AppState.getListItems('servicios_vinculados');
+
+    if (servicios.length === 0) {
+        const emptyMsg = document.createElement('p');
+        emptyMsg.className = 'empty-message';
+        emptyMsg.textContent = 'Primero añada operaciones en la sección anterior.';
+        container.appendChild(emptyMsg);
+        return;
+    }
+
+    servicios.forEach((servicio, servIdx) => {
+        const servicioBlock = document.createElement('div');
+        servicioBlock.className = 'operacion-block';
+        servicioBlock.dataset.servicioIndex = servIdx;
+
+        const servicioName = servicio.servicio_vinculado || `Operación ${servIdx + 1}`;
+        let entidades = servicio.entidades_vinculadas || [];
+
+        // Ensure at least one entity row exists for each operation
+        if (entidades.length === 0) {
+            entidades = [{ entidad_vinculada: '', ingreso_entidad: 0, gasto_entidad: 0 }];
+            servicio.entidades_vinculadas = entidades;
+        }
+
+        // Render entity rows
+        entidades.forEach((entidad, entIdx) => {
+            const row = document.createElement('div');
+            row.className = 'form-table-row operations-detail-row';
+            row.dataset.servicioIndex = servIdx;
+            row.dataset.entidadIndex = entIdx;
+
+            // Operation name (only show on first entity row)
+            const opCell = document.createElement('span');
+            opCell.className = 'form-table-cell';
+            opCell.style.flex = '0.25';
+            if (entIdx === 0) {
+                opCell.innerHTML = `<strong>${servicioName}</strong>`;
+            }
+
+            // Entity name input
+            const entCell = document.createElement('span');
+            entCell.className = 'form-table-cell';
+            entCell.style.flex = '0.25';
+
+            const entInput = document.createElement('input');
+            entInput.type = 'text';
+            entInput.className = 'form-input';
+            entInput.placeholder = 'Nombre de entidad';
+            entInput.value = entidad.entidad_vinculada || '';
+            entInput.addEventListener('input', (e) => {
+                if (servicio.entidades_vinculadas && servicio.entidades_vinculadas[entIdx]) {
+                    servicio.entidades_vinculadas[entIdx].entidad_vinculada = e.target.value;
+                }
+            });
+            entCell.appendChild(entInput);
+
+            // Ingreso input
+            const ingresoCell = document.createElement('span');
+            ingresoCell.className = 'form-table-cell';
+            ingresoCell.style.flex = '0.20';
+
+            const ingresoInput = document.createElement('input');
+            ingresoInput.type = 'number';
+            ingresoInput.className = 'form-input currency-input';
+            ingresoInput.step = '0.01';
+            ingresoInput.placeholder = '0,00';
+            ingresoInput.value = entidad.ingreso_entidad || 0;
+            ingresoInput.addEventListener('input', (e) => {
+                const value = parseFloat(e.target.value) || 0;
+                if (servicio.entidades_vinculadas && servicio.entidades_vinculadas[entIdx]) {
+                    servicio.entidades_vinculadas[entIdx].ingreso_entidad = value;
+                }
+                updatePesoOOVVIndicators();
+            });
+            ingresoCell.appendChild(ingresoInput);
+
+            // Gasto input
+            const gastoCell = document.createElement('span');
+            gastoCell.className = 'form-table-cell';
+            gastoCell.style.flex = '0.20';
+
+            const gastoInput = document.createElement('input');
+            gastoInput.type = 'number';
+            gastoInput.className = 'form-input currency-input';
+            gastoInput.step = '0.01';
+            gastoInput.placeholder = '0,00';
+            gastoInput.value = entidad.gasto_entidad || 0;
+            gastoInput.addEventListener('input', (e) => {
+                const value = parseFloat(e.target.value) || 0;
+                if (servicio.entidades_vinculadas && servicio.entidades_vinculadas[entIdx]) {
+                    servicio.entidades_vinculadas[entIdx].gasto_entidad = value;
+                }
+                updatePesoOOVVIndicators();
+            });
+            gastoCell.appendChild(gastoInput);
+
+            // Remove entity button (only if more than one entity)
+            const removeCell = document.createElement('span');
+            removeCell.className = 'form-table-cell';
+            removeCell.style.flex = '0.10';
+            removeCell.style.textAlign = 'right';
+
+            if (entidades.length > 1) {
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'btn-remove-small';
+                removeBtn.innerHTML = '−';
+                removeBtn.title = 'Eliminar entidad';
+                removeBtn.addEventListener('click', () => {
+                    removeEntidadFromOperacion(servIdx, entIdx);
+                });
+                removeCell.appendChild(removeBtn);
+            }
+
+            row.appendChild(opCell);
+            row.appendChild(entCell);
+            row.appendChild(ingresoCell);
+            row.appendChild(gastoCell);
+            row.appendChild(removeCell);
+            servicioBlock.appendChild(row);
+        });
+
+        // Add entity button for this operation
+        const addEntBtn = document.createElement('button');
+        addEntBtn.type = 'button';
+        addEntBtn.className = 'btn btn-outline btn-add-entity';
+        addEntBtn.innerHTML = `Añadir entidad a '${servicioName}'`;
+        addEntBtn.addEventListener('click', () => {
+            addEntidadToOperacion(servIdx);
+        });
+        servicioBlock.appendChild(addEntBtn);
+
+        // Divider between operations
+        const divider = document.createElement('hr');
+        divider.className = 'operation-divider';
+        servicioBlock.appendChild(divider);
+
+        container.appendChild(servicioBlock);
+    });
 }
 
 function updatePesoOOVVIndicators() {
@@ -1502,6 +1849,24 @@ function updatePesoOOVVIndicators() {
             totalGasto += parseFloat(entidad.gasto_entidad) || 0;
         });
     });
+
+    // Update totals display
+    const totalIngresoEl = document.getElementById('total-ingreso-oovv');
+    const totalGastoEl = document.getElementById('total-gasto-oovv');
+
+    const formatCurrency = (value) => {
+        return value.toLocaleString('es-ES', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }) + ' €';
+    };
+
+    if (totalIngresoEl) {
+        totalIngresoEl.innerHTML = `<strong>${formatCurrency(totalIngreso)}</strong>`;
+    }
+    if (totalGastoEl) {
+        totalGastoEl.innerHTML = `<strong>${formatCurrency(totalGasto)}</strong>`;
+    }
 
     // Calculate peso indicators
     let pesoIncn = 'N/A';

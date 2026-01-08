@@ -2,7 +2,7 @@
 
 ## Enterprise Document Generation Platform - Analisi Tecnica e Guida Operativa
 
-**Versione:** 2.3
+**Versione:** 2.4
 **Data:** Gennaio 2026
 **Autore:** Sistema di Documentazione Automatica
 
