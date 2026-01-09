@@ -3,11 +3,21 @@
 Comentarios Valorativos Module - Processing logic for conditional evaluative comments.
 
 This module handles:
-- Loading comentarios valorativos definitions from YAML
-- Extracting text previews (first 3 lines) for UI display
-- Building context data for document generation
+- Loading comentarios valorativos definitions from YAML (questions only)
+- Extracting formatted text from Word document library
+- Building text previews (first 3 lines) for UI display
+- Building context data for document generation with RichText formatting
 """
 from typing import Any
+from docxtpl import RichText
+
+from .word_text_extractor import (
+    get_comentarios_plain_text,
+    get_comentarios_richtext,
+    get_comentario_plain_text,
+    get_comentario_richtext,
+    NUM_COMENTARIOS,
+)
 
 
 def get_text_preview(text: str, max_lines: int = 3) -> str:
@@ -56,12 +66,17 @@ def get_comentarios_for_ui(comentarios_defs: dict) -> list[dict]:
     """
     result = []
 
-    for i in range(1, 18):
+    # Get plain texts from Word document for preview
+    plain_texts = get_comentarios_plain_text()
+
+    for i in range(1, NUM_COMENTARIOS + 1):
         key = f"comentario_valorativo_{i}"
         comentario = comentarios_defs.get(key, {})
 
         question = comentario.get("question", f"[Pregunta {i} no definida]")
-        full_text = comentario.get("text", "")
+
+        # Get text from Word document
+        full_text = plain_texts.get(i, "")
         text_preview = get_text_preview(full_text, max_lines=3)
 
         result.append({
@@ -81,7 +96,7 @@ def build_comentarios_context(data: dict, comentarios_defs: dict) -> dict:
 
     This function:
     1. Checks each comentario_valorativo_i field value
-    2. If "si", includes the corresponding text in the context
+    2. If "si", includes the corresponding RichText in the context
     3. Builds a list of selected comentarios for template iteration
 
     Args:
@@ -91,30 +106,32 @@ def build_comentarios_context(data: dict, comentarios_defs: dict) -> dict:
     Returns:
         Dictionary with:
         - comentarios_valorativos_selected: list of selected comentarios with text
-        - comentario_valorativo_i_text: individual text for each selected comentario
+        - comentario_texto_i: RichText for each comentario (empty if not selected)
     """
     context = {}
     selected = []
 
-    for i in range(1, 18):
+    # Get RichText objects from Word document
+    richtext_dict = get_comentarios_richtext()
+    plain_texts = get_comentarios_plain_text()
+
+    for i in range(1, NUM_COMENTARIOS + 1):
         field_name = f"comentario_valorativo_{i}"
-        text_field_name = f"{field_name}_text"
+        texto_field_name = f"comentario_texto_{i}"
 
         value = data.get(field_name, "no")
-        comentario_def = comentarios_defs.get(field_name, {})
-        full_text = comentario_def.get("text", "")
 
         if value == "si":
-            # Include the text in context
-            context[text_field_name] = full_text
+            # Include the RichText in context for document generation
+            context[texto_field_name] = richtext_dict.get(i, RichText())
             selected.append({
                 "index": i,
                 "id": field_name,
-                "text": full_text,
+                "text": plain_texts.get(i, ""),  # Plain text for reference
             })
         else:
-            # Empty text for non-selected
-            context[text_field_name] = ""
+            # Empty RichText for non-selected
+            context[texto_field_name] = RichText()
 
     context["comentarios_valorativos_selected"] = selected
     context["has_comentarios_valorativos"] = len(selected) > 0

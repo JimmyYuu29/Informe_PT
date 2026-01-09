@@ -3,7 +3,7 @@
 # Generated: 2025-12-31 | Step 2 - YAML Pack Generation
 
 plugin_id: pt_review
-version: "1.1.0"
+version: "1.2.0"
 name: "Transfer Pricing Review Report"
 name_es: "Informe de Revisión de Precios de Transferencia"
 description: |
@@ -12,7 +12,7 @@ description: |
 
 author: "Forvis Mazars Tax & Legal, S.L.P."
 created: "2025-12-31"
-updated: "2026-01-08"
+updated: "2026-01-09"
 
 template:
   path: "config/template_final.docx"
