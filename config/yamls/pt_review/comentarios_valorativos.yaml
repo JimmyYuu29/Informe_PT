@@ -1,127 +1,66 @@
 # comentarios_valorativos.yaml - Conditional Evaluative Comments
 # Plugin ID: pt_review
-# Generated: 2025-01-08
+# Updated: 2026-01-09
 #
-# This file contains 17 conditional evaluative comment variables.
+# This file contains 16 conditional evaluative comment definitions.
 # Each variable (comentario_valorativo_i) has:
-#   - question: The question displayed in the UI
-#   - text: The text paragraph to include in the document when selected "si"
+#   - question: The question/title displayed in the UI
+#
+# TEXT EXTRACTION:
+#   - Text content is extracted from Word document: config/Text_comentario valorativo.docx
+#   - Text is delimited by markers: {{COMENTARIO_TEXTO_i_START}} and {{COMENTARIO_TEXTO_i_END}}
+#   - Formatting (bold, italic, bullets) is preserved during extraction
 #
 # Usage:
-#   - If comentario_valorativo_i == "si", the corresponding text is included
+#   - If comentario_valorativo_i == "si", the corresponding text is included in the document
 #   - If comentario_valorativo_i == "no" (default), the text is not included
 
 comentarios_valorativos:
 
   comentario_valorativo_1:
     question: "Comentario sentencia Cashpooling"
-    text: |
-      [TODO: Escriba el texto del comentario valorativo 1 aquí]
-      Este texto se mostrará en el documento cuando la respuesta sea "si".
-      Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_2:
     question: "Comentarios Idioma distinto al inglés y/o Español"
-    text: |
-      [TODO: Escriba el texto del comentario valorativo 2 aquí]
-      Este texto se mostrará en el documento cuando la respuesta sea "si".
-      Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_3:
     question: "Diferencias 232, CCAA y Local File"
-    text: |
-      [TODO: Escriba el texto del comentario valorativo 3 aquí]
-      Este texto se mostrará en el documento cuando la respuesta sea "si".
-      Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_4:
     question: "Documentación en formato borrador"
-    text: |
-      [TODO: Escriba el texto del comentario valorativo 4 aquí]
-      Este texto se mostrará en el documento cuando la respuesta sea "si".
-      Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_5:
     question: "Error en los filtros de independencia aplicados"
-    text: |
-      [TODO: Escriba el texto del comentario valorativo 5 aquí]
-      Este texto se mostrará en el documento cuando la respuesta sea "si".
-      Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_6:
     question: "Error en los filtros de Independencia aplicados accionistas"
-    text: |
-      [TODO: Escriba el texto del comentario valorativo 6 aquí]
-      Este texto se mostrará en el documento cuando la respuesta sea "si".
-      Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_7:
     question: "Información financiera de comparables no actualizada"
-    text: |
-      [TODO: Escriba el texto del comentario valorativo 7 aquí]
-      Este texto se mostrará en el documento cuando la respuesta sea "si".
-      Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_8:
     question: "No acceso a la estrategia de búsqueda utilizada"
-    text: |
-      [TODO: Escriba el texto del comentario valorativo 8 aquí]
-      Este texto se mostrará en el documento cuando la respuesta sea "si".
-      Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_9:
     question: "No justificación del método seleccionado en la documentación"
-    text: |
-      [TODO: Escriba el texto del comentario valorativo 9 aquí]
-      Este texto se mostrará en el documento cuando la respuesta sea "si".
-      Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_10:
     question: "Pago de royalty en situación de perdidas"
-    text: |
-      [TODO: Escriba el texto del comentario valorativo 10 aquí]
-      Este texto se mostrará en el documento cuando la respuesta sea "si".
-      Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_11:
     question: "PLI incorrecto o mal aplicado"
-    text: |
-      [TODO: Escriba el texto del comentario valorativo 11 aquí]
-      Este texto se mostrará en el documento cuando la respuesta sea "si".
-      Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_12:
     question: "Preparación de la documentación de manera contemporánea"
-    text: |
-      [TODO: Escriba el texto del comentario valorativo 12 aquí]
-      Este texto se mostrará en el documento cuando la respuesta sea "si".
-      Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_13:
     question: "Rangos de mercado demasiado amplios"
-    text: |
-      [TODO: Escriba el texto del comentario valorativo 13 aquí]
-      Este texto se mostrará en el documento cuando la respuesta sea "si".
-      Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_14:
     question: "Rentabilidad utilizada ponderando la rentabilidad de varios años"
-    text: |
-      [TODO: Escriba el texto del comentario valorativo 14 aquí]
-      Este texto se mostrará en el documento cuando la respuesta sea "si".
-      Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_15:
     question: "Servicios intragrupo benefit test"
-    text: |
-      [TODO: Escriba el texto del comentario valorativo 15 aquí]
-      Este texto se mostrará en el documento cuando la respuesta sea "si".
-      Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_16:
     question: "Situación de pérdidas de la compañía"
-    text: |
-      [TODO: Escriba el texto del comentario valorativo 16 aquí]
-      Este texto se mostrará en el documento cuando la respuesta sea "si".
-      Puede incluir múltiples líneas de texto según sea necesario.
-

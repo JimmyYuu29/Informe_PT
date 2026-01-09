@@ -4,6 +4,29 @@ All notable changes to the Informe PT project are documented in this file.
 
 ---
 
+## [v2.5] - 2026-01-09
+
+### Added
+- **Word Text Extractor Module** (`modules/word_text_extractor.py`): New module to extract formatted comentarios valorativos from Word document library
+  - Preserves formatting (bold, italic, bullet lists) using docxtpl RichText
+  - Caches extracted texts for performance optimization
+  - Provides both RichText (for document generation) and plain text (for UI preview)
+
+### Changed
+- **Comentarios Valorativos**: Now extracted from `config/Text_comentario valorativo.docx` instead of YAML
+  - Text content delimited by `{{COMENTARIO_TEXTO_i_START}}` and `{{COMENTARIO_TEXTO_i_END}}` markers
+  - YAML config (`comentarios_valorativos.yaml`) now only contains questions/titles
+  - Supports 16 conditional evaluative comments
+- Updated `modules/comentarios_valorativos.py` to use Word text extraction
+- Updated plugin version to 1.2.0
+
+### Technical
+- RichText objects preserve Word formatting (bold, italic, bullets) in generated documents
+- Text library loaded once per session (cached) for optimal I/O performance
+- UI preview continues to show first 3 lines of plain text
+
+---
+
 ## [v2.4] - 2026-01-08
 
 ### Fixed
@@ -51,7 +74,7 @@ All notable changes to the Informe PT project are documented in this file.
   - Peso OOVV sobre INCN (automatically calculated)
   - Peso OOVV sobre total costes (automatically calculated)
 - New `valoracion_oovv` text field for peso-based valuation commentary
-- Comentarios Valorativos section with 17 conditional si/no toggles
+- Comentarios Valorativos section with 16 conditional si/no toggles
 - Text preview feature for comentarios valorativos (shows first 3 lines when "si" selected)
 - New `comentarios_valorativos.yaml` configuration file
 - New `comentarios_valorativos.py` module for processing logic
