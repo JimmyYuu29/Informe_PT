@@ -64,8 +64,11 @@ class DocxRenderer:
         Returns:
             tuple: (output_path, evaluation_traces)
         """
-        # Build context
-        context = self.context_builder.build_context(data)
+        # Load template first (needed for Subdoc creation in context building)
+        doc = DocxTemplate(str(self.template_path))
+
+        # Build context with template for Subdoc support
+        context = self.context_builder.build_context(data, doc)
 
         # Evaluate rules
         visibility, traces = self.rule_engine.evaluate_all_rules(data)
@@ -77,8 +80,7 @@ class DocxRenderer:
         # Get enabled services
         context["enabled_services"] = self.rule_engine.get_enabled_services(data)
 
-        # Load and render template
-        doc = DocxTemplate(str(self.template_path))
+        # Render template with context
         doc.render(context)
 
         # Apply cell colors if requested
