@@ -14,120 +14,114 @@
 comentarios_valorativos:
 
   comentario_valorativo_1:
-    question: "[TODO: Escriba la pregunta 1 aquí]"
+    question: "Comentario sentencia Cashpooling"
     text: |
       [TODO: Escriba el texto del comentario valorativo 1 aquí]
       Este texto se mostrará en el documento cuando la respuesta sea "si".
       Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_2:
-    question: "[TODO: Escriba la pregunta 2 aquí]"
+    question: "Comentarios Idioma distinto al inglés y/o Español"
     text: |
       [TODO: Escriba el texto del comentario valorativo 2 aquí]
       Este texto se mostrará en el documento cuando la respuesta sea "si".
       Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_3:
-    question: "[TODO: Escriba la pregunta 3 aquí]"
+    question: "Diferencias 232, CCAA y Local File"
     text: |
       [TODO: Escriba el texto del comentario valorativo 3 aquí]
       Este texto se mostrará en el documento cuando la respuesta sea "si".
       Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_4:
-    question: "[TODO: Escriba la pregunta 4 aquí]"
+    question: "Documentación en formato borrador"
     text: |
       [TODO: Escriba el texto del comentario valorativo 4 aquí]
       Este texto se mostrará en el documento cuando la respuesta sea "si".
       Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_5:
-    question: "[TODO: Escriba la pregunta 5 aquí]"
+    question: "Error en los filtros de independencia aplicados"
     text: |
       [TODO: Escriba el texto del comentario valorativo 5 aquí]
       Este texto se mostrará en el documento cuando la respuesta sea "si".
       Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_6:
-    question: "[TODO: Escriba la pregunta 6 aquí]"
+    question: "Error en los filtros de Independencia aplicados accionistas"
     text: |
       [TODO: Escriba el texto del comentario valorativo 6 aquí]
       Este texto se mostrará en el documento cuando la respuesta sea "si".
       Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_7:
-    question: "[TODO: Escriba la pregunta 7 aquí]"
+    question: "Información financiera de comparables no actualizada"
     text: |
       [TODO: Escriba el texto del comentario valorativo 7 aquí]
       Este texto se mostrará en el documento cuando la respuesta sea "si".
       Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_8:
-    question: "[TODO: Escriba la pregunta 8 aquí]"
+    question: "No acceso a la estrategia de búsqueda utilizada"
     text: |
       [TODO: Escriba el texto del comentario valorativo 8 aquí]
       Este texto se mostrará en el documento cuando la respuesta sea "si".
       Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_9:
-    question: "[TODO: Escriba la pregunta 9 aquí]"
+    question: "No justificación del método seleccionado en la documentación"
     text: |
       [TODO: Escriba el texto del comentario valorativo 9 aquí]
       Este texto se mostrará en el documento cuando la respuesta sea "si".
       Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_10:
-    question: "[TODO: Escriba la pregunta 10 aquí]"
+    question: "Pago de royalty en situación de perdidas"
     text: |
       [TODO: Escriba el texto del comentario valorativo 10 aquí]
       Este texto se mostrará en el documento cuando la respuesta sea "si".
       Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_11:
-    question: "[TODO: Escriba la pregunta 11 aquí]"
+    question: "PLI incorrecto o mal aplicado"
     text: |
       [TODO: Escriba el texto del comentario valorativo 11 aquí]
       Este texto se mostrará en el documento cuando la respuesta sea "si".
       Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_12:
-    question: "[TODO: Escriba la pregunta 12 aquí]"
+    question: "Preparación de la documentación de manera contemporánea"
     text: |
       [TODO: Escriba el texto del comentario valorativo 12 aquí]
       Este texto se mostrará en el documento cuando la respuesta sea "si".
       Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_13:
-    question: "[TODO: Escriba la pregunta 13 aquí]"
+    question: "Rangos de mercado demasiado amplios"
     text: |
       [TODO: Escriba el texto del comentario valorativo 13 aquí]
       Este texto se mostrará en el documento cuando la respuesta sea "si".
       Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_14:
-    question: "[TODO: Escriba la pregunta 14 aquí]"
+    question: "Rentabilidad utilizada ponderando la rentabilidad de varios años"
     text: |
       [TODO: Escriba el texto del comentario valorativo 14 aquí]
       Este texto se mostrará en el documento cuando la respuesta sea "si".
       Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_15:
-    question: "[TODO: Escriba la pregunta 15 aquí]"
+    question: "Servicios intragrupo benefit test"
     text: |
       [TODO: Escriba el texto del comentario valorativo 15 aquí]
       Este texto se mostrará en el documento cuando la respuesta sea "si".
       Puede incluir múltiples líneas de texto según sea necesario.
 
   comentario_valorativo_16:
-    question: "[TODO: Escriba la pregunta 16 aquí]"
+    question: "Situación de pérdidas de la compañía"
     text: |
       [TODO: Escriba el texto del comentario valorativo 16 aquí]
       Este texto se mostrará en el documento cuando la respuesta sea "si".
       Puede incluir múltiples líneas de texto según sea necesario.
 
-  comentario_valorativo_17:
-    question: "[TODO: Escriba la pregunta 17 aquí]"
-    text: |
-      [TODO: Escriba el texto del comentario valorativo 17 aquí]
-      Este texto se mostrará en el documento cuando la respuesta sea "si".
-      Puede incluir múltiples líneas de texto según sea necesario.
