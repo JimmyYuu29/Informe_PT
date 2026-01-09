@@ -3,7 +3,7 @@
 # Generated: 2025-12-31 | Step 2 - YAML Pack Generation
 
 plugin_id: pt_review
-version: "1.2.0"
+version: "1.3.0"
 name: "Transfer Pricing Review Report"
 name_es: "Informe de Revisión de Precios de Transferencia"
 description: |

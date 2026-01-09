@@ -4,6 +4,25 @@ All notable changes to the Informe PT project are documented in this file.
 
 ---
 
+## [v2.6] - 2026-01-09
+
+### Changed
+- **Word Subdoc Formatting**: Replaced RichText with Subdoc for comentarios valorativos
+  - Full Word paragraph formatting now preserved (indentation, list numbering, paragraph spacing)
+  - Empty paragraphs/spacing between titles and body text maintained
+  - Deep copy of paragraph XML elements ensures exact formatting replication
+
+### Technical
+- New `create_comentarios_subdocs(tpl: DocxTemplate)` function in `word_text_extractor.py`
+- Cached paragraph elements for performance (Subdocs created fresh per render)
+- API change: `build_comentarios_context(data, defs)` → `build_comentarios_context(data, defs, tpl)`
+- `context_builder.build_context(data)` → `build_context(data, tpl)` with optional template
+- Template loaded before context building in `renderer_docx.py`
+- Backwards compatible: falls back to RichText if no template provided
+- Updated plugin version to 1.3.0
+
+---
+
 ## [v2.5] - 2026-01-09
 
 ### Added

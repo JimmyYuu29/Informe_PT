@@ -5,7 +5,16 @@ Context Builder - Build rendering context from input data and derived fields.
 from datetime import date
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Any, Optional
-from docxtpl import RichText
+from docxtpl import DocxTemplate, RichText
+
+# Subdoc requires docxcompose which may not always be available
+try:
+    from docxtpl.subdoc import Subdoc
+
+    SUBDOC_AVAILABLE = True
+except ImportError:
+    Subdoc = None  # type: ignore
+    SUBDOC_AVAILABLE = False
 from .plugin_loader import PluginPack
 from .comentarios_valorativos import build_comentarios_context
 
@@ -185,6 +194,10 @@ def sanitize_template_value(value: Any) -> Any:
         return value
     if isinstance(value, RichText):
         # RichText objects should be passed through unchanged
+        return value
+    # Check for Subdoc-like objects (has subdocx attribute)
+    if hasattr(value, "subdocx"):
+        # Subdoc objects should be passed through unchanged
         return value
     if isinstance(value, list):
         return [sanitize_template_value(v) for v in value]
@@ -436,12 +449,15 @@ class ContextBuilder:
         self.plugin = plugin
         self.formatting = plugin.formatting
 
-    def build_context(self, data: dict) -> dict:
+    def build_context(
+        self, data: dict, tpl: Optional[DocxTemplate] = None
+    ) -> dict:
         """
         Build the complete rendering context.
 
         Args:
             data: Input data dictionary.
+            tpl: Optional DocxTemplate for creating Subdocs with full formatting.
 
         Returns:
             Context dictionary for template rendering.
@@ -522,8 +538,9 @@ class ContextBuilder:
 
         # Process comentarios valorativos
         # This adds texto for each selected comentario and a list of selected items
+        # When tpl is provided, uses Subdoc for full formatting preservation
         comentarios_defs = self.plugin.get_comentarios_valorativos()
-        comentarios_context = build_comentarios_context(data, comentarios_defs)
+        comentarios_context = build_comentarios_context(data, comentarios_defs, tpl)
         context.update(comentarios_context)
 
         # Sanitize all values to ensure proper template insertion

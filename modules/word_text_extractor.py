@@ -5,13 +5,24 @@ Word Text Extractor - Extract formatted text from Word document text library.
 This module extracts comentarios valorativos from a Word document using
 markers like {{COMENTARIO_TEXTO_i_START}} and {{COMENTARIO_TEXTO_i_END}}.
 
-It preserves formatting (bold, italic, bullets) using docxtpl RichText.
+It preserves formatting using docxtpl Subdoc for full paragraph formatting
+preservation (indentation, list numbering, paragraph spacing).
 """
+from copy import deepcopy
 from enum import Enum
 from pathlib import Path
 from typing import Optional
 from docx import Document
-from docxtpl import RichText
+from docxtpl import DocxTemplate, RichText
+
+# Subdoc requires docxcompose which may not always be available
+try:
+    from docxtpl.subdoc import Subdoc
+
+    SUBDOC_AVAILABLE = True
+except ImportError:
+    Subdoc = None  # type: ignore
+    SUBDOC_AVAILABLE = False
 
 
 # Path to the text library document
@@ -24,6 +35,10 @@ NUM_COMENTARIOS = 16
 # Cache for extracted texts (loaded once per session)
 _cached_comentarios: Optional[dict] = None
 _cached_plain_texts: Optional[dict] = None
+# Cache for paragraph elements (used to create Subdocs)
+_cached_paragraphs: Optional[dict] = None
+# Cache the source document for deep copying paragraph elements
+_cached_source_doc: Optional[Document] = None
 
 
 class NumberingType(Enum):
@@ -273,14 +288,16 @@ def _extract_paragraph_as_plain_text(
     return prefix + para.text
 
 
-def _load_comentarios_from_word() -> tuple[dict, dict]:
+def _load_comentarios_from_word() -> tuple[dict, dict, dict, Document]:
     """
     Load all comentarios from the Word text library.
 
     Returns:
-        Tuple of (richtext_dict, plaintext_dict) where:
+        Tuple of (richtext_dict, plaintext_dict, paragraphs_dict, source_doc) where:
         - richtext_dict: {1: RichText, 2: RichText, ...}
         - plaintext_dict: {1: "plain text", 2: "plain text", ...}
+        - paragraphs_dict: {1: [para1, para2, ...], 2: [...], ...} (paragraph objects)
+        - source_doc: The source Document object for paragraph copying
     """
     if not TEXT_LIBRARY_PATH.exists():
         raise FileNotFoundError(f"Text library not found: {TEXT_LIBRARY_PATH}")
@@ -289,6 +306,7 @@ def _load_comentarios_from_word() -> tuple[dict, dict]:
 
     richtext_results = {}
     plaintext_results = {}
+    paragraphs_results = {}
 
     for i in range(1, NUM_COMENTARIOS + 1):
         start_marker = f"{{{{COMENTARIO_TEXTO_{i}_START}}}}"
@@ -300,6 +318,7 @@ def _load_comentarios_from_word() -> tuple[dict, dict]:
         in_section = False
         rt = RichText()
         plain_lines = []
+        section_paragraphs = []
         is_first = True
 
         for para in doc.paragraphs:
@@ -314,6 +333,9 @@ def _load_comentarios_from_word() -> tuple[dict, dict]:
                 break
 
             if in_section:
+                # Store the paragraph object for Subdoc creation
+                section_paragraphs.append(para)
+
                 # Keep empty paragraphs to preserve line breaks
                 # but still extract content from non-empty ones
                 if text:
@@ -341,8 +363,22 @@ def _load_comentarios_from_word() -> tuple[dict, dict]:
 
         richtext_results[i] = rt
         plaintext_results[i] = "\n".join(plain_lines)
+        paragraphs_results[i] = section_paragraphs
 
-    return richtext_results, plaintext_results
+    return richtext_results, plaintext_results, paragraphs_results, doc
+
+
+def _ensure_cache_loaded() -> None:
+    """Ensure the comentarios cache is loaded."""
+    global _cached_comentarios, _cached_plain_texts, _cached_paragraphs, _cached_source_doc
+
+    if _cached_comentarios is None:
+        (
+            _cached_comentarios,
+            _cached_plain_texts,
+            _cached_paragraphs,
+            _cached_source_doc,
+        ) = _load_comentarios_from_word()
 
 
 def get_comentarios_richtext() -> dict:
@@ -354,11 +390,7 @@ def get_comentarios_richtext() -> dict:
     Returns:
         Dictionary mapping comentario index (1-16) to RichText object.
     """
-    global _cached_comentarios, _cached_plain_texts
-
-    if _cached_comentarios is None:
-        _cached_comentarios, _cached_plain_texts = _load_comentarios_from_word()
-
+    _ensure_cache_loaded()
     return _cached_comentarios
 
 
@@ -371,12 +403,88 @@ def get_comentarios_plain_text() -> dict:
     Returns:
         Dictionary mapping comentario index (1-16) to plain text string.
     """
-    global _cached_comentarios, _cached_plain_texts
-
-    if _cached_plain_texts is None:
-        _cached_comentarios, _cached_plain_texts = _load_comentarios_from_word()
-
+    _ensure_cache_loaded()
     return _cached_plain_texts
+
+
+def get_comentarios_paragraphs() -> dict:
+    """
+    Get all comentarios as lists of paragraph objects.
+
+    Uses caching - loads from Word only once per session.
+
+    Returns:
+        Dictionary mapping comentario index (1-16) to list of paragraph objects.
+    """
+    _ensure_cache_loaded()
+    return _cached_paragraphs
+
+
+def _create_subdoc_from_paragraphs(
+    tpl: DocxTemplate, paragraphs: list
+) -> Subdoc:
+    """
+    Create a Subdoc containing the specified paragraphs with full formatting.
+
+    This preserves all Word paragraph formatting including:
+    - Paragraph indentation and spacing
+    - List numbering (bullets, decimal)
+    - Text formatting (bold, italic, underline)
+    - Empty paragraphs for spacing
+
+    Args:
+        tpl: DocxTemplate object to create the Subdoc from.
+        paragraphs: List of python-docx Paragraph objects to copy.
+
+    Returns:
+        Subdoc object containing the copied paragraphs.
+    """
+    subdoc = tpl.new_subdoc()
+
+    for para in paragraphs:
+        # Deep copy the paragraph XML element to preserve all formatting
+        new_para = deepcopy(para._element)
+        subdoc.subdocx.element.body.append(new_para)
+
+    return subdoc
+
+
+def create_comentarios_subdocs(tpl: DocxTemplate) -> Optional[dict]:
+    """
+    Create Subdoc objects for all comentarios.
+
+    This function creates fresh Subdoc objects each time it's called,
+    as Subdocs cannot be reused across different template renders.
+    The underlying paragraph data is cached for performance.
+
+    Args:
+        tpl: DocxTemplate object to create Subdocs from.
+
+    Returns:
+        Dictionary mapping comentario index (1-16) to Subdoc object,
+        or None if docxcompose is not available.
+    """
+    if not SUBDOC_AVAILABLE:
+        # docxcompose not installed, cannot create Subdocs
+        return None
+
+    _ensure_cache_loaded()
+
+    subdocs = {}
+    for i in range(1, NUM_COMENTARIOS + 1):
+        paragraphs = _cached_paragraphs.get(i, [])
+        if paragraphs:
+            subdocs[i] = _create_subdoc_from_paragraphs(tpl, paragraphs)
+        else:
+            # Empty Subdoc for comentarios with no content
+            subdocs[i] = tpl.new_subdoc()
+
+    return subdocs
+
+
+def is_subdoc_available() -> bool:
+    """Check if Subdoc functionality is available (docxcompose installed)."""
+    return SUBDOC_AVAILABLE
 
 
 def get_comentario_richtext(index: int) -> RichText:
@@ -409,9 +517,11 @@ def get_comentario_plain_text(index: int) -> str:
 
 def clear_cache() -> None:
     """Clear the cached comentarios (useful for testing or reloading)."""
-    global _cached_comentarios, _cached_plain_texts
+    global _cached_comentarios, _cached_plain_texts, _cached_paragraphs, _cached_source_doc
     _cached_comentarios = None
     _cached_plain_texts = None
+    _cached_paragraphs = None
+    _cached_source_doc = None
 
 
 def get_comentario_title(index: int) -> str:

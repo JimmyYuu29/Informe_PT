@@ -6,16 +6,20 @@ This module handles:
 - Loading comentarios valorativos definitions from YAML (questions only)
 - Extracting formatted text from Word document library
 - Building text previews (first 3 lines) for UI display
-- Building context data for document generation with RichText formatting
+- Building context data for document generation with Subdoc formatting
+
+Uses Subdoc instead of RichText to preserve full Word paragraph formatting
+including indentation, list numbering, and paragraph spacing.
 """
-from typing import Any
-from docxtpl import RichText
+from typing import Any, Optional
+from docxtpl import DocxTemplate, RichText
 
 from .word_text_extractor import (
     get_comentarios_plain_text,
     get_comentarios_richtext,
     get_comentario_plain_text,
     get_comentario_richtext,
+    create_comentarios_subdocs,
     NUM_COMENTARIOS,
 )
 
@@ -90,48 +94,84 @@ def get_comentarios_for_ui(comentarios_defs: dict) -> list[dict]:
     return result
 
 
-def build_comentarios_context(data: dict, comentarios_defs: dict) -> dict:
+def build_comentarios_context(
+    data: dict,
+    comentarios_defs: dict,
+    tpl: Optional[DocxTemplate] = None,
+) -> dict:
     """
     Build context data for comentarios valorativos in document generation.
 
     This function:
     1. Checks each comentario_valorativo_i field value
-    2. If "si", includes the corresponding RichText in the context
+    2. If "si", includes the corresponding Subdoc (or RichText fallback) in the context
     3. Builds a list of selected comentarios for template iteration
+
+    When a DocxTemplate is provided, uses Subdoc for full formatting preservation.
+    Otherwise falls back to RichText for backwards compatibility.
 
     Args:
         data: Input data with comentario_valorativo_i field values.
         comentarios_defs: Dictionary of comentario definitions from YAML.
+        tpl: Optional DocxTemplate object for creating Subdocs with full formatting.
 
     Returns:
         Dictionary with:
         - comentarios_valorativos_selected: list of selected comentarios with text
-        - comentario_texto_i: RichText for each comentario (empty if not selected)
+        - comentario_texto_i: Subdoc/RichText for each comentario (empty if not selected)
     """
     context = {}
     selected = []
 
-    # Get RichText objects from Word document
-    richtext_dict = get_comentarios_richtext()
+    # Get plain texts for reference and UI
     plain_texts = get_comentarios_plain_text()
 
-    for i in range(1, NUM_COMENTARIOS + 1):
-        field_name = f"comentario_valorativo_{i}"
-        texto_field_name = f"comentario_texto_{i}"
+    # Use Subdoc if template is provided and docxcompose is available
+    subdocs_dict = None
+    if tpl is not None:
+        # Try to create Subdoc objects for full formatting preservation
+        subdocs_dict = create_comentarios_subdocs(tpl)
 
-        value = data.get(field_name, "no")
+    if subdocs_dict is not None:
+        # Subdoc available - use for full formatting preservation
+        for i in range(1, NUM_COMENTARIOS + 1):
+            field_name = f"comentario_valorativo_{i}"
+            texto_field_name = f"comentario_texto_{i}"
 
-        if value == "si":
-            # Include the RichText in context for document generation
-            context[texto_field_name] = richtext_dict.get(i, RichText())
-            selected.append({
-                "index": i,
-                "id": field_name,
-                "text": plain_texts.get(i, ""),  # Plain text for reference
-            })
-        else:
-            # Empty RichText for non-selected
-            context[texto_field_name] = RichText()
+            value = data.get(field_name, "no")
+
+            if value == "si":
+                # Include the Subdoc in context for document generation
+                context[texto_field_name] = subdocs_dict.get(i, tpl.new_subdoc())
+                selected.append({
+                    "index": i,
+                    "id": field_name,
+                    "text": plain_texts.get(i, ""),  # Plain text for reference
+                })
+            else:
+                # Empty Subdoc for non-selected
+                context[texto_field_name] = tpl.new_subdoc()
+    else:
+        # Fallback to RichText for backwards compatibility
+        richtext_dict = get_comentarios_richtext()
+
+        for i in range(1, NUM_COMENTARIOS + 1):
+            field_name = f"comentario_valorativo_{i}"
+            texto_field_name = f"comentario_texto_{i}"
+
+            value = data.get(field_name, "no")
+
+            if value == "si":
+                # Include the RichText in context for document generation
+                context[texto_field_name] = richtext_dict.get(i, RichText())
+                selected.append({
+                    "index": i,
+                    "id": field_name,
+                    "text": plain_texts.get(i, ""),  # Plain text for reference
+                })
+            else:
+                # Empty RichText for non-selected
+                context[texto_field_name] = RichText()
 
     context["comentarios_valorativos_selected"] = selected
     context["has_comentarios_valorativos"] = len(selected) > 0
