@@ -7,6 +7,7 @@ markers like {{COMENTARIO_TEXTO_i_START}} and {{COMENTARIO_TEXTO_i_END}}.
 
 It preserves formatting (bold, italic, bullets) using docxtpl RichText.
 """
+from enum import Enum
 from pathlib import Path
 from typing import Optional
 from docx import Document
@@ -25,29 +26,214 @@ _cached_comentarios: Optional[dict] = None
 _cached_plain_texts: Optional[dict] = None
 
 
+class NumberingType(Enum):
+    """Types of paragraph numbering."""
+    NONE = "none"
+    BULLET = "bullet"
+    DECIMAL = "decimal"
+
+
+# Track list counters per numId for proper numbering
+_list_counters: dict = {}
+
+
+def _get_numbering_type(para, doc) -> NumberingType:
+    """
+    Determine the numbering type of a paragraph.
+
+    Args:
+        para: python-docx Paragraph object.
+        doc: python-docx Document object (needed for numbering definitions).
+
+    Returns:
+        NumberingType enum value (NONE, BULLET, or DECIMAL).
+    """
+    # Check if paragraph has numbering properties
+    if para._element.pPr is None or para._element.pPr.numPr is None:
+        return NumberingType.NONE
+
+    num_pr = para._element.pPr.numPr
+
+    # Get numId (numbering definition ID)
+    if num_pr.numId is None:
+        return NumberingType.NONE
+
+    num_id = num_pr.numId.val
+    if num_id == 0:
+        return NumberingType.NONE
+
+    # Get indentation level (default to 0)
+    ilvl = 0
+    if num_pr.ilvl is not None:
+        ilvl = num_pr.ilvl.val
+
+    # Try to get numbering format from document's numbering part
+    try:
+        numbering_part = doc.part.numbering_part
+        if numbering_part is None:
+            return NumberingType.BULLET  # Default to bullet if no definitions
+
+        # Access the numbering XML element
+        numbering_elm = numbering_part._element
+
+        # Find the abstract numbering definition
+        # First, find the num element with matching numId
+        num_elm = None
+        for num in numbering_elm.findall(
+            './/{http://schemas.openxmlformats.org/wordprocessingml/2006/main}num'
+        ):
+            if num.get(
+                '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}numId'
+            ) == str(num_id):
+                num_elm = num
+                break
+
+        if num_elm is None:
+            return NumberingType.BULLET
+
+        # Get the abstractNumId
+        abstract_num_id_elm = num_elm.find(
+            './/{http://schemas.openxmlformats.org/wordprocessingml/2006/main}abstractNumId'
+        )
+        if abstract_num_id_elm is None:
+            return NumberingType.BULLET
+
+        abstract_num_id = abstract_num_id_elm.get(
+            '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}val'
+        )
+
+        # Find the abstract numbering definition
+        abstract_num = None
+        for an in numbering_elm.findall(
+            './/{http://schemas.openxmlformats.org/wordprocessingml/2006/main}abstractNum'
+        ):
+            if an.get(
+                '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}abstractNumId'
+            ) == abstract_num_id:
+                abstract_num = an
+                break
+
+        if abstract_num is None:
+            return NumberingType.BULLET
+
+        # Find the level definition for our ilvl
+        for lvl in abstract_num.findall(
+            './/{http://schemas.openxmlformats.org/wordprocessingml/2006/main}lvl'
+        ):
+            if lvl.get(
+                '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}ilvl'
+            ) == str(ilvl):
+                # Get the numFmt element
+                num_fmt = lvl.find(
+                    './/{http://schemas.openxmlformats.org/wordprocessingml/2006/main}numFmt'
+                )
+                if num_fmt is not None:
+                    fmt_val = num_fmt.get(
+                        '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}val'
+                    )
+                    # Check if it's a decimal/numeric format
+                    if fmt_val in ('decimal', 'decimalZero', 'upperRoman',
+                                   'lowerRoman', 'upperLetter', 'lowerLetter',
+                                   'ordinal', 'cardinalText', 'ordinalText'):
+                        return NumberingType.DECIMAL
+                    else:
+                        return NumberingType.BULLET
+                break
+
+        return NumberingType.BULLET
+
+    except Exception:
+        # If anything goes wrong, default to bullet
+        return NumberingType.BULLET
+
+
+def _get_list_number(para, doc) -> int:
+    """
+    Get the list number for a decimal-numbered paragraph.
+
+    Uses internal counters to track numbering across paragraphs.
+
+    Args:
+        para: python-docx Paragraph object.
+        doc: python-docx Document object.
+
+    Returns:
+        The list number (1, 2, 3, etc.).
+    """
+    global _list_counters
+
+    if para._element.pPr is None or para._element.pPr.numPr is None:
+        return 1
+
+    num_pr = para._element.pPr.numPr
+    if num_pr.numId is None:
+        return 1
+
+    num_id = num_pr.numId.val
+    ilvl = 0
+    if num_pr.ilvl is not None:
+        ilvl = num_pr.ilvl.val
+
+    # Create a unique key for this numbering list and level
+    key = (num_id, ilvl)
+
+    # Increment and return the counter
+    if key not in _list_counters:
+        _list_counters[key] = 1
+    else:
+        _list_counters[key] += 1
+
+    return _list_counters[key]
+
+
+def _reset_list_counters() -> None:
+    """Reset all list counters (call before processing a new document)."""
+    global _list_counters
+    _list_counters = {}
+
+
 def _has_bullet(para) -> bool:
-    """Check if a paragraph has bullet/numbering."""
+    """Check if a paragraph has bullet/numbering (legacy compatibility)."""
     return (
         para._element.pPr is not None
         and para._element.pPr.numPr is not None
     )
 
 
-def _extract_paragraph_as_richtext(para, rt: RichText, is_first: bool = False) -> None:
+def _extract_paragraph_as_richtext(
+    para,
+    rt: RichText,
+    doc,
+    is_first: bool = False,
+    num_type: NumberingType = None,
+    list_num: Optional[int] = None,
+) -> None:
     """
     Extract a paragraph and append it to RichText object.
 
     Args:
         para: python-docx Paragraph object.
         rt: RichText object to append to.
+        doc: python-docx Document object (needed for numbering detection).
         is_first: If True, don't add paragraph break before.
+        num_type: Pre-computed numbering type (if None, will be detected).
+        list_num: Pre-computed list number for decimal lists.
     """
     # Add paragraph break if not first paragraph
     if not is_first:
         rt.add("\a")  # Paragraph break in Word
 
-    # Add bullet prefix if paragraph has numbering
-    if _has_bullet(para):
+    # Get numbering type if not provided
+    if num_type is None:
+        num_type = _get_numbering_type(para, doc)
+
+    # Add appropriate prefix based on numbering type
+    if num_type == NumberingType.DECIMAL:
+        # For decimal lists, use the provided or computed number
+        if list_num is None:
+            list_num = _get_list_number(para, doc)
+        rt.add(f"\t{list_num}.\t")
+    elif num_type == NumberingType.BULLET:
         rt.add("\t•\t")
 
     # Add runs with their formatting
@@ -62,17 +248,28 @@ def _extract_paragraph_as_richtext(para, rt: RichText, is_first: bool = False) -
             )
 
 
-def _extract_paragraph_as_plain_text(para) -> str:
+def _extract_paragraph_as_plain_text(
+    para,
+    num_type: NumberingType = None,
+    list_num: Optional[int] = None,
+) -> str:
     """
-    Extract a paragraph as plain text with bullet prefix.
+    Extract a paragraph as plain text with appropriate list prefix.
 
     Args:
         para: python-docx Paragraph object.
+        num_type: Pre-computed numbering type.
+        list_num: Pre-computed list number for decimal lists.
 
     Returns:
         Plain text string.
     """
-    prefix = "• " if _has_bullet(para) else ""
+    if num_type == NumberingType.DECIMAL:
+        prefix = f"{list_num}. " if list_num else "1. "
+    elif num_type == NumberingType.BULLET:
+        prefix = "• "
+    else:
+        prefix = ""
     return prefix + para.text
 
 
@@ -97,6 +294,9 @@ def _load_comentarios_from_word() -> tuple[dict, dict]:
         start_marker = f"{{{{COMENTARIO_TEXTO_{i}_START}}}}"
         end_marker = f"{{{{COMENTARIO_TEXTO_{i}_END}}}}"
 
+        # Reset list counters for each comentario section
+        _reset_list_counters()
+
         in_section = False
         rt = RichText()
         plain_lines = []
@@ -113,13 +313,31 @@ def _load_comentarios_from_word() -> tuple[dict, dict]:
                 in_section = False
                 break
 
-            if in_section and text:
-                # Extract as RichText
-                _extract_paragraph_as_richtext(para, rt, is_first)
-                is_first = False
+            if in_section:
+                # Keep empty paragraphs to preserve line breaks
+                # but still extract content from non-empty ones
+                if text:
+                    # Get numbering info once to avoid double-counting
+                    num_type = _get_numbering_type(para, doc)
+                    list_num = None
+                    if num_type == NumberingType.DECIMAL:
+                        list_num = _get_list_number(para, doc)
 
-                # Extract as plain text
-                plain_lines.append(_extract_paragraph_as_plain_text(para))
+                    # Extract as RichText (with formatting and numbering)
+                    _extract_paragraph_as_richtext(
+                        para, rt, doc, is_first, num_type, list_num
+                    )
+                    # Extract as plain text
+                    plain_lines.append(
+                        _extract_paragraph_as_plain_text(para, num_type, list_num)
+                    )
+                else:
+                    # Empty paragraph - add line break for spacing
+                    if not is_first:
+                        rt.add("\a")  # Paragraph break in Word
+                    plain_lines.append("")
+
+                is_first = False
 
         richtext_results[i] = rt
         plaintext_results[i] = "\n".join(plain_lines)
