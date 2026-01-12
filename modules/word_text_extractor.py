@@ -353,6 +353,12 @@ def _load_comentarios_from_word() -> tuple[dict, dict, dict, Document]:
                     plain_lines.append(
                         _extract_paragraph_as_plain_text(para, num_type, list_num)
                     )
+
+                    # Add extra line break after the first paragraph (title)
+                    # to ensure visual separation from body text in RichText mode
+                    if is_first:
+                        rt.add("\a")  # Extra paragraph break after title
+                        plain_lines.append("")  # Blank line in plain text
                 else:
                     # Empty paragraph - add line break for spacing
                     if not is_first:
@@ -432,6 +438,9 @@ def _create_subdoc_from_paragraphs(
     - Text formatting (bold, italic, underline)
     - Empty paragraphs for spacing
 
+    The first paragraph (typically the title) gets additional spacing after
+    to ensure visual separation from the body text.
+
     Args:
         tpl: DocxTemplate object to create the Subdoc from.
         paragraphs: List of python-docx Paragraph objects to copy.
@@ -441,9 +450,32 @@ def _create_subdoc_from_paragraphs(
     """
     subdoc = tpl.new_subdoc()
 
-    for para in paragraphs:
+    # Word XML namespace
+    w_ns = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+
+    for idx, para in enumerate(paragraphs):
         # Deep copy the paragraph XML element to preserve all formatting
         new_para = deepcopy(para._element)
+
+        # Add spacing after the first paragraph (title) to separate from body
+        if idx == 0 and para.text.strip():
+            # Get or create paragraph properties
+            pPr = new_para.find(f"{w_ns}pPr")
+            if pPr is None:
+                from lxml import etree
+                pPr = etree.SubElement(new_para, f"{w_ns}pPr")
+                # Insert pPr at the beginning of the paragraph
+                new_para.insert(0, pPr)
+
+            # Get or create spacing element
+            spacing = pPr.find(f"{w_ns}spacing")
+            if spacing is None:
+                from lxml import etree
+                spacing = etree.SubElement(pPr, f"{w_ns}spacing")
+
+            # Set spacing after (200 twips = ~10pt, provides visual separation)
+            spacing.set(f"{w_ns}after", "200")
+
         subdoc.subdocx.element.body.append(new_para)
 
     return subdoc
