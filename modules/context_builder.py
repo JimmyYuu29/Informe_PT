@@ -136,22 +136,23 @@ def format_date_dashed_spanish(d: date) -> str:
 
 
 def format_currency_eur(value: Any) -> str:
-    """Format a currency value in EUR format: '1.500.000 €'."""
+    """Format a currency value in Spanish format with 2 decimals: '1.500.000,00'."""
     if value is None:
         return ""
     try:
         num = Decimal(str(value))
-        # Round to whole number
-        num = num.quantize(Decimal("1"), rounding=ROUND_HALF_UP)
-        # Format with dots as thousand separators
-        formatted = f"{num:,.0f}".replace(",", ".")
-        return f"{formatted} €"
+        # Round to 2 decimal places
+        num = num.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        # Format with commas as thousands separators, then swap for Spanish format
+        formatted = f"{num:,.2f}"
+        formatted = formatted.replace(",", "X").replace(".", ",").replace("X", ".")
+        return formatted
     except Exception:
         return str(value)
 
 
 def format_percentage(value: Any, precision: int = 2) -> str:
-    """Format a percentage value: '15,00 %'."""
+    """Format a percentage value: '15,00'."""
     if value is None:
         return ""
     try:
@@ -160,7 +161,7 @@ def format_percentage(value: Any, precision: int = 2) -> str:
         num = num.quantize(Decimal(pattern), rounding=ROUND_HALF_UP)
         # Replace decimal point with comma for Spanish format
         formatted = str(num).replace(".", ",")
-        return f"{formatted} %"
+        return formatted
     except Exception:
         return str(value)
 
@@ -197,35 +198,31 @@ def format_spanish_number(value: Any, precision: int = 2) -> str:
         return str(value)
 
 
-def format_spanish_currency(value: Any, precision: int = 0) -> str:
+def format_spanish_currency(value: Any, precision: int = 2) -> str:
     """
-    Format a currency value in Spanish EUR format.
-
+    Format a currency value in Spanish format (no symbol).
+ 
     Examples:
-        1500000 -> "1.500.000 €"
-        1234.56 -> "1.235 €" (rounded to 0 decimals)
-        1234.56 with precision=2 -> "1.234,56 €"
-
+        1500000 -> "1.500.000,00"
+        1234.56 -> "1.234,56"
+        100 -> "100,00"
+ 
     Args:
         value: The numeric value to format.
-        precision: Number of decimal places (default: 0).
-
+        precision: Number of decimal places (default: 2).
+ 
     Returns:
-        Formatted string in Spanish currency format with € symbol.
+        Formatted string in Spanish number format without € symbol.
     """
     if value is None:
         return ""
     try:
         num = Decimal(str(value))
-        if precision == 0:
-            num = num.quantize(Decimal("1"), rounding=ROUND_HALF_UP)
-            formatted = f"{num:,.0f}".replace(",", ".")
-        else:
-            pattern = f"1.{'0' * precision}"
-            num = num.quantize(Decimal(pattern), rounding=ROUND_HALF_UP)
-            formatted = f"{num:,.{precision}f}"
-            formatted = formatted.replace(",", "X").replace(".", ",").replace("X", ".")
-        return f"{formatted} €"
+        pattern = f"1.{'0' * precision}"
+        num = num.quantize(Decimal(pattern), rounding=ROUND_HALF_UP)
+        formatted = f"{num:,.{precision}f}"
+        formatted = formatted.replace(",", "X").replace(".", ",").replace("X", ".")
+        return formatted
     except Exception:
         return str(value)
 
