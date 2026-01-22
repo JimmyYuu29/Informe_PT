@@ -551,14 +551,14 @@ class ContextBuilder:
             context["servicios_vinculados"] = []
 
         # Format currency fields in servicios_vinculados for document export
-        # This adds _formatted versions of ingreso_entidad and gasto_entidad
+        # Directly overwrite original fields with Spanish currency format
         for servicio in context.get("servicios_vinculados", []):
             for entidad in servicio.get("entidades_vinculadas", []):
                 ingreso = entidad.get("ingreso_entidad", 0)
                 gasto = entidad.get("gasto_entidad", 0)
-                # Add formatted versions in Spanish currency format
-                entidad["ingreso_entidad_formatted"] = format_spanish_currency(ingreso, 2)
-                entidad["gasto_entidad_formatted"] = format_spanish_currency(gasto, 2)
+                # Directly overwrite with Spanish currency format
+                entidad["ingreso_entidad"] = format_spanish_currency(ingreso, 2)
+                entidad["gasto_entidad"] = format_spanish_currency(gasto, 2)
 
         # Build servicios_oovv from servicios_vinculados with analisis enabled
         # This allows users to select which servicios get analyzed
@@ -574,25 +574,19 @@ class ContextBuilder:
                 max_val = analisis.get("max", 0)
 
                 # Add the analisis data as a servicios_oovv entry
-                # Format percentages in Spanish format (comma as decimal separator)
+                # Directly use Spanish formatted values for document export
                 servicios_oovv.append({
                     "enabled": True,
                     "titulo_servicio_oovv": analisis.get("titulo_servicio_oovv", servicio.get("servicio_vinculado", "")),
                     "texto_intro_servicio": analisis.get("texto_intro_servicio", ""),
                     "descripcion_tabla": analisis.get("descripcion_tabla", ""),
                     "metodo": analisis.get("metodo", ""),
-                    # Raw values (for calculations if needed)
-                    "min": min_val,
-                    "lq": lq_val,
-                    "med": med_val,
-                    "uq": uq_val,
-                    "max": max_val,
-                    # Formatted values in Spanish format for document export
-                    "min_formatted": format_spanish_number(min_val, 2),
-                    "lq_formatted": format_spanish_number(lq_val, 2),
-                    "med_formatted": format_spanish_number(med_val, 2),
-                    "uq_formatted": format_spanish_number(uq_val, 2),
-                    "max_formatted": format_spanish_number(max_val, 2),
+                    # Directly use Spanish formatted values
+                    "min": format_spanish_number(min_val, 2),
+                    "lq": format_spanish_number(lq_val, 2),
+                    "med": format_spanish_number(med_val, 2),
+                    "uq": format_spanish_number(uq_val, 2),
+                    "max": format_spanish_number(max_val, 2),
                     "texto_conclusion_servicio": analisis.get("texto_conclusion_servicio", ""),
                 })
         context["servicios_oovv"] = servicios_oovv
@@ -640,7 +634,7 @@ class ContextBuilder:
         return context
 
     def _format_fields(self, context: dict) -> dict:
-        """Apply formatting to fields."""
+        """Apply formatting to fields with Spanish number format."""
         # Format date - using Spanish long format with 'del': "01 de enero del 2025"
         if "fecha_fin_fiscal" in context:
             fecha = context["fecha_fin_fiscal"]
@@ -660,17 +654,17 @@ class ContextBuilder:
                 except Exception:
                     context["fecha_fin_fiscal_formatted"] = fecha
 
-        # Format currency fields
+        # Format currency fields - directly overwrite original fields with Spanish format
         currency_fields = self.formatting.get("currency_formats", {}).get("eur", {}).get("applies_to", [])
         for field in currency_fields:
             if field in context and context[field] is not None:
-                context[f"{field}_formatted"] = format_currency_eur(context[field])
+                context[field] = format_currency_eur(context[field])
 
-        # Format percentage fields
+        # Format percentage fields - directly overwrite original fields with Spanish format
         pct_fields = self.formatting.get("percentage_formats", {}).get("standard", {}).get("applies_to", [])
         for field in pct_fields:
             if field in context and context[field] is not None:
-                context[f"{field}_formatted"] = format_percentage(context[field])
+                context[field] = format_percentage(context[field])
 
         return context
 
