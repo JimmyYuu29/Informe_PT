@@ -58,7 +58,7 @@ class AuthRequest(BaseModel):
 
 
 class AuthResponse(BaseModel):
-    authorized: bool
+    ok: bool
     message: str = ""
 
 
@@ -81,7 +81,8 @@ class PublishResponse(BaseModel):
 
 class RollbackRequest(BaseModel):
     plugin_id: str
-    target_version: str
+    version: str
+    admin_password: str = ""
 
 
 class VersionInfo(BaseModel):
@@ -105,8 +106,8 @@ class VersionInfo(BaseModel):
 async def authenticate(request: AuthRequest):
     """Verify admin password."""
     if request.password == ADMIN_PASSWORD:
-        return AuthResponse(authorized=True, message="Authenticated successfully")
-    return AuthResponse(authorized=False, message="Invalid password")
+        return AuthResponse(ok=True, message="Authenticated successfully")
+    return AuthResponse(ok=False, message="Invalid password")
 
 
 # ============================================================================
@@ -178,8 +179,8 @@ async def publish_template(
     template_name: str = Form("template_final"),
     version_bump: str = Form("patch"),
     author: str = Form(""),
-    change_log: str = Form(...),
-    password: str = Form(...),
+    changelog: str = Form(""),
+    admin_password: str = Form(...),
 ):
     """
     Publish a validated template.
@@ -190,7 +191,7 @@ async def publish_template(
     4. Records in local registry with versioning
     """
     # Auth check
-    if password != ADMIN_PASSWORD:
+    if admin_password != ADMIN_PASSWORD:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid admin password"
@@ -249,7 +250,7 @@ async def publish_template(
             template_name=template_name,
             version=version,
             author=author,
-            change_log=change_log,
+            change_log=changelog,
             sha256=result.sha256,
             variables=result.variables_found,
             validation_status=result.status,
@@ -288,7 +289,7 @@ async def publish_template(
             template_name=template_name,
             version=version,
             author=author,
-            change_log=change_log,
+            change_log=changelog,
             sha256=result.sha256,
             variables=result.variables_found,
             validation_status=result.status,
@@ -341,29 +342,36 @@ async def list_template_versions(plugin_id: str):
 @router.post("/rollback")
 async def rollback_template(request: RollbackRequest):
     """Rollback to a specific template version."""
+    # Auth check
+    if request.admin_password and request.admin_password != ADMIN_PASSWORD:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid admin password"
+        )
+
     registry = TemplateRegistry()
 
     # Check cache exists
     cache_path = registry.get_cached_template_path(
-        request.plugin_id, request.target_version
+        request.plugin_id, request.version
     )
     if not cache_path:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Cached template for v{request.target_version} not found"
+            detail=f"Cached template for v{request.version} not found"
         )
 
-    tv = registry.rollback(request.plugin_id, request.target_version)
+    tv = registry.rollback(request.plugin_id, request.version)
     if not tv:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Version {request.target_version} not found in registry"
+            detail=f"Version {request.version} not found in registry"
         )
 
     return {
         "success": True,
         "plugin_id": request.plugin_id,
-        "active_version": request.target_version,
+        "active_version": request.version,
         "cache_path": tv.cache_path,
     }
 
