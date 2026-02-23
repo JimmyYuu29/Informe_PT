@@ -1958,3 +1958,379 @@ body {
 .currency-input {
     text-align: right;
 }
+
+/* ============================================================================
+   Template Admin Panel
+   ============================================================================ */
+
+.template-admin-panel {
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--gray-100);
+    z-index: 900;
+    overflow-y: auto;
+    padding: var(--spacing-xl) var(--spacing-2xl);
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.ta-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.ta-header {
+    margin-bottom: var(--spacing-xl);
+}
+
+.ta-header h2 {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--primary-blue);
+}
+
+.ta-subtitle {
+    color: var(--gray-600);
+    margin-top: var(--spacing-xs);
+}
+
+/* ── Login Card ── */
+.ta-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 320px;
+}
+
+.ta-login-card {
+    text-align: center;
+    max-width: 420px;
+    width: 100%;
+}
+
+.ta-card-icon {
+    font-size: 3rem;
+    margin-bottom: var(--spacing-md);
+}
+
+.ta-form-row {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.ta-form-row .form-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.ta-error {
+    color: var(--danger);
+    font-size: var(--font-size-sm);
+    margin-top: var(--spacing-sm);
+}
+
+/* ── Tabs ── */
+.ta-tabs {
+    display: flex;
+    gap: var(--spacing-sm);
+    border-bottom: 2px solid var(--gray-200);
+    margin-bottom: var(--spacing-xl);
+}
+
+.ta-tab {
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    margin-bottom: -2px;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    font-family: var(--font-family);
+    color: var(--gray-600);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+}
+
+.ta-tab:hover {
+    color: var(--primary-blue);
+    background: var(--gray-100);
+}
+
+.ta-tab.active {
+    color: var(--primary-blue);
+    border-bottom-color: var(--primary-blue);
+    font-weight: 600;
+}
+
+.ta-logout-tab {
+    margin-left: auto;
+    color: var(--danger);
+}
+
+.ta-logout-tab:hover {
+    color: var(--danger);
+    background: var(--danger-light);
+}
+
+.ta-tab-content {
+    display: none;
+}
+
+.ta-tab-content.active {
+    display: block;
+}
+
+/* ── Cards ── */
+.ta-card {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--spacing-xl);
+}
+
+.ta-card h3 {
+    font-size: var(--font-size-lg);
+    color: var(--primary-blue);
+    margin-bottom: var(--spacing-lg);
+    font-weight: 600;
+}
+
+/* ── 2-column grid ── */
+.ta-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xl);
+    align-items: start;
+}
+
+@media (max-width: 900px) {
+    .ta-grid-2 { grid-template-columns: 1fr; }
+}
+
+/* ── File Drop Zone ── */
+.ta-file-drop {
+    border: 2px dashed var(--gray-300);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-xl);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ta-file-drop:hover,
+.ta-file-drop.drag-over {
+    border-color: var(--primary-blue);
+    background: rgba(0, 51, 102, 0.03);
+}
+
+.ta-file-icon {
+    font-size: 2.5rem;
+    margin-bottom: var(--spacing-sm);
+}
+
+.ta-file-drop p {
+    color: var(--gray-500);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.ta-file-drop.has-file {
+    border-color: var(--success);
+    background: var(--success-light);
+}
+
+.ta-file-drop.has-file p {
+    color: var(--success);
+    font-weight: 500;
+}
+
+/* ── Validation Result ── */
+.ta-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.ta-status-pass {
+    background: var(--success-light);
+    color: var(--success);
+    border: 2px solid var(--success);
+}
+
+.ta-status-warn {
+    background: var(--warning-light);
+    color: #856404;
+    border: 2px solid var(--warning);
+}
+
+.ta-status-fail {
+    background: var(--danger-light);
+    color: var(--danger);
+    border: 2px solid var(--danger);
+}
+
+.ta-issue-list {
+    list-style: none;
+    padding: 0;
+    margin: var(--spacing-md) 0;
+}
+
+.ta-issue-list li {
+    display: flex;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xs) 0;
+    font-size: var(--font-size-sm);
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.ta-issue-list li:last-child { border-bottom: none; }
+
+.ta-issue-error { color: var(--danger); }
+.ta-issue-warn  { color: #856404; }
+.ta-issue-info  { color: var(--primary-blue); }
+
+.ta-meta-row {
+    display: flex;
+    gap: var(--spacing-lg);
+    flex-wrap: wrap;
+    background: var(--gray-50);
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-md);
+    font-size: var(--font-size-xs);
+}
+
+.ta-meta-row span { color: var(--gray-500); }
+.ta-meta-row strong { color: var(--gray-800); }
+
+/* ── Version / Publish ── */
+.ta-divider {
+    border: none;
+    border-top: 1px solid var(--gray-200);
+    margin: var(--spacing-lg) 0;
+}
+
+.ta-version-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--primary-blue);
+    color: white;
+    border-radius: var(--border-radius-sm);
+    font-weight: 700;
+    font-size: var(--font-size-base);
+    min-width: 90px;
+    text-align: center;
+    margin-top: 26px; /* align with select */
+}
+
+/* ── Version History ── */
+.ta-version-list {
+    margin-top: var(--spacing-lg);
+}
+
+.ta-version-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--border-radius-md);
+    margin-bottom: var(--spacing-md);
+    transition: border-color 0.2s;
+}
+
+.ta-version-item:hover {
+    border-color: var(--primary-blue);
+}
+
+.ta-version-item.active-version {
+    border-color: var(--success);
+    background: var(--success-light);
+}
+
+.ta-version-info { flex: 1; }
+
+.ta-version-num {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--primary-blue);
+}
+
+.ta-version-active-tag {
+    display: inline-block;
+    background: var(--success);
+    color: white;
+    font-size: var(--font-size-xs);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 600;
+    margin-left: var(--spacing-sm);
+}
+
+.ta-version-meta {
+    font-size: var(--font-size-xs);
+    color: var(--gray-500);
+    margin-top: var(--spacing-xs);
+}
+
+.ta-version-changelog {
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+    margin-top: var(--spacing-xs);
+    font-style: italic;
+}
+
+.ta-version-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-shrink: 0;
+}
+
+/* ── Spinner row ── */
+.ta-spinner-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+    color: var(--gray-600);
+}
+
+/* ── Flex row ── */
+.ta-flex-row {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: flex-end;
+    margin-bottom: var(--spacing-lg);
+}
+
+/* ── Misc ── */
+.ta-muted {
+    color: var(--gray-400);
+    font-style: italic;
+    text-align: center;
+    padding: var(--spacing-xl) 0;
+}
+
+.ta-sha {
+    font-family: 'Courier New', monospace;
+    font-size: var(--font-size-xs);
+    color: var(--gray-500);
+    word-break: break-all;
+}

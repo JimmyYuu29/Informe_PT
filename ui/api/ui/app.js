@@ -1466,7 +1466,7 @@ function renderOperacionesVinculadasSection(allFields) {
         try {
             const year = new Date(fechaFin).getFullYear();
             if (!isNaN(year)) anyoActual = `FY ${year}`;
-        } catch (e) {}
+        } catch (e) { }
     }
 
     // Table header
@@ -2233,7 +2233,7 @@ function exportAsJson() {
 
 function importJson(file) {
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
         try {
             const json = JSON.parse(e.target.result);
             loadJsonData(json);
@@ -2242,7 +2242,7 @@ function importJson(file) {
             showNotification('error', 'Import Failed', `Invalid JSON file: ${error.message}`);
         }
     };
-    reader.onerror = function() {
+    reader.onerror = function () {
         showNotification('error', 'Import Failed', 'Failed to read the file.');
     };
     reader.readAsText(file);
@@ -2503,8 +2503,439 @@ async function init() {
         });
     });
 
-    console.log('Document Generation Platform initialized');
+    // ── Navigation: Generator ↔ Template Admin ──
+    const navGenerator = document.getElementById('nav-generator');
+    const navTA = document.getElementById('nav-template-admin');
+    const mainContainer = document.querySelector('.main-container');
+    const taPanel = document.getElementById('template-admin-panel');
+
+    navTA.addEventListener('click', (e) => {
+        e.preventDefault();
+        navTA.classList.add('active');
+        navGenerator.classList.remove('active');
+        mainContainer.style.display = 'none';
+        taPanel.classList.remove('hidden');
+        TemplateAdmin.onOpen();
+    });
+
+    navGenerator.addEventListener('click', (e) => {
+        e.preventDefault();
+        navGenerator.classList.add('active');
+        navTA.classList.remove('active');
+        mainContainer.style.display = '';
+        taPanel.classList.add('hidden');
+    });
+
+    console.log('Document Generation Platform v3.0 initialized');
 }
 
 // Start the application
 document.addEventListener('DOMContentLoaded', init);
+
+// ============================================================================
+// Template Admin Module
+// ============================================================================
+
+const TemplateAdmin = (() => {
+    // ── State ──
+    let _token = null;          // auth token (password echoed back)
+    let _validationResult = null;
+    let _selectedFile = null;
+    let _plugins = [];
+
+    // ── API helpers ──
+    async function taApi(endpoint, options = {}) {
+        const url = `${API_BASE}${endpoint}`;
+        try {
+            const response = await fetch(url, options);
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.detail || data.error || 'API Error');
+            return data;
+        } catch (err) {
+            console.error('TA API Error:', err);
+            throw err;
+        }
+    }
+
+    // ── Utility ──
+    function show(id) { document.getElementById(id).classList.remove('hidden'); }
+    function hide(id) { document.getElementById(id).classList.add('hidden'); }
+    function setHtml(id, html) { document.getElementById(id).innerHTML = html; }
+    function val(id) { return document.getElementById(id).value; }
+
+    function populatePluginSelects(plugins) {
+        _plugins = plugins;
+        ['ta-plugin-select', 'ta-history-plugin'].forEach(selId => {
+            const sel = document.getElementById(selId);
+            sel.innerHTML = '';
+            plugins.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.plugin_id;
+                opt.textContent = p.name || p.plugin_id;
+                sel.appendChild(opt);
+            });
+        });
+    }
+
+    // ── Auth ──
+    async function doLogin() {
+        const pwd = val('ta-password-input');
+        if (!pwd) return;
+        try {
+            const res = await taApi('/template/auth', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: pwd }),
+            });
+            if (res.ok) {
+                _token = pwd;
+                hide('ta-login');
+                show('ta-content');
+                hide('ta-login-error');
+                document.getElementById('ta-password-input').value = '';
+            } else {
+                show('ta-login-error');
+            }
+        } catch (_) {
+            show('ta-login-error');
+        }
+    }
+
+    function doLogout() {
+        _token = null;
+        _validationResult = null;
+        _selectedFile = null;
+        show('ta-login');
+        hide('ta-content');
+        hide('ta-login-error');
+        // Reset form
+        setHtml('ta-validation-result', '<p class="ta-muted">Upload and validate a template to see results here.</p>');
+        hide('ta-publish-section');
+        resetFileZone();
+    }
+
+    // ── File handling ──
+    function resetFileZone() {
+        _selectedFile = null;
+        const drop = document.getElementById('ta-file-drop');
+        drop.classList.remove('has-file');
+        drop.querySelector('p').textContent = 'Click to select or drag & drop a .docx file';
+        document.getElementById('ta-file-input').value = '';
+        document.getElementById('ta-validate-btn').disabled = true;
+    }
+
+    function onFileSelected(file) {
+        if (!file || !file.name.endsWith('.docx')) {
+            alert('Please select a .docx file');
+            return;
+        }
+        _selectedFile = file;
+        _validationResult = null;
+        const drop = document.getElementById('ta-file-drop');
+        drop.classList.add('has-file');
+        drop.querySelector('p').textContent = `📄 ${file.name}  (${(file.size / 1024).toFixed(1)} KB)`;
+        document.getElementById('ta-validate-btn').disabled = false;
+        // Clear previous validation
+        setHtml('ta-validation-result', '<p class="ta-muted">Click "Validate Template" to run checks.</p>');
+        hide('ta-publish-section');
+    }
+
+    // ── Validation ──
+    async function doValidate() {
+        if (!_selectedFile) return;
+        const pluginId = val('ta-plugin-select');
+        show('ta-validating');
+        document.getElementById('ta-validate-btn').disabled = true;
+        hide('ta-publish-section');
+
+        try {
+            const fd = new FormData();
+            fd.append('file', _selectedFile, _selectedFile.name);
+            fd.append('plugin_id', pluginId);
+            fd.append('check_anchors', 'false');
+
+            const res = await taApi('/template/validate', { method: 'POST', body: fd });
+            _validationResult = res;
+            renderValidationResult(res);
+
+            // Fetch current version to compute next
+            await refreshNextVersion();
+            show('ta-publish-section');
+
+            // Show warning acknowledgement checkbox if needed
+            const hasWarnings = res.status === 'WARN';
+            const warnRow = document.getElementById('ta-warn-confirm-row');
+            const warnBox = document.getElementById('ta-publish-warning');
+            if (hasWarnings) {
+                warnRow.style.display = '';
+                warnBox.classList.remove('hidden');
+            } else {
+                warnRow.style.display = 'none';
+                warnBox.classList.add('hidden');
+            }
+            document.getElementById('ta-warn-confirm').checked = false;
+            updatePublishBtn();
+
+        } catch (err) {
+            setHtml('ta-validation-result', `<p class="ta-error">Validation failed: ${err.message}</p>`);
+        } finally {
+            hide('ta-validating');
+            document.getElementById('ta-validate-btn').disabled = false;
+        }
+    }
+
+    function renderValidationResult(res) {
+        const statusEmoji = res.status === 'PASS' ? '✅' : res.status === 'WARN' ? '⚠️' : '❌';
+        const statusClass = res.status === 'PASS' ? 'ta-status-pass' : res.status === 'WARN' ? 'ta-status-warn' : 'ta-status-fail';
+
+        let issuesHtml = '';
+        if (res.issues && res.issues.length > 0) {
+            issuesHtml = `
+                <ul class="ta-issue-list">
+                    ${res.issues.map(i => `
+                        <li class="ta-issue-${i.severity.toLowerCase()}">
+                            <span>${i.severity === 'ERROR' ? '✕' : i.severity === 'WARN' ? '⚠' : 'ℹ'}</span>
+                            <span>[${i.check}] ${i.message}</span>
+                        </li>
+                    `).join('')}
+                </ul>`;
+        } else {
+            issuesHtml = '<p style="color:var(--success); margin-top:8px;">No issues found.</p>';
+        }
+
+        const vars = (res.variables_found || []).slice(0, 12).join(', ');
+        const moreVars = (res.variables_found || []).length > 12 ? ` … (+${res.variables_found.length - 12} more)` : '';
+
+        const html = `
+            <div class="ta-status-badge ${statusClass}">${statusEmoji} ${res.status}</div>
+            ${issuesHtml}
+            <div class="ta-meta-row">
+                <div><span>Variables found: </span><strong>${(res.variables_found || []).length}</strong></div>
+                <div><span>SHA-256: </span><span class="ta-sha">${(res.sha256 || '—').slice(0, 16)}…</span></div>
+            </div>
+            ${(res.variables_found || []).length > 0 ? `<p style="font-size:0.75rem;color:var(--gray-500);margin-top:8px;">${vars}${moreVars}</p>` : ''}
+        `;
+        setHtml('ta-validation-result', html);
+    }
+
+    // ── Next version preview ──
+    async function refreshNextVersion() {
+        const pluginId = val('ta-plugin-select');
+        const bump = val('ta-version-bump');
+        try {
+            const res = await taApi(`/template/versions/${pluginId}`);
+            const current = (res.versions && res.versions.length > 0)
+                ? res.versions[res.versions.length - 1].version
+                : '0.0.0';
+            const [ma, mi, pa] = current.split('.').map(Number);
+            let next;
+            if (bump === 'major') next = `${ma + 1}.0.0`;
+            else if (bump === 'minor') next = `${ma}.${mi + 1}.0`;
+            else next = `${ma}.${mi}.${pa + 1}`;
+            document.getElementById('ta-next-version').textContent = next;
+        } catch (_) {
+            document.getElementById('ta-next-version').textContent = '1.0.0';
+        }
+    }
+
+    function updatePublishBtn() {
+        const hasWarnings = _validationResult && _validationResult.status === 'WARN';
+        const confirmed = document.getElementById('ta-warn-confirm').checked;
+        const hasFail = _validationResult && _validationResult.status === 'FAIL';
+        const btn = document.getElementById('ta-publish-btn');
+        btn.disabled = hasFail || (hasWarnings && !confirmed);
+    }
+
+    // ── Publish ──
+    async function doPublish() {
+        if (!_selectedFile || !_validationResult) return;
+        if (_validationResult.status === 'FAIL') {
+            alert('Cannot publish a template that failed validation. Fix the errors first.');
+            return;
+        }
+
+        const pluginId = val('ta-plugin-select');
+        const bump = val('ta-version-bump');
+        const author = val('ta-author') || 'Admin';
+        const changelog = val('ta-changelog') || '(no description)';
+        const tplName = val('ta-template-name') || 'template_final';
+
+        const btn = document.getElementById('ta-publish-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Publishing…';
+
+        try {
+            const fd = new FormData();
+            fd.append('file', _selectedFile, _selectedFile.name);
+            fd.append('plugin_id', pluginId);
+            fd.append('admin_password', _token);
+            fd.append('template_name', tplName);
+            fd.append('version_bump', bump);
+            fd.append('author', author);
+            fd.append('changelog', changelog);
+
+            const res = await taApi('/template/publish', { method: 'POST', body: fd });
+
+            showNotification('success', '🚀 Published!',
+                `Version ${res.version} published successfully for plugin "${pluginId}".`);
+
+            // Refresh history if on that tab
+            if (document.getElementById('ta-tab-history').classList.contains('active')) {
+                await loadHistory();
+            }
+            resetFileZone();
+            setHtml('ta-validation-result', '<p class="ta-muted">Upload and validate a template to see results here.</p>');
+            hide('ta-publish-section');
+            _validationResult = null;
+
+        } catch (err) {
+            showNotification('error', 'Publish failed', err.message);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '🚀 Publish Template';
+        }
+    }
+
+    // ── Version History ──
+    async function loadHistory() {
+        const pluginId = val('ta-history-plugin');
+        const container = document.getElementById('ta-version-list');
+        container.innerHTML = '<p class="ta-muted">Loading…</p>';
+        try {
+            const res = await taApi(`/template/versions/${pluginId}`);
+            const versions = (res.versions || []).slice().reverse(); // newest first
+            const activeVer = res.active_version;
+
+            if (versions.length === 0) {
+                container.innerHTML = '<p class="ta-muted">No published versions yet.</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            versions.forEach(v => {
+                const isActive = v.version === activeVer;
+                const item = document.createElement('div');
+                item.className = `ta-version-item${isActive ? ' active-version' : ''}`;
+                item.innerHTML = `
+                    <div class="ta-version-info">
+                        <div>
+                            <span class="ta-version-num">v${v.version}</span>
+                            ${isActive ? '<span class="ta-version-active-tag">● Active</span>' : ''}
+                        </div>
+                        <div class="ta-version-meta">
+                            Published ${v.published_at ? new Date(v.published_at).toLocaleString() : '—'}
+                            ${v.author ? '· by ' + v.author : ''}
+                            · SHA: <span class="ta-sha">${(v.sha256 || '—').slice(0, 16)}…</span>
+                        </div>
+                        <div class="ta-version-changelog">${v.changelog || ''}</div>
+                    </div>
+                    <div class="ta-version-actions">
+                        ${!isActive ? `<button class="btn btn-outline btn-rollback" data-version="${v.version}" data-plugin="${pluginId}">↩ Rollback</button>` : '<span style="color:var(--success);font-size:0.85rem;">✔ Current</span>'}
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+
+            // Wire rollback buttons
+            container.querySelectorAll('.btn-rollback').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const ver = btn.dataset.version;
+                    const pid = btn.dataset.plugin;
+                    if (!confirm(`Roll back to v${ver} for plugin "${pid}"?\nThis will set that version as active immediately.`)) return;
+                    await doRollback(pid, ver);
+                });
+            });
+
+        } catch (err) {
+            container.innerHTML = `<p class="ta-error">Failed to load history: ${err.message}</p>`;
+        }
+    }
+
+    async function doRollback(pluginId, version) {
+        try {
+            await taApi('/template/rollback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ plugin_id: pluginId, version, admin_password: _token }),
+            });
+            showNotification('success', '↩ Rollback complete',
+                `Plugin "${pluginId}" is now using template v${version}.`);
+            await loadHistory();
+        } catch (err) {
+            showNotification('error', 'Rollback failed', err.message);
+        }
+    }
+
+    // ── Public init ──
+    function onOpen() {
+        // Populate plugin lists from already-loaded plugins
+        fetch(`${API_BASE}/plugins`)
+            .then(r => r.json())
+            .then(data => populatePluginSelects(data.plugins || []))
+            .catch(() => { });
+    }
+
+    // ── Wire events (called once DOM is ready) ──
+    function wireEvents() {
+        // Login
+        document.getElementById('ta-login-btn').addEventListener('click', doLogin);
+        document.getElementById('ta-password-input').addEventListener('keydown', e => {
+            if (e.key === 'Enter') doLogin();
+        });
+
+        // Logout
+        document.getElementById('ta-logout-btn').addEventListener('click', doLogout);
+
+        // Tabs
+        document.querySelectorAll('.ta-tab[data-tab]').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.ta-tab[data-tab]').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.ta-tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(`ta-tab-${tab.dataset.tab}`).classList.add('active');
+                if (tab.dataset.tab === 'history') loadHistory();
+            });
+        });
+
+        // File input
+        document.getElementById('ta-file-input').addEventListener('change', e => {
+            if (e.target.files && e.target.files[0]) onFileSelected(e.target.files[0]);
+        });
+
+        // Drag & drop
+        const dropZone = document.getElementById('ta-file-drop');
+        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+        dropZone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) onFileSelected(e.dataTransfer.files[0]);
+        });
+
+        // Validate button
+        document.getElementById('ta-validate-btn').addEventListener('click', doValidate);
+
+        // Version bump → update preview
+        document.getElementById('ta-version-bump').addEventListener('change', () => {
+            if (_validationResult) refreshNextVersion();
+        });
+        document.getElementById('ta-plugin-select').addEventListener('change', () => {
+            if (_validationResult) refreshNextVersion();
+        });
+
+        // Warning confirm checkbox
+        document.getElementById('ta-warn-confirm').addEventListener('change', updatePublishBtn);
+
+        // Publish button
+        document.getElementById('ta-publish-btn').addEventListener('click', doPublish);
+
+        // History plugin / refresh
+        document.getElementById('ta-history-plugin').addEventListener('change', loadHistory);
+        document.getElementById('ta-refresh-history').addEventListener('click', loadHistory);
+    }
+
+    // Auto-wire on DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', wireEvents);
+
+    return { onOpen };
+})();

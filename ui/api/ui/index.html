@@ -21,7 +21,8 @@
                 </div>
             </div>
             <nav class="nav">
-                <a href="#" class="nav-link active">Generator</a>
+                <a href="#" class="nav-link active" id="nav-generator">Generator</a>
+                <a href="#" class="nav-link" id="nav-template-admin">⚙️ Template Admin</a>
                 <a href="#" class="nav-link" id="nav-docs">Documentation</a>
                 <span class="nav-divider"></span>
                 <span class="status-indicator" id="api-status">
@@ -167,6 +168,143 @@
             </div>
         </div>
     </div>
+
+    <!-- Template Admin Panel (full-page overlay) -->
+    <div id="template-admin-panel" class="template-admin-panel hidden">
+        <div class="ta-container">
+
+            <!-- TA Header -->
+            <div class="ta-header">
+                <h2>⚙️ Template Admin</h2>
+                <p class="ta-subtitle">Upload, validate, publish and rollback DOCX templates</p>
+            </div>
+
+            <!-- Login Gate -->
+            <div id="ta-login" class="ta-section">
+                <div class="ta-card ta-login-card">
+                    <div class="ta-card-icon">🔐</div>
+                    <h3>Admin Authentication</h3>
+                    <p>Enter the admin password to manage templates.</p>
+                    <div class="ta-form-row">
+                        <input type="password" id="ta-password-input" class="form-input" placeholder="Password..." />
+                        <button id="ta-login-btn" class="btn btn-primary">Login</button>
+                    </div>
+                    <p id="ta-login-error" class="ta-error hidden">Incorrect password</p>
+                </div>
+            </div>
+
+            <!-- Admin Content (shown after login) -->
+            <div id="ta-content" class="ta-content hidden">
+
+                <!-- Tabs -->
+                <div class="ta-tabs">
+                    <button class="ta-tab active" data-tab="upload">📤 Upload &amp; Publish</button>
+                    <button class="ta-tab" data-tab="history">📜 Version History</button>
+                    <button class="ta-tab ta-logout-tab" id="ta-logout-btn">🚪 Logout</button>
+                </div>
+
+                <!-- Upload & Publish Tab -->
+                <div id="ta-tab-upload" class="ta-tab-content active">
+
+                    <div class="ta-grid-2">
+                        <!-- Left: Upload form -->
+                        <div class="ta-card">
+                            <h3>📄 Template File</h3>
+                            <div class="form-group">
+                                <label class="form-label">Plugin <span class="required">*</span></label>
+                                <select id="ta-plugin-select" class="select-input"></select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Template Name</label>
+                                <input type="text" id="ta-template-name" class="form-input" value="template_final" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Author</label>
+                                <input type="text" id="ta-author" class="form-input" placeholder="Your name..." />
+                            </div>
+                            <div class="form-group full-width">
+                                <label class="form-label">Change Log <span class="required">*</span></label>
+                                <textarea id="ta-changelog" class="textarea-input" rows="3" placeholder="Describe the changes in this version..."></textarea>
+                            </div>
+                            <div class="form-group full-width">
+                                <label class="form-label">DOCX Template File <span class="required">*</span></label>
+                                <div class="ta-file-drop" id="ta-file-drop">
+                                    <input type="file" id="ta-file-input" accept=".docx" style="display:none" />
+                                    <div class="ta-file-icon">📁</div>
+                                    <p id="ta-file-label">Click to select or drag &amp; drop a .docx file</p>
+                                    <button class="btn btn-outline" onclick="document.getElementById('ta-file-input').click()">Browse...</button>
+                                </div>
+                            </div>
+                            <button id="ta-validate-btn" class="btn btn-secondary btn-block" disabled>🔍 Validate Template</button>
+                        </div>
+
+                        <!-- Right: Validation result -->
+                        <div class="ta-card" id="ta-validation-card">
+                            <h3>✅ Validation Result</h3>
+                            <div id="ta-validation-result">
+                                <p class="ta-muted">Upload and validate a template to see results here.</p>
+                            </div>
+
+                            <!-- Publish section (shown after validation) -->
+                            <div id="ta-publish-section" class="hidden">
+                                <hr class="ta-divider" />
+                                <h3>🚀 Publish</h3>
+                                <div class="ta-form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Version Bump</label>
+                                        <select id="ta-version-bump" class="select-input">
+                                            <option value="patch">Patch (x.x.+1)</option>
+                                            <option value="minor">Minor (x.+1.0)</option>
+                                            <option value="major">Major (+1.0.0)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Next Version</label>
+                                        <div id="ta-next-version" class="ta-version-badge">-</div>
+                                    </div>
+                                </div>
+                                <div id="ta-publish-warning" class="notification notification-warning hidden">
+                                    <span class="notification-icon">⚠</span>
+                                    <div class="notification-content">
+                                        <div class="notification-title">Template has warnings</div>
+                                        <div class="notification-message">Please confirm you acknowledge the warnings before publishing.</div>
+                                    </div>
+                                </div>
+                                <label class="checkbox-item" id="ta-warn-confirm-row" style="display:none; margin-bottom:8px">
+                                    <input type="checkbox" id="ta-warn-confirm" /> I acknowledge the warnings and want to proceed
+                                </label>
+                                <button id="ta-publish-btn" class="btn btn-primary btn-block">🚀 Publish Template</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Validation loading -->
+                    <div id="ta-validating" class="ta-spinner-row hidden">
+                        <div class="spinner"></div> <span>Validating template...</span>
+                    </div>
+
+                </div>
+
+                <!-- Version History Tab -->
+                <div id="ta-tab-history" class="ta-tab-content">
+                    <div class="ta-card">
+                        <div class="ta-flex-row">
+                            <div class="form-group" style="flex:1">
+                                <label class="form-label">Plugin</label>
+                                <select id="ta-history-plugin" class="select-input"></select>
+                            </div>
+                            <button id="ta-refresh-history" class="btn btn-outline">🔄 Refresh</button>
+                        </div>
+                        <div id="ta-version-list" class="ta-version-list">
+                            <p class="ta-muted">Select a plugin to view version history.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div> <!-- end ta-content -->
+        </div>
+    </div>
+    <!-- END Template Admin Panel -->
 
     <script src="/static/app.js"></script>
 </body>

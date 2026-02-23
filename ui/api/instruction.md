@@ -1,8 +1,8 @@
 # API Deployment Instructions for Ubuntu Server
 
-**Version:** 2.4
+**Version:** 3.0
 **Author:** Yihao Yu
-**Last Updated:** 2026-01-08
+**Last Updated:** 2026-02-23
 
 ---
 
@@ -127,6 +127,10 @@ User=www-data
 Group=www-data
 WorkingDirectory=/opt/Informe_PT
 Environment="PATH=/opt/Informe_PT/venv/bin"
+# Template Admin configuration (optional)
+Environment="TEMPLATE_ADMIN_PASSWORD=your_secure_password"
+Environment="POWER_AUTOMATE_TEMPLATE_PUBLISH_URL=https://your-pa-trigger-url"
+Environment="SHAREPOINT_TARGET_ROOT=/Templates/Released/"
 ExecStart=/opt/Informe_PT/venv/bin/gunicorn ui.api.backend.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 127.0.0.1:8000
 Restart=always
 RestartSec=5

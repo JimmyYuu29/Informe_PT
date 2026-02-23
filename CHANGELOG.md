@@ -4,6 +4,59 @@ All notable changes to the Informe PT project are documented in this file.
 
 ---
 
+## [v3.0.0] - 2026-02-23 — Template Admin & Versioning
+
+### Added
+- **Template Admin page** (`⚙️ Template Admin`) in the Streamlit sidebar navigation
+- **Template validation pipeline** (`modules/template_validator.py`):
+  - Jinja2/docxtpl syntax parsing check
+  - Variable consistency check against plugin field definitions
+  - Smoke-test rendering with sample data
+  - Residual marker detection in rendered output
+  - Anchor/keyword structure protection (configurable)
+  - SHA-256 integrity hash for uploaded templates
+  - Detailed validation reports (PASS / WARN / FAIL)
+- **Template version registry** (`modules/template_registry.py`):
+  - SemVer version numbering (major.minor.patch) per plugin
+  - Local JSON registry at `data/template_registry.json`
+  - Active version tracking and automatic activation on publish
+  - Local template cache at `data/templates_cache/`
+- **SharePoint publisher** (`modules/sharepoint_publisher.py`):
+  - Publishes templates to SharePoint via Power Automate HTTP triggers
+  - Sends DOCX + metadata.json + validation_report.json as base64
+  - No direct SharePoint API or App Registration required
+  - Robust error handling for timeout, connection, and response errors
+- **Rollback functionality**: Revert to any previously published template version
+- **FastAPI Template Admin routes** (`ui/api/backend/template_admin_routes.py`):
+  - `POST /template/auth` — Admin authentication
+  - `POST /template/validate` — Multipart template validation
+  - `POST /template/publish` — Multipart template publish with auth
+  - `GET /template/versions/{plugin_id}` — List version history
+  - `POST /template/rollback` — Rollback to specific version
+  - `GET /template/fields/{plugin_id}` — List available template fields
+- **Password-protected access** for Template Admin (env: `TEMPLATE_ADMIN_PASSWORD`)
+- **Template resolution integration** in `plugin_loader.get_template_path()`:
+  1. Registry active version (cache) → 2. Plugin-specific template → 3. Legacy fallback
+- **Test suite** for template validator (`tests/test_template_validator.py`)
+- **Environment variables** for configuration:
+  - `TEMPLATE_ADMIN_PASSWORD`, `POWER_AUTOMATE_TEMPLATE_PUBLISH_URL`
+  - `SHAREPOINT_TARGET_ROOT`, `TEMPLATE_REGISTRY_PATH`, `TEMPLATE_CACHE_DIR`
+  - `ALLOW_PUBLISH_WITH_WARNINGS`
+
+### Changed
+- `plugin_loader.get_template_path()` now checks template registry first
+- `requirements.txt` — Added `httpx>=0.25.0` for Power Automate HTTP calls
+- `.gitignore` — Added `data/` directory
+- `ui/streamlit_app/app.py` — Added navigation sidebar with page selector
+- `ui/api/backend/main.py` — Registered Template Admin API router
+
+### Documentation
+- Updated `README.md` to v3.0 with Template Admin section
+- Added Power Automate request/response contract documentation
+- Updated project structure diagram with new files
+- Updated API endpoints table with 6 new template admin endpoints
+
+---
 ## [v2.6] - 2026-01-09
 
 ### Changed

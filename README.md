@@ -1,8 +1,10 @@
 # Enterprise Document Generation Platform
 
-**Version 2.4**
+**Version 3.0**
 
 A configuration-driven document generation system for creating professional reports from structured data and Word templates.
+
+**Last Updated:** 2026-02-23
 
 ---
 
@@ -38,6 +40,7 @@ The system supports multiple plugin packs, each representing a different documen
 - **Conditional evaluative comments**: 17 si/no toggles for including predefined text blocks
 - **Automatic peso OOVV calculation**: Displays peso indicators in Operaciones Vinculadas section
 - **Valoración OOVV text field**: User input field for peso-based valuation commentary
+- **Template Admin & Versioning**: Upload, validate, publish, and rollback DOCX templates with SemVer versioning and SharePoint integration via Power Automate
 
 ## Project Structure
 
@@ -53,7 +56,12 @@ project_root/
 │   │       ├── tables.yaml
 │   │       ├── logic.yaml
 │   │       └── ...
-│   └── template_final.docx     # Document template
+│   └── template_final.docx     # Default document template
+├── data/                        # Runtime data (gitignored)
+│   ├── template_registry.json   # Template version registry
+│   └── templates_cache/         # Cached template versions
+│       └── <plugin_id>/
+│           └── <version>.docx
 ├── modules/                     # Core engine
 │   ├── plugin_loader.py
 │   ├── dsl_allowlist.py
@@ -65,18 +73,23 @@ project_root/
 │   ├── audit_logger.py
 │   ├── validate_plugin.py
 │   ├── comentarios_valorativos.py  # Conditional evaluative comments
+│   ├── template_validator.py    # Template upload validation
+│   ├── template_registry.py    # Template versioning & registry
+│   ├── sharepoint_publisher.py  # Power Automate SharePoint publisher
 │   └── generate.py
 ├── ui/
 │   ├── streamlit_app/          # Streamlit UI
 │   │   ├── app.py
 │   │   ├── form_renderer.py
 │   │   ├── state_store.py
-│   │   └── components.py
+│   │   ├── components.py
+│   │   └── template_admin.py   # Template Admin page (⚙️)
 │   └── api/
 │       ├── backend/            # FastAPI backend
 │       │   ├── main.py
 │       │   ├── schemas.py
-│       │   └── deps.py
+│       │   ├── deps.py
+│       │   └── template_admin_routes.py  # Template Admin API
 │       ├── ui/                 # Web UI (HTML/CSS/JS)
 │       │   ├── index.html
 │       │   ├── app.js
@@ -89,6 +102,7 @@ project_root/
 │   ├── test_validator.py
 │   ├── test_rule_engine.py
 │   ├── test_golden.py
+│   ├── test_template_validator.py  # Template validation tests
 │   └── golden/
 ├── CHANGELOG.md                # Version history
 ├── requirements.txt            # Python dependencies
@@ -162,6 +176,12 @@ pytest tests/ -v
 | `/plugins/{id}/validate` | POST | Validate input data |
 | `/plugins/{id}/generate` | POST | Generate document |
 | `/download/{filename}` | GET | Download generated document |
+| `/template/auth` | POST | Authenticate as template admin |
+| `/template/validate` | POST | Validate uploaded template (multipart) |
+| `/template/publish` | POST | Publish validated template (multipart) |
+| `/template/versions/{id}` | GET | List template versions for a plugin |
+| `/template/rollback` | POST | Rollback to a specific template version |
+| `/template/fields/{id}` | GET | List available template fields |
 
 ## Plugin Development
 
@@ -251,6 +271,86 @@ rules:
 - Full traceability via `refs.yaml` and `decision_map.yaml`
 - Audit logs with trace IDs for each generation
 - Sensitive fields masked in logs
+- Template versioning with SHA-256 integrity hashes
+- Password-protected Template Admin access
+
+## Template Admin & Versioning
+
+### Overview
+
+The Template Admin module (v3.0) provides a complete workflow for managing DOCX templates:
+
+1. **Upload** — Upload a new DOCX template for a plugin
+2. **Validate** — Automated validation (syntax, variables, rendering, anchors)
+3. **Publish** — Version and publish to SharePoint via Power Automate
+4. **Rollback** — Revert to any previously published version
+
+### Access
+
+- **Streamlit**: Select "⚙️ Template Admin" from the Navigation dropdown in the sidebar
+- **API**: Use the `/template/*` endpoints (see API Endpoints table)
+- **Password**: Set via `TEMPLATE_ADMIN_PASSWORD` env var (default: `admin123`)
+
+### Template Resolution Order
+
+When generating documents, templates are resolved in this order:
+1. Active version from template registry (local cache)
+2. Plugin-specific template (`config/templates/<plugin_id>/template_final.docx`)
+3. Legacy fallback (`config/template_final.docx`)
+
+### Validation Checks
+
+| Check | Type | Description |
+|-------|------|-------------|
+| Jinja2/docxtpl syntax | FAIL | Template must parse without errors |
+| Variable consistency | WARN | All template variables must exist in plugin fields |
+| Smoke-test rendering | FAIL | Template must render with sample data |
+| Residual markers | WARN | Output must not contain `{{` or `{%` |
+| Anchor keywords | WARN/FAIL | Required structural keywords must be present |
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `TEMPLATE_ADMIN_PASSWORD` | `admin123` | Admin page access password |
+| `POWER_AUTOMATE_TEMPLATE_PUBLISH_URL` | *(required)* | Power Automate HTTP trigger URL |
+| `SHAREPOINT_TARGET_ROOT` | `/Templates/Released/` | SharePoint target folder |
+| `TEMPLATE_REGISTRY_PATH` | `data/template_registry.json` | Local registry file path |
+| `TEMPLATE_CACHE_DIR` | `data/templates_cache/` | Local template cache directory |
+| `ALLOW_PUBLISH_WITH_WARNINGS` | `false` | Allow publishing templates with warnings |
+
+### Power Automate Integration
+
+Template publishing uses Power Automate HTTP triggers (no SharePoint App Registration required).
+
+**Request** (API → Power Automate):
+```json
+{
+  "plugin_id": "pt_review",
+  "template_name": "template_final",
+  "version": "1.2.0",
+  "target_folder": "/Templates/Released/pt_review/",
+  "files": [
+    {"filename": "template_final__1.2.0.docx", "content_base64": "...", "content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
+    {"filename": "metadata__1.2.0.json", "content_base64": "...", "content_type": "application/json"},
+    {"filename": "validation_report__1.2.0.json", "content_base64": "...", "content_type": "application/json"}
+  ]
+}
+```
+
+**Response** (Power Automate → API):
+```json
+{
+  "ok": true,
+  "sharepoint": {
+    "folder": "/Templates/Released/pt_review/",
+    "template_file_url": "https://...",
+    "metadata_file_url": "https://...",
+    "validation_file_url": "https://...",
+    "item_ids": {}
+  }
+}
+```
 
 ## Deployment
 

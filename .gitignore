@@ -36,6 +36,7 @@ env/
 # Project specific
 output/
 logs/
+data/
 *.docx
 !config/*.docx
 

@@ -24,6 +24,7 @@ from modules.validate_plugin import validate_plugin
 from ui.streamlit_app import state_store as state
 from ui.streamlit_app import components
 from ui.streamlit_app import form_renderer
+from ui.streamlit_app.template_admin import render_template_admin
 
 
 # Page configuration
@@ -37,6 +38,20 @@ st.set_page_config(
 
 def main():
     """Main application entry point."""
+    # Page navigation
+    with st.sidebar:
+        st.header("Navigation")
+        page = st.selectbox(
+            "Select Page",
+            options=["📄 Document Generation", "⚙️ Template Admin"],
+            key="app_page_selector",
+        )
+        st.divider()
+
+    if page == "⚙️ Template Admin":
+        render_template_admin()
+        return
+
     st.title("Enterprise Document Generation Platform")
 
     # Get available plugins first

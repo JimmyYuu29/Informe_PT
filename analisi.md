@@ -2,8 +2,8 @@
 
 ## 企业文档生成平台 - 技术分析与操作指南
 
-**版本:** 2.4
-**日期:** 2026年1月
+**版本:** 3.0
+**日期:** 2026年2月
 **作者:** 自动文档系统
 
 ---
@@ -36,16 +36,25 @@ Informe_PT/
 │           ├── fields.yaml     # 输入字段定义
 │           ├── derived.yaml    # 计算字段
 │           └── ...
+├── data/                        # 运行时数据（gitignored）
+│   ├── template_registry.json   # 模板版本注册表
+│   └── templates_cache/         # 缓存的模板版本
+│       └── <plugin_id>/
+│           └── <version>.docx
 ├── modules/                    # Python 核心模块
 │   ├── plugin_loader.py        # 插件加载器
 │   ├── generate.py             # 文档生成
 │   ├── context_builder.py      # 上下文构建
-│   └── renderer_docx.py        # DOCX 渲染
+│   ├── renderer_docx.py        # DOCX 渲染
+│   ├── template_validator.py   # 模板验证
+│   ├── template_registry.py    # 模板版本管理
+│   └── sharepoint_publisher.py # SharePoint 发布（通过 Power Automate）
 ├── templates/                  # DOCX 模板
 ├── ui/
 │   ├── api/
 │   │   ├── backend/
-│   │   │   └── main.py         # FastAPI 后端
+│   │   │   ├── main.py         # FastAPI 后端
+│   │   │   └── template_admin_routes.py  # 模板管理 API
 │   │   └── ui/
 │   │       ├── index.html      # 前端 HTML
 │   │       ├── app.js          # JavaScript 应用
@@ -53,7 +62,8 @@ Informe_PT/
 │   └── streamlit_app/
 │       ├── app.py              # Streamlit 应用
 │       ├── form_renderer.py    # 表单渲染器
-│       └── state_store.py      # 状态管理
+│       ├── state_store.py      # 状态管理
+│       └── template_admin.py   # 模板管理页面 (⚙️)
 ├── requirements.txt            # Python 依赖
 └── output/                     # 生成文件输出目录
 ```

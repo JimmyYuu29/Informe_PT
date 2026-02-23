@@ -21,8 +21,24 @@ def get_plugin_path(plugin_id: str) -> Path:
 
 
 def get_template_path(plugin_id: str) -> Path:
-    """Get the path to a plugin's template directory."""
-    # First check plugin-specific templates dir
+    """Get the path to a plugin's template.
+
+    Resolution order:
+    1. Template registry active version (local cache)
+    2. Plugin-specific templates directory (config/templates/<plugin_id>/)
+    3. Legacy fallback (config/template_final.docx)
+    """
+    # Check template registry for active version
+    try:
+        from .template_registry import TemplateRegistry
+        registry = TemplateRegistry()
+        active_path = registry.get_active_template_path(plugin_id)
+        if active_path and active_path.exists():
+            return active_path
+    except Exception:
+        pass  # Registry not available or error - fallback to defaults
+
+    # Check plugin-specific templates dir
     plugin_template_dir = TEMPLATES_BASE / plugin_id
     if plugin_template_dir.exists():
         template_file = plugin_template_dir / "template_final.docx"

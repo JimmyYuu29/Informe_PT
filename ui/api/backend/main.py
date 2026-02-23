@@ -37,6 +37,7 @@ from .schemas import (
     ErrorResponse,
 )
 from .deps import get_plugin, get_settings, Settings
+from .template_admin_routes import router as template_admin_router
 
 
 # Create FastAPI app
@@ -56,6 +57,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include template admin routes
+app.include_router(template_admin_router)
 
 
 # ============================================================================
